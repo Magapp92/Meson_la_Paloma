@@ -1,13 +1,13 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Button } from '@components/button/button.jsx'
 import { TodayHours } from '@components/today-hours/today-hours.jsx'
 import { MobileMenu } from '@components/mobile-menu/mobile-menu.jsx'
 import { NAV_LINKS } from '@const/navigation.js'
 import './header.css'
 
-/* Cabecera de todas las páginas con la franja del horario, el logo, el menú y el botón de reservar */
+/* Cabecera de todas las páginas con la franja del horario, el logo y el menú.
+El botón de reservar no va aquí: está en el hero de la portada, junto a Ver la carta */
 export const Header = () => {
 
     return (
@@ -32,10 +32,7 @@ export const Header = () => {
                         <Link key={link.text} href={link.href} className="Header-link" title={link.title}>{link.text}</Link>
                     )}
                 </nav>
-                <div className="Header-cta">
-                    <Button href="/" title="Ir a reservar mesa">Reservar mesa</Button>
-                </div>
-                {/* El menú del móvil solo se ve en pantallas pequeñas, en lugar del nav y el botón */}
+                {/* El menú del móvil solo se ve en pantallas pequeñas, en lugar del nav */}
                 <MobileMenu />
             </div>
         </header>

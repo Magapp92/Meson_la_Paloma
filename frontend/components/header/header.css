@@ -49,19 +49,19 @@
 
 /* MENÚ DE NAVEGACIÓN */
 
-/* El menú ocupa el hueco entre el logo y el botón y coloca sus enlaces en fila.
-   La separación entre enlaces se estrecha con la pantalla */
+/* El menú ocupa el hueco que deja el logo y coloca sus enlaces en fila, pegados a la derecha.
+   La separación entre enlaces es amplia y se estrecha con la pantalla */
 .Header-nav{
     display: flex;
     flex: 1;
-    justify-content: center;
-    gap: clamp(.9rem, 1.6vw, 1.5rem);
+    justify-content: flex-end;
+    gap: clamp(1.5rem, 3vw, 3rem);
 }
 
 /* Enlaces del menú que se vuelven mostaza al pasar el ratón.
-   La letra se reduce un poco en pantallas medianas y el texto nunca se parte en dos líneas */
+   La letra crece un poco en pantallas grandes y el texto nunca se parte en dos líneas */
 .Header-link{
-    font-size: clamp(.875rem, 1.1vw, 1rem);
+    font-size: clamp(1rem, 1.25vw, 1.2rem);
     font-weight: 500;
     white-space: nowrap;
 
@@ -80,9 +80,9 @@
 
 /* MÓVIL */
 
-/* En pantallas de 900px o menos (56.25em) se ocultan el menú y el botón: en su lugar aparece el menú del móvil */
+/* En pantallas de 900px o menos (56.25em) se oculta el menú: en su lugar aparece el menú del móvil */
 @media (max-width: 56.25em){
-    .Header-nav, .Header-cta{
+    .Header-nav{
         display: none;
     }
 }

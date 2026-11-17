@@ -3,10 +3,11 @@
 
 /* HERO */
 
-/* Damos al Hero un margen interior provisional arriba y abajo.
+/* Damos al Hero un margen interior arriba que crece con la pantalla, como el título:
+   así la tilde de la Ó, que sobresale por encima de la línea, no se mete en la cabecera.
    El ancho máximo y los márgenes laterales los pone la clase Container */
 .Hero{
-    padding-block: 1rem;
+    padding-block: clamp(2.5rem, 6vw, 5rem) 1rem;
 }
 
 /* Título gigante con un tamaño fluido: crece con el ancho de la pantalla, entre 4rem y 12rem.
