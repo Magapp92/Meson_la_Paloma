@@ -1,3 +1,4 @@
+
 import { Anton, Inter_Tight } from 'next/font/google'
 import './reset.css'
 
@@ -17,13 +18,13 @@ const fontText = Inter_Tight({
 
 /* Layout raíz: Next lo pide obligatoriamente y envuelve todas las páginas.
 Es el único sitio donde van las etiquetas <html> y <body> */
-export default function RootLayout(props) {
-
-    const { children } = props
+const RootLayout = ({ children }) => {
 
     return (
-        <html lang="es" className={`${fontTitle.variable} ${fontText.variable}`}>
+        <html lang="es" className={`${ fontTitle.variable } ${ fontText.variable }`}>
             <body>{children}</body>
         </html>
     )
 }
+
+export default RootLayout
