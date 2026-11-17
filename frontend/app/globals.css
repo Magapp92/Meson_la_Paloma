@@ -1,0 +1,13 @@
+/* Colores del modelo B1 · Noche. De momento solo los dos que usa la web;
+el resto se irá añadiendo cuando algún elemento los necesite */
+:root {
+    --color-fondo: #0E0E0D;
+    --color-texto: #F5F1E8;
+}
+
+/* El navegador deja un margen de 8px alrededor de la página que no queremos */
+body {
+    margin: 0;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
