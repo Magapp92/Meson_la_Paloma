@@ -1,5 +1,5 @@
 
-/* INICIO */
+/* HOME */
 
 /* HERO */
 
@@ -23,4 +23,13 @@
 
     color: var(--accent);
     line-height: inherit;
+}
+
+/* Botones de reservar y ver la carta en fila, bajando de línea si no caben */
+.Hero-actions{
+    margin-top: 2rem;
+
+    display: flex;
+    flex-flow: row wrap;
+    gap: .8rem;
 }

@@ -1,0 +1,49 @@
+
+/* BUTTON */
+
+/* Damos estilo base a todos los botones: forma de píldora y contenido centrado con flex */
+.Button{
+    height: 48px;
+    padding: 0 1.5rem;
+    border-radius: 999px;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    font-weight: 600;
+    white-space: nowrap;
+
+    transition: background .2s, border-color .2s, color .2s, filter .2s, transform .2s;
+}
+
+/* Al pulsar, el botón se encoge ligeramente */
+.Button:active{
+    transform: scale(.97);
+}
+
+/* Contorno mostaza visible al llegar con el teclado (tabulador) */
+.Button:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* Botón principal mostaza con texto negro, para la acción más importante: reservar */
+.Button--primary{
+    background: var(--accent);
+
+    color: var(--bg);
+}
+.Button--primary:hover{
+    filter: brightness(1.1);
+}
+
+/* Botón solo con borde, que se vuelve mostaza al pasar el ratón */
+.Button--ghost{
+    border: 1px solid var(--border);
+}
+.Button--ghost:hover{
+    border-color: var(--accent);
+
+    color: var(--accent);
+}
