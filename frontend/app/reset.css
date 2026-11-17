@@ -1,0 +1,31 @@
+
+/* RESET */
+
+/* Agrupamos las custom properties de colores del modelo B1 · Noche: fondo negro, texto crema y acento mostaza.
+   Solo las que usa la web; el resto se irán añadiendo cuando algún elemento las necesite.
+   Las de tipografías (--font-title y --font-text) las crea next/font en layout.jsx */
+:root{
+    --bg: #0e0e0d;
+    --text: #f5f1e8;
+    --accent: #f0b429;
+}
+
+/* Quitamos márgenes y paddings por defecto y hacemos que el ancho incluya borde y padding */
+*, *::before, *::after{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Damos al body el fondo y la tipografía base: Inter Tight para los textos */
+body{
+    background: var(--bg);
+
+    color: var(--text);
+    font-family: var(--font-text), sans-serif;
+}
+
+/* Los títulos usan Anton, la letra de cartel del modelo B1 */
+h1{
+    font-family: var(--font-title), sans-serif;
+}

@@ -1,15 +1,24 @@
-/* Título gigante del hero: en mayúsculas desde el CSS para que el texto
-siga escrito normal en el código y los lectores de pantalla no lo deletreen */
-.Inicio-titulo {
-    margin: 0;
+
+/* INICIO */
+
+/* HERO */
+
+/* Damos al Hero un margen interior provisional para que el título no toque los bordes de la pantalla */
+.Hero{
     padding: 1rem;
+}
+
+/* Título gigante con un tamaño fluido: crece con el ancho de la pantalla, entre 4rem y 12rem.
+   Las mayúsculas van desde el CSS para que el texto siga escrito normal y los lectores de pantalla no lo deletreen */
+.Hero-title{
     font-size: clamp(4rem, 16vw, 12rem);
-    line-height: 0.9;
+    line-height: .9;
     text-transform: uppercase;
 }
 
-/* Segunda línea en mostaza: el span ocupa su propia línea */
-.Inicio-tituloAcento {
+/* Segunda línea del título en mostaza: el span pasa a bloque para ocupar su propia línea */
+.Hero-titleAccent{
     display: block;
-    color: var(--color-mostaza);
+
+    color: var(--accent);
 }

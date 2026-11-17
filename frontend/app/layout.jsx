@@ -1,18 +1,18 @@
 import { Anton, Inter_Tight } from 'next/font/google'
-import './globals.css'
+import './reset.css'
 
 /* Next descarga las fuentes al compilar y las sirve desde nuestra web,
 así el navegador no tiene que pedírselas a Google.
-Cada una queda guardada en una variable CSS para usarla desde globals.css */
+Cada una queda guardada en una variable CSS para usarla desde reset.css */
 const fuenteTitulos = Anton({
     weight: '400',
     subsets: ['latin'],
-    variable: '--fuente-titulos'
+    variable: '--font-title'
 })
 
 const fuenteTexto = Inter_Tight({
     subsets: ['latin'],
-    variable: '--fuente-texto'
+    variable: '--font-text'
 })
 
 /* Layout raíz: Next lo pide obligatoriamente y envuelve todas las páginas.
