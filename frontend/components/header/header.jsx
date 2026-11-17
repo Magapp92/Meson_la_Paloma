@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@components/button/button.jsx'
+import { TodayHours } from '@components/today-hours/today-hours.jsx'
 import './header.css'
 
 /* Enlaces del menú. De momento todos llevan a la portada:
@@ -14,11 +15,12 @@ const NAV_LINKS = Object.freeze([
     { text: 'Mi reserva', href: '/', title: 'Ir a gestionar mi reserva' }
 ])
 
-/* Cabecera de todas las páginas con el logo, el menú y el botón de reservar */
+/* Cabecera de todas las páginas con la franja del horario, el logo, el menú y el botón de reservar */
 export const Header = () => {
 
     return (
         <header className="Header">
+            <TodayHours />
             <div className="Header-inner">
                 {/* En el logo agrupamos el barril y el nombre del mesón; siempre lleva a la portada.
                 La imagen lleva alt vacío porque el nombre ya está escrito al lado.

@@ -3,6 +3,7 @@
         "baseUrl": ".",
         "paths": {
             "@components/*": ["components/*"],
+            "@const/*": ["const/*"],
             "@views/*": ["views/*"]
         }
     }

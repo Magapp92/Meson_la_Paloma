@@ -1,0 +1,19 @@
+
+/* TODAY HOURS */
+
+/* Franja mostaza a todo el ancho con el horario de hoy en negro y centrado.
+   La altura mínima reserva su sitio mientras el texto aparece, para que la página no salte */
+.TodayHours{
+    min-height: 2rem;
+    padding: .4rem 1rem;
+    background: var(--accent);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: var(--bg);
+    font-size: .875rem;
+    font-weight: 600;
+    text-align: center;
+}
