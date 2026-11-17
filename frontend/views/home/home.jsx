@@ -17,8 +17,9 @@ export const Home = () => {
                     <span className="Hero-titleAccent">La Paloma</span>
                 </h1>
                 <div className="Hero-actions">
-                    <Button href="/reservar" title="Ir a reservar mesa">Reservar mesa</Button>
-                    <Button href="/carta" variant="ghost" title="Ir a la carta">Ver la carta</Button>
+                    {/* De momento llevan a la portada: cambiarán a su página cuando la creemos */}
+                    <Button href="/" title="Ir a reservar mesa">Reservar mesa</Button>
+                    <Button href="/" variant="ghost" title="Ir a la carta">Ver la carta</Button>
                 </div>
             </section>
         </main>

@@ -6,13 +6,14 @@
     border-bottom: 2px solid var(--accent);
 }
 
-/* Colocamos con flex el logo, el menú y el botón en una fila */
+/* Colocamos con flex el logo, el menú y el botón en una fila.
+   La separación se estrecha con la pantalla para que todo quepa en una línea */
 .Header-inner{
     padding: 1rem;
 
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: clamp(1rem, 2vw, 2rem);
 }
 
 /* El logo agrupa la imagen y el nombre en una fila; nunca se encoge para dejar sitio al menú */
@@ -23,27 +24,46 @@
     gap: .8rem;
 }
 
+/* El barril a su tamaño fijo: el reset pone las imágenes a todo el ancho y aquí no lo queremos */
+.Header-logoImg{
+    width: 56px;
+    height: 56px;
+}
+
 /* Nombre del mesón en Anton y en mayúsculas, como el título de la portada */
 .Header-logoText{
     font-family: var(--font-title), sans-serif;
     font-size: 1.4rem;
+    line-height: .95;
     text-transform: uppercase;
+}
+
+/* Segunda línea del nombre en mostaza, en su propia línea y con el mismo interlineado */
+.Header-logoTextAccent{
+    display: block;
+
+    color: var(--accent);
+    line-height: inherit;
 }
 
 
 /* MENÚ DE NAVEGACIÓN */
 
-/* El menú ocupa el hueco entre el logo y el botón y coloca sus enlaces en fila */
+/* El menú ocupa el hueco entre el logo y el botón y coloca sus enlaces en fila.
+   La separación entre enlaces se estrecha con la pantalla */
 .Header-nav{
     display: flex;
     flex: 1;
     justify-content: center;
-    gap: 1.5rem;
+    gap: clamp(.9rem, 1.6vw, 1.5rem);
 }
 
-/* Enlaces del menú que se vuelven mostaza al pasar el ratón */
+/* Enlaces del menú que se vuelven mostaza al pasar el ratón.
+   La letra se reduce un poco en pantallas medianas y el texto nunca se parte en dos líneas */
 .Header-link{
+    font-size: clamp(.875rem, 1.1vw, 1rem);
     font-weight: 500;
+    white-space: nowrap;
 
     transition: color .2s;
 }

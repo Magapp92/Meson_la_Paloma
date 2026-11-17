@@ -23,10 +23,14 @@ export const Header = () => {
                 {/* En el logo agrupamos el barril y el nombre del mesón; siempre lleva a la portada.
                 La imagen lleva alt vacío porque el nombre ya está escrito al lado.
                 width y height son el tamaño en pantalla: Next genera una versión de ese tamaño
-                y otra del doble para las pantallas de alta densidad */}
+                y otra del doble para las pantallas de alta densidad.
+                El nombre va en dos líneas y dos tonos, como el título de la portada */}
                 <Link href="/" className="Header-logo" title="Ir a la página de inicio">
-                    <Image src="/img/logo-meson.webp" alt="" width={56} height={56} loading="eager" />
-                    <span className="Header-logoText">Mesón La Paloma</span>
+                    <Image className="Header-logoImg" src="/img/logo-meson.webp" alt="" width={56} height={56} loading="eager" />
+                    <span className="Header-logoText">
+                        Mesón{' '}
+                        <span className="Header-logoTextAccent">La Paloma</span>
+                    </span>
                 </Link>
                 {/* En el nav agrupamos los enlaces a cada página */}
                 <nav className="Header-nav" aria-label="Principal">
