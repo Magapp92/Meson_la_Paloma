@@ -3,17 +3,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@components/button/button.jsx'
 import { TodayHours } from '@components/today-hours/today-hours.jsx'
+import { NAV_LINKS } from '@const/navigation.js'
 import './header.css'
-
-/* Enlaces del menú. De momento todos llevan a la portada:
-cada uno se cambiará a su página cuando la creemos */
-const NAV_LINKS = Object.freeze([
-    { text: 'Carta', href: '/', title: 'Ir a la carta' },
-    { text: 'Experiencias', href: '/', title: 'Ir a las experiencias' },
-    { text: 'Menús y eventos', href: '/', title: 'Ir a los menús y eventos' },
-    { text: 'Nosotros', href: '/', title: 'Ir a la historia del mesón' },
-    { text: 'Mi reserva', href: '/', title: 'Ir a gestionar mi reserva' }
-])
 
 /* Cabecera de todas las páginas con la franja del horario, el logo, el menú y el botón de reservar */
 export const Header = () => {
