@@ -2,9 +2,10 @@
 /* BUTTON */
 
 /* Damos estilo base a todos los botones: forma de píldora y contenido centrado con flex.
+   Alto mínimo y no fijo, para que crezca si el usuario agranda la letra.
    El radio de 100vmax es siempre mayor que la mitad del alto, así los lados quedan redondos del todo */
 .Button{
-    height: 3rem;
+    min-height: 3rem;
     padding: 0 1.5rem;
     border-radius: 100vmax;
 

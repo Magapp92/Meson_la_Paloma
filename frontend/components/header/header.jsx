@@ -13,7 +13,7 @@ export const Header = () => {
     return (
         <header className="Header">
             <TodayHours />
-            <div className="Header-inner">
+            <div className="Container Header-inner">
                 {/* En el logo agrupamos el barril y el nombre del mesón; siempre lleva a la portada.
                 La imagen lleva alt vacío porque el nombre ya está escrito al lado.
                 width y height son el tamaño en pantalla: Next genera una versión de ese tamaño

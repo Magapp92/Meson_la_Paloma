@@ -12,11 +12,11 @@
 
 /* BOTÓN HAMBURGUESA */
 
-/* Botón cuadrado de 2.75rem (44px, el mínimo cómodo para el dedo) con las tres líneas en columna.
+/* Botón cuadrado de al menos 2.75rem (44px, el mínimo cómodo para el dedo) con las tres líneas en columna.
    Queda por encima del panel para poder cerrarlo */
 .MobileMenu-toggle{
-    width: 2.75rem;
-    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
 
     display: flex;
     flex-flow: column nowrap;

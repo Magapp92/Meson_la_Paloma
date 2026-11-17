@@ -3,9 +3,10 @@
 
 /* HERO */
 
-/* Damos al Hero un margen interior provisional para que el título no toque los bordes de la pantalla */
+/* Damos al Hero un margen interior provisional arriba y abajo.
+   El ancho máximo y los márgenes laterales los pone la clase Container */
 .Hero{
-    padding: 1rem;
+    padding-block: 1rem;
 }
 
 /* Título gigante con un tamaño fluido: crece con el ancho de la pantalla, entre 4rem y 12rem.

@@ -9,7 +9,7 @@ export const Home = () => {
         <main>
             {/* En la sección hero agrupamos el nombre del mesón en grande y a dos tonos
             y los botones para reservar y ver la carta */}
-            <section className="Hero">
+            <section className="Container Hero">
                 <h1 className="Hero-title">
                     {/* El espacio separa las dos palabras para los lectores de pantalla,
                     aunque en pantalla cada parte vaya en su propia línea */}

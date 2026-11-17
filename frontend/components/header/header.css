@@ -7,9 +7,10 @@
 }
 
 /* Colocamos con flex el logo, el menú y el botón en una fila.
-   La separación se estrecha con la pantalla para que todo quepa en una línea */
+   La separación se estrecha con la pantalla para que todo quepa en una línea.
+   El ancho máximo y los márgenes laterales los pone la clase Container */
 .Header-inner{
-    padding: 1rem;
+    padding-block: 1rem;
 
     display: flex;
     align-items: center;
