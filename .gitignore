@@ -1,0 +1,5 @@
+# Librerías instaladas por npm: se recrean con npm install
+node_modules/
+
+# Carpeta que Next genera al arrancar (npm run dev) o compilar: se recrea sola
+.next/
