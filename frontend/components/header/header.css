@@ -6,7 +6,7 @@
     border-bottom: 2px solid var(--accent);
 }
 
-/* Colocamos con flex el logo, el menú y el botón en una fila.
+/* Colocamos con flex el logo y el menú en una fila.
    La separación se estrecha con la pantalla para que todo quepa en una línea.
    El ancho máximo y los márgenes laterales los pone la clase Container */
 .Header-inner{
