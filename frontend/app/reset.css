@@ -1,23 +1,191 @@
 
 /* RESET */
 
-/* Agrupamos las custom properties de colores del modelo B1 · Noche: fondo negro, texto crema y acento mostaza.
-   Solo las que usa la web; el resto se irán añadiendo cuando algún elemento las necesite.
+/* Reset CSS Pro de Eduardo Fierro (https://github.com/eduardofierropro/Reset-CSS), licencia MIT.
+   Elimina las diferencias entre navegadores para que todos partan de cero:
+   márgenes, tipografías, imágenes, enlaces, listas, formularios, tablas y svg */
+
+/* Agrupamos las custom properties y la tipografía y el tamaño de letra que haya elegido el usuario en su navegador.
+   Colores del modelo B1 · Noche: fondo negro, texto crema y acento mostaza.
+   Solo los que usa la web; el resto se irán añadiendo cuando algún elemento los necesite.
    Las de tipografías (--font-title y --font-text) las crea next/font en layout.jsx */
 :root{
     --bg: #0e0e0d;
     --text: #f5f1e8;
     --accent: #f0b429;
+
+    font-size: 100%;
+    font-family: system-ui, sans-serif;
+
+    scroll-behavior: smooth;
 }
 
-/* Quitamos márgenes y paddings por defecto y hacemos que el ancho incluya borde y padding */
+/* Si el usuario ha pedido en su sistema reducir el movimiento, quitamos animaciones y transiciones */
+@media (prefers-reduced-motion: reduce){
+    *{
+        -webkit-animation: none !important;
+        animation: none !important;
+        -webkit-transition: none !important;
+        transition: none !important;
+    }
+}
+
+/* Quitamos márgenes, paddings y bordes de todas las etiquetas y hacemos que el ancho incluya borde y padding */
 *, *::before, *::after{
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    border: 0;
+    box-sizing: border-box;
+
+    vertical-align: baseline;
 }
 
-/* Damos al body el fondo y la tipografía base: Inter Tight para los textos */
+/* Los pseudoelementos se comportan como cajas */
+*::before, *::after{
+    display: block;
+}
+
+/* Evitamos problemas con las imágenes y los vídeos: nunca se salen de su contenedora */
+img, picture, video, iframe, figure, canvas{
+    max-width: 100%;
+    width: 100%;
+    height: initial;
+
+    display: block;
+}
+
+/* Los enlaces funcionan como cajas y heredan el color y el tamaño del texto… */
+a{
+    display: block;
+
+    color: inherit;
+    font-size: inherit;
+    text-decoration: none;
+}
+
+/* …excepto los que están dentro de un párrafo, que siguen en la línea */
+p a{
+    display: inline;
+}
+
+/* Quitamos los puntos de las listas */
+li, menu, summary{
+    list-style: none;
+}
+
+/* Evitamos que las listas numeradas anidadas sigan contando desde la de fuera en Firefox */
+ol{
+    counter-reset: revert;
+}
+
+/* El smooth también en html para los navegadores que no lo leen en :root */
+html{
+    scroll-behavior: smooth;
+}
+
+/* Quitamos los estilos por defecto de las etiquetas de texto: todas heredan tipografía y color */
+h1, h2, h3, h4, h5, h6, p, span, a, strong, blockquote, i, b, u, em, mark, del, pre, code{
+    font: inherit;
+    line-height: 1em;
+    color: inherit;
+    text-decoration: none;
+    text-wrap: pretty;
+}
+
+/* El texto marcado sin el fondo amarillo del navegador */
+mark{
+    background-color: transparent;
+}
+
+/* Quitamos las comillas que el navegador añade a las citas */
+blockquote:before, blockquote:after, q:before, q:after{
+    content: "";
+    content: none;
+}
+
+/* Igualamos los formularios: heredan tipografía y color y no traen fondo */
+form, input, textarea, select, button, label{
+    background-color: transparent;
+
+    display: block;
+
+    font: inherit;
+    color: inherit;
+    hyphens: auto;
+}
+
+/* Safari tiene un fallo con los saltos de línea en los textarea */
+textarea{
+    white-space: pre-wrap;
+}
+
+/* El texto de ejemplo de los campos con el color normal */
+::placeholder{
+    color: unset;
+}
+
+/* Los botones y las etiquetas muestran la mano al pasar el ratón */
+button, label{
+    cursor: pointer;
+}
+
+/* Reseteamos las tablas */
+table, tr, td, th, thead, tbody, tfoot{
+    border-collapse: collapse;
+    border-spacing: 0;
+
+    font: inherit;
+}
+
+/* Los iconos svg ocupan su contenedora y toman el color del texto */
+svg{
+    width: 100%;
+    height: initial;
+
+    display: block;
+
+    fill: currentColor;
+}
+
+/* …excepto los que están dentro de un párrafo, que van en la línea */
+p svg{
+    width: initial;
+
+    display: inline;
+}
+
+/* Corrige un fallo de Chrome con los elementos editables */
+:where([contenteditable]:not([contenteditable="false"])){
+    -moz-user-modify: read-write;
+    -webkit-user-modify: read-write;
+    overflow-wrap: break-word;
+    -webkit-line-break: after-white-space;
+    -webkit-user-select: auto;
+}
+
+/* Hace que los elementos arrastrables funcionen bien en Safari */
+:where([draggable="true"]){
+    -webkit-user-drag: element;
+}
+
+/* Damos al body el alto mínimo de la pantalla, un interlineado cómodo y un suavizado de letra */
+body{
+    min-height: 100vh;
+
+    color: inherit;
+    line-height: 1.5em;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    font-smooth: always;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* BASE */
+
+/* Damos al body el fondo y la tipografía de la web: Inter Tight para los textos */
 body{
     background: var(--bg);
 

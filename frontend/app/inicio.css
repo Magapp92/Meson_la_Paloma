@@ -16,9 +16,11 @@
     text-transform: uppercase;
 }
 
-/* Segunda línea del título en mostaza: el span pasa a bloque para ocupar su propia línea */
+/* Segunda línea del título en mostaza: el span pasa a bloque para ocupar su propia línea.
+   Hereda el interlineado del título porque el reset le pone a los span el suyo propio (1em) */
 .Hero-titleAccent{
     display: block;
 
     color: var(--accent);
+    line-height: inherit;
 }
