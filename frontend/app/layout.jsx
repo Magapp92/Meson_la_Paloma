@@ -1,5 +1,6 @@
 
 import { Anton, Inter_Tight } from 'next/font/google'
+import { Header } from '@components/header/header.jsx'
 import './reset.css'
 
 /* Next descarga las fuentes al compilar y las sirve desde nuestra web,
@@ -17,12 +18,16 @@ const fontText = Inter_Tight({
 })
 
 /* Layout raíz: Next lo pide obligatoriamente y envuelve todas las páginas.
-Es el único sitio donde van las etiquetas <html> y <body> */
+Es el único sitio donde van las etiquetas <html> y <body>.
+El Header va aquí para que salga en todas las páginas, encima de cada una */
 const RootLayout = ({ children }) => {
 
     return (
         <html lang="es" className={`${ fontTitle.variable } ${ fontText.variable }`}>
-            <body>{children}</body>
+            <body>
+                <Header />
+                {children}
+            </body>
         </html>
     )
 }
