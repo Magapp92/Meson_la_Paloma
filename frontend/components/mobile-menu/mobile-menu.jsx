@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { NAV_LINKS } from '@const/navigation.js'
 import './mobile-menu.css'
@@ -11,6 +11,34 @@ Es un componente de cliente porque tiene que recordar si está abierto y respond
 export const MobileMenu = () => {
 
     const [ isOpen, setIsOpen ] = useState( false )
+
+    /* Mientras el menú está abierto: la página de debajo no hace scroll, la tecla Escape lo cierra
+    y, si la pantalla se ensancha hasta el tamaño de escritorio (al girar una tablet), se cierra solo.
+    La función del return deshace todo al cerrarlo */
+    useEffect(() => {
+
+        if (!isOpen) return
+
+        const desktop = window.matchMedia('(min-width: 901px)')
+
+        const closeWithEscape = ( e ) => {
+            if (e.key === 'Escape') setIsOpen( false )
+        }
+
+        const closeOnDesktop = ( e ) => {
+            if (e.matches) setIsOpen( false )
+        }
+
+        document.body.style.overflow = 'hidden'
+        document.addEventListener('keydown', closeWithEscape)
+        desktop.addEventListener('change', closeOnDesktop)
+
+        return () => {
+            document.body.style.overflow = ''
+            document.removeEventListener('keydown', closeWithEscape)
+            desktop.removeEventListener('change', closeOnDesktop)
+        }
+    }, [isOpen])
 
     /* Abre el menú si está cerrado y lo cierra si está abierto */
     const toggleMenu = () => {
