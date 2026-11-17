@@ -38,11 +38,10 @@
     text-transform: uppercase;
 }
 
-/* Segunda línea del nombre en mostaza, en su propia línea y con el mismo interlineado */
-.Header-logoTextAccent{
+/* Segunda línea del nombre: el span pasa a bloque para ocupar su propia línea, con el mismo interlineado */
+.Header-logoTextLine{
     display: block;
 
-    color: var(--accent);
     line-height: inherit;
 }
 

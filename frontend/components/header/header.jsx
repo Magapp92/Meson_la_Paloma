@@ -24,12 +24,12 @@ export const Header = () => {
                 La imagen lleva alt vacío porque el nombre ya está escrito al lado.
                 width y height son el tamaño en pantalla: Next genera una versión de ese tamaño
                 y otra del doble para las pantallas de alta densidad.
-                El nombre va en dos líneas y dos tonos, como el título de la portada */}
+                El nombre va en dos líneas, como el título de la portada, pero todo en crema */}
                 <Link href="/" className="Header-logo" title="Ir a la página de inicio">
                     <Image className="Header-logoImg" src="/img/logo-meson.webp" alt="" width={56} height={56} loading="eager" />
                     <span className="Header-logoText">
                         Mesón{' '}
-                        <span className="Header-logoTextAccent">La Paloma</span>
+                        <span className="Header-logoTextLine">La Paloma</span>
                     </span>
                 </Link>
                 {/* En el nav agrupamos los enlaces a cada página */}
