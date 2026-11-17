@@ -1,0 +1,15 @@
+/* Título gigante del hero: en mayúsculas desde el CSS para que el texto
+siga escrito normal en el código y los lectores de pantalla no lo deletreen */
+.Inicio-titulo {
+    margin: 0;
+    padding: 1rem;
+    font-size: clamp(4rem, 16vw, 12rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+}
+
+/* Segunda línea en mostaza: el span ocupa su propia línea */
+.Inicio-tituloAcento {
+    display: block;
+    color: var(--color-mostaza);
+}
