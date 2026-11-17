@@ -26,8 +26,8 @@
 
 /* El barril a su tamaño fijo: el reset pone las imágenes a todo el ancho y aquí no lo queremos */
 .Header-logoImg{
-    width: 56px;
-    height: 56px;
+    width: 3.5rem;
+    height: 3.5rem;
 }
 
 /* Nombre del mesón en Anton y en mayúsculas, como el título de la portada */
@@ -79,8 +79,8 @@
 
 /* MÓVIL */
 
-/* En pantallas pequeñas solo se ven el logo y el nombre: el menú del móvil llegará en el siguiente paso */
-@media (max-width: 900px){
+/* En pantallas de 900px o menos (56.25em) se ocultan el menú y el botón: en su lugar aparece el menú del móvil */
+@media (max-width: 56.25em){
     .Header-nav, .Header-cta{
         display: none;
     }

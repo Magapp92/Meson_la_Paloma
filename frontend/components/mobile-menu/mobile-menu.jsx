@@ -19,24 +19,26 @@ export const MobileMenu = () => {
 
         if (!isOpen) return
 
-        const desktop = window.matchMedia('(min-width: 901px)')
+        /* La misma media query que usa el CSS para mostrar el menú del móvil */
+        const mobile = window.matchMedia('(max-width: 56.25em)')
 
         const closeWithEscape = ( e ) => {
             if (e.key === 'Escape') setIsOpen( false )
         }
 
+        /* Si la pantalla deja de cumplir la media query del móvil, cerramos */
         const closeOnDesktop = ( e ) => {
-            if (e.matches) setIsOpen( false )
+            if (!e.matches) setIsOpen( false )
         }
 
         document.body.style.overflow = 'hidden'
         document.addEventListener('keydown', closeWithEscape)
-        desktop.addEventListener('change', closeOnDesktop)
+        mobile.addEventListener('change', closeOnDesktop)
 
         return () => {
             document.body.style.overflow = ''
             document.removeEventListener('keydown', closeWithEscape)
-            desktop.removeEventListener('change', closeOnDesktop)
+            mobile.removeEventListener('change', closeOnDesktop)
         }
     }, [isOpen])
 

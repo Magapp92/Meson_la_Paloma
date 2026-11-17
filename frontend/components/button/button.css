@@ -1,11 +1,12 @@
 
 /* BUTTON */
 
-/* Damos estilo base a todos los botones: forma de píldora y contenido centrado con flex */
+/* Damos estilo base a todos los botones: forma de píldora y contenido centrado con flex.
+   El radio de 100vmax es siempre mayor que la mitad del alto, así los lados quedan redondos del todo */
 .Button{
-    height: 48px;
+    height: 3rem;
     padding: 0 1.5rem;
-    border-radius: 999px;
+    border-radius: 100vmax;
 
     display: inline-flex;
     justify-content: center;

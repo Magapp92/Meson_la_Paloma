@@ -12,26 +12,27 @@
 
 /* BOTÓN HAMBURGUESA */
 
-/* Botón cuadrado de 44px (el mínimo cómodo para el dedo) con las tres líneas en columna.
+/* Botón cuadrado de 2.75rem (44px, el mínimo cómodo para el dedo) con las tres líneas en columna.
    Queda por encima del panel para poder cerrarlo */
 .MobileMenu-toggle{
-    width: 44px;
-    height: 44px;
+    width: 2.75rem;
+    height: 2.75rem;
 
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: flex-end;
-    gap: 6px;
+    gap: .375rem;
 
     position: relative;
     z-index: 20;
 }
 
-/* Cada línea del botón */
+/* Cada línea del botón. El grueso va en rem como el resto de medidas
+   para que la X siga cuadrando si el usuario agranda la letra del navegador */
 .MobileMenu-bar{
-    width: 28px;
-    height: 2px;
+    width: 1.75rem;
+    height: .125rem;
     background: var(--text);
 
     transition: transform .3s, opacity .3s, width .3s;
@@ -39,22 +40,22 @@
 
 /* La última línea es más corta y en mostaza */
 .MobileMenu-bar:last-child{
-    width: 18px;
+    width: 1.125rem;
     background: var(--accent);
 }
 
 /* Con el menú abierto las líneas forman una X: la del medio desaparece
-   y las otras dos giran hasta cruzarse en el centro */
+   y las otras dos se desplazan .5rem (grueso de la línea + separación) hasta cruzarse en el centro */
 .MobileMenu-toggle.isOpen .MobileMenu-bar:first-child{
-    transform: translateY(8px) rotate(45deg);
+    transform: translateY(.5rem) rotate(45deg);
 }
 .MobileMenu-toggle.isOpen .MobileMenu-bar:nth-child(2){
     opacity: 0;
 }
 .MobileMenu-toggle.isOpen .MobileMenu-bar:last-child{
-    width: 28px;
+    width: 1.75rem;
 
-    transform: translateY(-8px) rotate(-45deg);
+    transform: translateY(-.5rem) rotate(-45deg);
 }
 
 /* Contorno mostaza visible al llegar con el teclado */
@@ -137,8 +138,8 @@
 
 /* MÓVIL */
 
-/* El menú del móvil aparece justo cuando se oculta el menú de la cabecera */
-@media (max-width: 900px){
+/* El menú del móvil aparece justo cuando se oculta el menú de la cabecera: 900px o menos (56.25em) */
+@media (max-width: 56.25em){
     .MobileMenu{
         display: block;
     }
