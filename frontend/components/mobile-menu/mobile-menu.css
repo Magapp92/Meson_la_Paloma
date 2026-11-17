@@ -1,0 +1,145 @@
+
+/* MOBILE MENU */
+
+/* El menú del móvil no se ve en pantallas grandes, donde está el menú de la cabecera.
+   margin-left auto lo empuja al extremo derecho de la cabecera */
+.MobileMenu{
+    margin-left: auto;
+
+    display: none;
+}
+
+
+/* BOTÓN HAMBURGUESA */
+
+/* Botón cuadrado de 44px (el mínimo cómodo para el dedo) con las tres líneas en columna.
+   Queda por encima del panel para poder cerrarlo */
+.MobileMenu-toggle{
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 6px;
+
+    position: relative;
+    z-index: 20;
+}
+
+/* Cada línea del botón */
+.MobileMenu-bar{
+    width: 28px;
+    height: 2px;
+    background: var(--text);
+
+    transition: transform .3s, opacity .3s, width .3s;
+}
+
+/* La última línea es más corta y en mostaza */
+.MobileMenu-bar:last-child{
+    width: 18px;
+    background: var(--accent);
+}
+
+/* Con el menú abierto las líneas forman una X: la del medio desaparece
+   y las otras dos giran hasta cruzarse en el centro */
+.MobileMenu-toggle.isOpen .MobileMenu-bar:first-child{
+    transform: translateY(8px) rotate(45deg);
+}
+.MobileMenu-toggle.isOpen .MobileMenu-bar:nth-child(2){
+    opacity: 0;
+}
+.MobileMenu-toggle.isOpen .MobileMenu-bar:last-child{
+    width: 28px;
+
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Contorno mostaza visible al llegar con el teclado */
+.MobileMenu-toggle:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* PANEL */
+
+/* Panel negro a pantalla completa por encima de la página, con los enlaces centrados en vertical.
+   Aparece con un fundido suave */
+.MobileMenu-panel{
+    padding: 6rem 1.5rem 2rem;
+    background: var(--bg);
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+
+    overflow-y: auto;
+    animation: mobileMenuFadeIn .3s;
+}
+
+@keyframes mobileMenuFadeIn{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;
+    }
+}
+
+/* Enlaces en columna */
+.MobileMenu-list{
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 1.2rem;
+}
+
+/* Enlaces grandes en Anton y mayúsculas, con el número delante */
+.MobileMenu-link{
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+
+    font-family: var(--font-title), sans-serif;
+    font-size: clamp(2.2rem, 10vw, 3.5rem);
+    line-height: 1;
+    text-transform: uppercase;
+
+    transition: color .2s;
+}
+.MobileMenu-link:hover{
+    color: var(--accent);
+}
+
+/* Contorno mostaza visible al llegar con el teclado */
+.MobileMenu-link:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* Número pequeño en mostaza delante de cada enlace.
+   tabular-nums hace que todas las cifras midan lo mismo, para que los enlaces queden alineados */
+.MobileMenu-number{
+    font-family: var(--font-text), sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    line-height: inherit;
+}
+
+
+/* MÓVIL */
+
+/* El menú del móvil aparece justo cuando se oculta el menú de la cabecera */
+@media (max-width: 900px){
+    .MobileMenu{
+        display: block;
+    }
+}

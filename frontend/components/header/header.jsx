@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@components/button/button.jsx'
 import { TodayHours } from '@components/today-hours/today-hours.jsx'
+import { MobileMenu } from '@components/mobile-menu/mobile-menu.jsx'
 import { NAV_LINKS } from '@const/navigation.js'
 import './header.css'
 
@@ -34,6 +35,8 @@ export const Header = () => {
                 <div className="Header-cta">
                     <Button href="/" title="Ir a reservar mesa">Reservar mesa</Button>
                 </div>
+                {/* El menú del móvil solo se ve en pantallas pequeñas, en lugar del nav y el botón */}
+                <MobileMenu />
             </div>
         </header>
     )
