@@ -11,6 +11,9 @@ const LEGAL_LINKS = Object.freeze([
     { text: 'Cookies', href: '/', title: 'Ir a la política de cookies' }
 ])
 
+/* Autora de la web, con el enlace a su portfolio */
+const AUTHOR = Object.freeze({ name: 'Magaly Puente', href: 'https://www.magasporfolio.com/' })
+
 /* Orden de la semana en España, empezando por el lunes (en JavaScript el 0 es el domingo) */
 const WEEK_ORDER = Object.freeze([1, 2, 3, 4, 5, 6, 0])
 
@@ -104,18 +107,25 @@ export const Footer = () => {
                     </dl>
                 </div>
             </div>
-            {/* En la línea final agrupamos el copyright y los enlaces legales */}
+            {/* En la línea final agrupamos el copyright a la izquierda y, a la derecha,
+            los enlaces legales junto al crédito de la autora de la web */}
             <div className="Container Footer-bottom">
                 <p>© {year} Mesón La Paloma</p>
-                <nav aria-label="Legal">
-                    <ul className="Footer-legal">
-                        { LEGAL_LINKS.map( link =>
-                            <li key={link.text}>
-                                <Link href={link.href} className="Footer-link" title={link.title}>{link.text}</Link>
-                            </li>
-                        )}
-                    </ul>
-                </nav>
+                <div className="Footer-bottomLinks">
+                    <nav aria-label="Legal">
+                        <ul className="Footer-legal">
+                            { LEGAL_LINKS.map( link =>
+                                <li key={link.text}>
+                                    <Link href={link.href} className="Footer-link" title={link.title}>{link.text}</Link>
+                                </li>
+                            )}
+                        </ul>
+                    </nav>
+                    <p>
+                        Diseño y desarrollo:{' '}
+                        <a href={AUTHOR.href} className="Footer-link" target="_blank" rel="noopener noreferrer" title={`Ir al portfolio de ${ AUTHOR.name }`}>{AUTHOR.name}</a>
+                    </p>
+                </div>
             </div>
         </footer>
     )
