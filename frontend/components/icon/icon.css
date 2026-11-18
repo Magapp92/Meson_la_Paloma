@@ -1,0 +1,12 @@
+
+/* ICON */
+
+/* Tamaño de los iconos: el reset pone los svg a todo el ancho y aquí los queremos pequeños y fijos.
+   Son dibujos de línea: el reset los rellena con el color del texto (fill) y aquí se lo quitamos */
+.Icon{
+    width: 1.25rem;
+    height: 1.25rem;
+
+    flex-shrink: 0;
+    fill: none;
+}

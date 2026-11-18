@@ -1,0 +1,173 @@
+
+/* FOOTER */
+
+/* Damos estilo al Footer: separado del contenido, con la línea mostaza arriba como la cabecera
+   y un fondo un poco más claro que la página */
+.Footer{
+    margin-top: clamp(3rem, 8vw, 6rem);
+    border-top: 2px solid var(--accent);
+    background: var(--surface);
+
+    color: var(--muted);
+}
+
+/* Columnas con grid: caben tantas como permita el ancho, cada una de al menos 13rem.
+   En el ordenador salen cuatro en fila y en el móvil se apilan solas, sin media query */
+.Footer-inner{
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 2.5rem 2rem;
+}
+
+
+/* MARCA */
+
+/* El logo del pie, como el de la cabecera: barril y nombre en dos líneas */
+.Footer-logo{
+    display: inline-flex;
+    align-items: center;
+    gap: .8rem;
+
+    color: var(--text);
+}
+
+/* El barril a su tamaño fijo: el reset pone las imágenes a todo el ancho */
+.Footer-logoImg{
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+.Footer-logoText{
+    font-family: var(--font-title), sans-serif;
+    font-size: 1.4rem;
+    line-height: .95;
+    text-transform: uppercase;
+}
+
+/* Segunda línea del nombre en su propia línea, con el mismo interlineado */
+.Footer-logoTextLine{
+    display: block;
+
+    line-height: inherit;
+}
+
+/* Texto de marca con un ancho máximo para que las líneas no sean demasiado largas */
+.Footer-text{
+    max-width: 22rem;
+    margin-top: 1rem;
+
+    line-height: 1.5;
+}
+
+/* Iconos de las redes en fila */
+.Footer-social{
+    margin-top: 1.5rem;
+
+    display: flex;
+    gap: .6rem;
+}
+
+/* Cada red en un círculo con borde de al menos 2.75rem, el mínimo cómodo para el dedo.
+   Al pasar el ratón se vuelve mostaza */
+.Footer-socialLink{
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+
+    color: var(--text);
+
+    transition: color .2s, border-color .2s;
+}
+.Footer-socialLink:hover{
+    border-color: var(--accent);
+
+    color: var(--accent);
+}
+
+
+/* COLUMNAS */
+
+/* Títulos de las columnas pequeños, en mayúsculas y con las letras separadas */
+.Footer-title{
+    margin-bottom: 1rem;
+
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--faint);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+/* Contenido de cada columna en lista vertical. La dirección no va en cursiva como pone el navegador */
+.Footer-list{
+    display: flex;
+    flex-flow: column nowrap;
+    gap: .7rem;
+
+    font-style: normal;
+    line-height: 1.4;
+}
+
+/* Enlaces del pie que se vuelven mostaza al pasar el ratón.
+   Heredan el interlineado de la lista: el reset les pone 1em y la dirección, en dos líneas, quedaba apretada */
+.Footer-link{
+    line-height: inherit;
+
+    transition: color .2s;
+}
+.Footer-link:hover{
+    color: var(--accent);
+}
+
+/* Contorno mostaza visible al llegar con el teclado */
+.Footer-link:focus-visible, .Footer-socialLink:focus-visible, .Footer-logo:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* Cada fila del horario: los días a la izquierda y las horas a la derecha */
+.Footer-hoursRow{
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* Las horas en crema para que destaquen sobre los días */
+.Footer-hoursRow dd{
+    color: var(--text);
+    white-space: nowrap;
+}
+
+/* Los días cerrados en gris */
+.Footer-hoursRow dd.isClosed{
+    color: var(--faint);
+}
+
+
+/* LÍNEA FINAL */
+
+/* Copyright y enlaces legales en una fila separada por una línea fina; bajan de línea si no caben */
+.Footer-bottom{
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--border);
+
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    gap: .8rem 2rem;
+
+    font-size: .875rem;
+    color: var(--faint);
+}
+
+/* Enlaces legales en fila */
+.Footer-legal{
+    display: flex;
+    gap: 1.5rem;
+}

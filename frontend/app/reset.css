@@ -6,12 +6,16 @@
    márgenes, tipografías, imágenes, enlaces, listas, formularios, tablas y svg */
 
 /* Agrupamos las custom properties y la tipografía y el tamaño de letra que haya elegido el usuario en su navegador.
-   Colores del modelo B1 · Noche: fondo negro, texto crema, acento mostaza y borde gris oscuro.
+   Colores del modelo B1 · Noche: fondo negro, superficie un poco más clara, texto crema y dos grises de texto
+   secundario, acento mostaza y borde gris oscuro.
    Solo los que usa la web; el resto se irán añadiendo cuando algún elemento los necesite.
    Las de tipografías (--font-title y --font-text) las crea next/font en layout.jsx */
 :root{
     --bg: #0e0e0d;
+    --surface: #161513;
     --text: #f5f1e8;
+    --muted: #c9c2b4;
+    --faint: #a39c90;
     --accent: #f0b429;
     --border: #3a3833;
 
