@@ -1,6 +1,24 @@
 
 /* Datos del mesón que usan varias partes de la web */
 
+/* Datos de contacto. El teléfono va dos veces: como se lee y como lo entiende el móvil para llamar
+(tel: con el prefijo de España y sin espacios). directionsHref abre Google Maps con la dirección */
+export const CONTACT = Object.freeze({
+    phone: '608 83 65 64',
+    phoneHref: 'tel:+34608836564',
+    email: 'info@mesonlapaloma.com',
+    street: 'C/ Artajona, 9',
+    city: '28039 Madrid',
+    directionsHref: 'https://www.google.com/maps/search/?api=1&query=Calle%20de%20Artajona%209%2C%2028039%20Madrid'
+})
+
+/* Redes sociales, con los enlaces de la web antigua. Pendiente de confirmar con el mesón que siguen activas */
+export const SOCIAL_LINKS = Object.freeze([
+    { name: 'Instagram', href: 'https://www.instagram.com/mesonlapaloma/' },
+    { name: 'Facebook', href: 'https://www.facebook.com/people/Mes%C3%B3n-La-Paloma/100090445720134/' },
+    { name: 'X', href: 'https://x.com/mesonlapaloma' }
+])
+
 /* Zona horaria del mesón: el horario de hoy se calcula siempre con la hora de Madrid,
 aunque quien visite la web esté en otro país */
 export const TIME_ZONE = 'Europe/Madrid'
