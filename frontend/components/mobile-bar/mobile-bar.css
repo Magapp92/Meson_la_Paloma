@@ -1,0 +1,71 @@
+
+/* MOBILE BAR */
+
+/* La barra no se ve en pantallas grandes */
+.MobileBar{
+    display: none;
+}
+
+
+/* MÓVIL */
+
+@media (max-width: 900px){
+
+    /* Barra fija abajo a todo el ancho, con fondo oscuro translúcido y desenfoque de lo que pasa por detrás.
+       z-index 5: por encima de la página, pero por debajo del menú del móvil (10) cuando está abierto */
+    .MobileBar{
+        padding: .75rem 1rem;
+        border-top: 1px solid var(--border);
+        background: rgba(14, 14, 13, .9);
+        backdrop-filter: blur(.75rem);
+
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 5;
+    }
+
+    /* Hueco al final de la página del alto de la barra, para que no tape el final del pie */
+    body{
+        padding-bottom: 4.5rem;
+    }
+
+    /* Botón redondo de llamar, del mismo alto que el de reservar */
+    .MobileBar-call{
+        min-width: 3rem;
+        min-height: 3rem;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+
+        display: grid;
+        place-items: center;
+
+        color: var(--text);
+
+        transition: color .2s, border-color .2s;
+    }
+    .MobileBar-call:hover{
+        border-color: var(--accent);
+
+        color: var(--accent);
+    }
+
+    /* Contorno mostaza visible al llegar con el teclado */
+    .MobileBar-call:focus-visible{
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
+
+    /* El botón de reservar ocupa todo el ancho que queda */
+    .MobileBar-reserve{
+        flex: 1;
+    }
+    .MobileBar-reserve .Button{
+        width: 100%;
+    }
+}

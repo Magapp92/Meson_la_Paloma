@@ -2,6 +2,7 @@
 import { Anton, Inter_Tight } from 'next/font/google'
 import { Header } from '@components/header/header.jsx'
 import { Footer } from '@components/footer/footer.jsx'
+import { MobileBar } from '@components/mobile-bar/mobile-bar.jsx'
 import './reset.css'
 
 /* Next descarga las fuentes al compilar y las sirve desde nuestra web,
@@ -20,7 +21,8 @@ const fontText = Inter_Tight({
 
 /* Layout raíz: Next lo pide obligatoriamente y envuelve todas las páginas.
 Es el único sitio donde van las etiquetas <html> y <body>.
-El Header y el Footer van aquí para que salgan en todas las páginas, encima y debajo de cada una */
+El Header y el Footer van aquí para que salgan en todas las páginas, encima y debajo de cada una,
+y la barra del móvil, que se queda fija abajo */
 const RootLayout = ({ children }) => {
 
     return (
@@ -29,6 +31,7 @@ const RootLayout = ({ children }) => {
                 <Header />
                 {children}
                 <Footer />
+                <MobileBar />
             </body>
         </html>
     )
