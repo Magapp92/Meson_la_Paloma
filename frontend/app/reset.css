@@ -199,11 +199,11 @@ h1{
     font-family: var(--font-title), sans-serif;
 }
 
-/* Contenedora centrada: en pantallas muy anchas el contenido no pasa de 90rem (1440px)
-   y queda en el centro, con un margen a los lados para que nunca toque los bordes */
+/* Contenedora centrada: en pantallas muy anchas el contenido no pasa de 100rem (1600px)
+   y queda en el centro. El margen a los lados crece con la pantalla, de 1rem en el móvil a 2rem */
 .Container{
     width: 100%;
-    max-width: 90rem;
+    max-width: 100rem;
     margin-inline: auto;
-    padding-inline: 1rem;
+    padding-inline: clamp(1rem, 3vw, 2rem);
 }
