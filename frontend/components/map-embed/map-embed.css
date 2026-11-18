@@ -2,9 +2,10 @@
 /* MAP EMBED */
 
 /* Recuadro del mapa con esquinas redondeadas, como las tarjetas del modelo B1.
-   El alto es fijo porque el mapa (un iframe) necesita saber cuánto ocupar; crece con la pantalla */
+   El alto es fijo porque el mapa (un iframe) y la imagen de fondo necesitan saber cuánto ocupar.
+   24rem dejan sitio en el móvil para la chincheta en el centro y el texto debajo */
 .MapEmbed{
-    height: clamp(14rem, 28vw, 20rem);
+    height: 24rem;
     border: 1px solid var(--border);
     border-radius: 1.125rem;
     background: var(--bg);
@@ -12,23 +13,70 @@
     overflow: hidden;
 }
 
-/* El mapa ocupa todo el recuadro */
+/* El mapa de Google ocupa todo el recuadro */
 .MapEmbed-frame{
     height: 100%;
 }
 
-/* Antes de cargar el mapa: la dirección, la nota y el botón, centrados */
-.MapEmbed-placeholder{
+
+/* VISTA PREVIA */
+
+/* Antes de cargar el mapa: la imagen de fondo con el contenido encima, centrado en vertical a la izquierda.
+   position relative para que la imagen, la chincheta y el crédito se coloquen respecto a este recuadro */
+.MapEmbed-preview{
     height: 100%;
-    padding: 1.5rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+
+    display: flex;
+    align-items: center;
+
+    position: relative;
+}
+
+/* La imagen cubre todo el recuadro (recortándose si hace falta) y se pasa a grises oscuros:
+   invert da la vuelta a los colores (el fondo blanco del mapa pasa a negro) y el resto la apaga */
+.MapEmbed-image{
+    object-fit: cover;
+    filter: grayscale(1) invert(1) brightness(.75) contrast(.9);
+}
+
+/* Degradado oscuro desde la izquierda para que el texto se lea sobre el mapa */
+.MapEmbed-preview::after{
+    content: '';
+    background: linear-gradient(90deg, rgba(14, 14, 13, .95) 0%, rgba(14, 14, 13, .6) 40%, rgba(14, 14, 13, 0) 70%);
+
+    position: absolute;
+    inset: 0;
+}
+
+/* Chincheta mostaza con la punta justo en el centro, que es donde está el mesón en la imagen */
+.MapEmbed-pin{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -100%);
+}
+.MapEmbed-pin .Icon{
+    width: 2.75rem;
+    height: 2.75rem;
+
+    fill: var(--accent);
+    stroke: var(--bg);
+    stroke-width: 1.5;
+}
+
+/* Dirección, aviso y botón en columna, por encima del degradado */
+.MapEmbed-content{
+    max-width: 22rem;
 
     display: flex;
     flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     gap: .8rem;
 
-    text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 /* Dirección en crema y algo más grande */
@@ -39,9 +87,41 @@
     line-height: 1.4;
 }
 
-/* Aviso de las cookies de Google, pequeño y en gris */
+/* Aviso de las cookies de Google, pequeño y en gris claro */
 .MapEmbed-note{
     font-size: .875rem;
-    color: var(--faint);
+    color: var(--muted);
     line-height: 1.4;
+}
+
+/* Crédito de OpenStreetMap, pequeño en la esquina inferior derecha */
+.MapEmbed-credit{
+    padding: .2rem .5rem;
+    border-radius: .375rem;
+    background: rgba(14, 14, 13, .75);
+
+    font-size: .7rem;
+    color: var(--faint);
+
+    position: absolute;
+    right: .6rem;
+    bottom: .6rem;
+    z-index: 1;
+}
+.MapEmbed-credit:hover{
+    color: var(--accent);
+}
+
+
+/* MÓVIL */
+
+/* En pantallas de 900px o menos el contenido baja al pie del recuadro y el degradado sube desde abajo,
+   así la chincheta del centro queda a la vista por encima del texto */
+@media (max-width: 900px){
+    .MapEmbed-preview{
+        align-items: flex-end;
+    }
+    .MapEmbed-preview::after{
+        background: linear-gradient(0deg, rgba(14, 14, 13, .95) 0%, rgba(14, 14, 13, .6) 40%, rgba(14, 14, 13, 0) 60%);
+    }
 }
