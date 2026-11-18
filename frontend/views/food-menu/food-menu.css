@@ -1,0 +1,34 @@
+
+/* FOOD MENU */
+
+/* HERO */
+
+/* Cabecera de la carta, más baja que la de la portada. El margen de arriba deja sitio a la tilde de las mayúsculas */
+.FoodMenu-hero{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) 1rem;
+}
+
+/* Título a dos tonos como el de la portada, pero más pequeño: es una página interior */
+.FoodMenu-title{
+    font-size: clamp(3.5rem, 11vw, 8rem);
+    line-height: .9;
+    text-transform: uppercase;
+}
+
+/* Segunda línea del título en mostaza, en su propia línea y con el mismo interlineado */
+.FoodMenu-titleAccent{
+    display: block;
+
+    color: var(--accent);
+    line-height: inherit;
+}
+
+/* Entradilla bajo el título, en gris claro y con un ancho máximo para que la línea no sea muy larga */
+.FoodMenu-intro{
+    max-width: 36rem;
+    margin-top: 1.5rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
