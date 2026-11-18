@@ -4,21 +4,22 @@
 /* Damos estilo al Footer: separado del contenido, con la línea mostaza arriba como la cabecera
    y un fondo un poco más claro que la página */
 .Footer{
-    margin-top: clamp(3rem, 8vw, 6rem);
+    margin-top: clamp(2.5rem, 6vw, 4rem);
     border-top: 2px solid var(--accent);
     background: var(--surface);
 
     color: var(--muted);
 }
 
-/* Columnas con grid: caben tantas como permita el ancho, cada una de al menos 13rem.
-   En el ordenador salen cuatro en fila y en el móvil se apilan solas, sin media query */
+/* Columnas con flex: cada una mide lo que su contenido y se reparten el ancho con space-between,
+   la marca a la izquierda y el horario a la derecha. Si no caben, bajan de línea solas (wrap) */
 .Footer-inner{
-    padding-block: clamp(2.5rem, 5vw, 4rem);
+    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
 
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    gap: 2.5rem 2rem;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    gap: 2rem 3rem;
 }
 
 
@@ -56,14 +57,14 @@
 /* Texto de marca con un ancho máximo para que las líneas no sean demasiado largas */
 .Footer-text{
     max-width: 22rem;
-    margin-top: 1rem;
+    margin-top: .8rem;
 
     line-height: 1.5;
 }
 
 /* Iconos de las redes en fila */
 .Footer-social{
-    margin-top: 1.5rem;
+    margin-top: 1rem;
 
     display: flex;
     gap: .6rem;
@@ -95,7 +96,7 @@
 
 /* Títulos de las columnas pequeños, en mayúsculas y con las letras separadas */
 .Footer-title{
-    margin-bottom: 1rem;
+    margin-bottom: .75rem;
 
     font-size: .8rem;
     font-weight: 600;
@@ -108,7 +109,7 @@
 .Footer-list{
     display: flex;
     flex-flow: column nowrap;
-    gap: .7rem;
+    gap: .5rem;
 
     font-style: normal;
     line-height: 1.4;
@@ -135,7 +136,7 @@
 .Footer-hoursRow{
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 2rem;
 }
 
 /* Las horas en crema para que destaquen sobre los días */
@@ -154,7 +155,7 @@
 
 /* Copyright y enlaces legales en una fila separada por una línea fina; bajan de línea si no caben */
 .Footer-bottom{
-    padding-block: 1.5rem;
+    padding-block: 1rem;
     border-top: 1px solid var(--border);
 
     display: flex;

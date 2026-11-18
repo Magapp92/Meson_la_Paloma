@@ -3,7 +3,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Icon } from '@components/icon/icon.jsx'
 import { CONTACT, SOCIAL_LINKS, DAY_NAMES, OPENING_HOURS } from '@const/business.js'
-import { NAV_LINKS } from '@const/navigation.js'
 import './footer.css'
 
 /* Enlaces legales. De momento llevan a la portada: cambiarán cuando creemos sus páginas */
@@ -48,7 +47,7 @@ const groupOpeningHours = () => {
     return [...rows.filter( row => !row.isClosed ), ...rows.filter( row => row.isClosed )]
 }
 
-/* Pie de todas las páginas: marca y redes, contacto, horario, enlaces y la línea legal */
+/* Pie de todas las páginas: marca y redes, contacto, horario y la línea legal */
 export const Footer = () => {
 
     const hoursRows = groupOpeningHours()
@@ -102,17 +101,6 @@ export const Footer = () => {
                         )}
                     </dl>
                 </div>
-                {/* En los enlaces repetimos el menú de la cabecera, con Mi reserva para gestionar la reserva */}
-                <nav className="Footer-column" aria-label="Pie de página">
-                    <h2 className="Footer-title">Explora</h2>
-                    <ul className="Footer-list">
-                        { NAV_LINKS.map( link =>
-                            <li key={link.text}>
-                                <Link href={link.href} className="Footer-link" title={link.title}>{link.text}</Link>
-                            </li>
-                        )}
-                    </ul>
-                </nav>
             </div>
             {/* En la línea final agrupamos el copyright y los enlaces legales */}
             <div className="Container Footer-bottom">
