@@ -83,7 +83,9 @@ export const Footer = () => {
                     <h2 className="Footer-title">Contacto</h2>
                     <address className="Footer-list">
                         <a href={CONTACT.directionsHref} className="Footer-link" target="_blank" rel="noopener noreferrer" title="Ver cómo llegar en Google Maps">
-                            {CONTACT.street}<br />{CONTACT.city}
+                            {/* En el ordenador la dirección va en una línea; en el móvil la ciudad baja a la siguiente */}
+                            {CONTACT.street}{' '}
+                            <span className="Footer-addressCity">{CONTACT.city}</span>
                         </a>
                         <a href={CONTACT.phoneHref} className="Footer-link" title="Llamar al mesón">{CONTACT.phone}</a>
                         <a href={`mailto:${ CONTACT.email }`} className="Footer-link" title="Escribir un correo al mesón">{CONTACT.email}</a>
