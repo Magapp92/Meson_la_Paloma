@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { TodayHours } from '@components/today-hours/today-hours.jsx'
 import { MobileMenu } from '@components/mobile-menu/mobile-menu.jsx'
-import { NAV_LINKS } from '@const/navigation.js'
+import { HeaderNav } from '@components/header/header-nav.jsx'
 import { ROUTES } from '@const/routes.js'
 import './header.css'
 
@@ -27,12 +27,8 @@ export const Header = () => {
                         <span className="Header-logoTextLine">La Paloma</span>
                     </span>
                 </Link>
-                {/* En el nav agrupamos los enlaces a cada página */}
-                <nav className="Header-nav" aria-label="Principal">
-                    { NAV_LINKS.map( link =>
-                        <Link key={link.text} href={link.href} className="Header-link" title={link.title}>{link.text}</Link>
-                    )}
-                </nav>
+                {/* En el nav agrupamos los enlaces a cada página; marca en mostaza el de la página actual */}
+                <HeaderNav />
                 {/* El menú del móvil solo se ve en pantallas pequeñas, en lugar del nav */}
                 <MobileMenu />
             </div>

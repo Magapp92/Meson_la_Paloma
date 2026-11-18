@@ -71,6 +71,11 @@
     color: var(--accent);
 }
 
+/* El enlace de la página en la que estamos, en mostaza */
+.Header-link.isActive{
+    color: var(--accent);
+}
+
 /* Contorno mostaza visible al llegar con el teclado */
 .Header-link:focus-visible, .Header-logo:focus-visible{
     outline: 2px solid var(--accent);

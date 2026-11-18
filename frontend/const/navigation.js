@@ -10,3 +10,8 @@ export const NAV_LINKS = Object.freeze([
     { text: 'Nosotros', href: ROUTES.HOME, title: 'Ir a la historia del mesón' },
     { text: 'Mi reserva', href: ROUTES.HOME, title: 'Ir a gestionar mi reserva' }
 ])
+
+/* Dice si un enlace del menú es el de la página en la que estamos.
+La portada nunca se marca: es a la que llevan provisionalmente los enlaces sin página,
+y se marcarían todos a la vez. startsWith marca también las páginas que cuelguen de él (/carta/postres) */
+export const isActiveLink = ( href, pathname ) => href !== ROUTES.HOME && pathname.startsWith( href )

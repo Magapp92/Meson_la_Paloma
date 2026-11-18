@@ -118,6 +118,11 @@
     color: var(--accent);
 }
 
+/* El enlace de la página en la que estamos, en mostaza */
+.MobileMenu-link.isActive{
+    color: var(--accent);
+}
+
 /* Contorno mostaza visible al llegar con el teclado */
 .MobileMenu-link:focus-visible{
     outline: 2px solid var(--accent);

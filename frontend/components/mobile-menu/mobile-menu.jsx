@@ -3,7 +3,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { NAV_LINKS } from '@const/navigation.js'
+import { usePathname } from 'next/navigation'
+import { NAV_LINKS, isActiveLink } from '@const/navigation.js'
 import './mobile-menu.css'
 
 /* Menú del móvil: el botón hamburguesa y, al pulsarlo, los enlaces a pantalla completa.
@@ -11,6 +12,8 @@ Es un componente de cliente porque tiene que recordar si está abierto y respond
 export const MobileMenu = () => {
 
     const [ isOpen, setIsOpen ] = useState( false )
+
+    const pathname = usePathname()
 
     /* Mientras el menú está abierto: la página de debajo no hace scroll, la tecla Escape lo cierra
     y, si la pantalla se ensancha hasta el tamaño de escritorio (al girar una tablet), se cierra solo.
@@ -70,14 +73,25 @@ export const MobileMenu = () => {
             { isOpen &&
                 <nav id="mobile-menu" className="MobileMenu-panel" aria-label="Principal">
                     <ol className="MobileMenu-list">
-                        { NAV_LINKS.map( ( link, index ) =>
-                            <li key={link.text}>
-                                <Link href={link.href} className="MobileMenu-link" title={link.title} onClick={closeMenu}>
-                                    <span className="MobileMenu-number">{ String(index + 1).padStart(2, '0') }</span>
-                                    {link.text}
-                                </Link>
-                            </li>
-                        )}
+                        { NAV_LINKS.map( ( link, index ) => {
+
+                            const isActive = isActiveLink( link.href, pathname )
+
+                            return (
+                                <li key={link.text}>
+                                    <Link
+                                        href={link.href}
+                                        className={`MobileMenu-link ${ isActive ? 'isActive' : '' }`}
+                                        aria-current={ isActive ? 'page' : undefined }
+                                        title={link.title}
+                                        onClick={closeMenu}
+                                    >
+                                        <span className="MobileMenu-number">{ String(index + 1).padStart(2, '0') }</span>
+                                        {link.text}
+                                    </Link>
+                                </li>
+                            )
+                        })}
                     </ol>
                 </nav>
             }
