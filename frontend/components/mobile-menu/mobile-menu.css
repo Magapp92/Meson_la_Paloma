@@ -138,8 +138,8 @@
 
 /* MÓVIL */
 
-/* El menú del móvil aparece justo cuando se oculta el menú de la cabecera: 900px o menos (56.25em) */
-@media (max-width: 56.25em){
+/* El menú del móvil aparece justo cuando se oculta el menú de la cabecera: 900px o menos */
+@media (max-width: 900px){
     .MobileMenu{
         display: block;
     }

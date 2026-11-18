@@ -184,8 +184,8 @@
 
 /* MÓVIL */
 
-/* En pantallas de 900px o menos (56.25em) la ciudad baja a su propia línea, debajo de la calle */
-@media (max-width: 56.25em){
+/* En pantallas de 900px o menos la ciudad baja a su propia línea, debajo de la calle */
+@media (max-width: 900px){
     .Footer-addressCity{
         display: block;
     }

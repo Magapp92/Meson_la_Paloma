@@ -20,7 +20,7 @@ export const MobileMenu = () => {
         if (!isOpen) return
 
         /* La misma media query que usa el CSS para mostrar el menú del móvil */
-        const mobile = window.matchMedia('(max-width: 56.25em)')
+        const mobile = window.matchMedia('(max-width: 900px)')
 
         const closeWithEscape = ( e ) => {
             if (e.key === 'Escape') setIsOpen( false )

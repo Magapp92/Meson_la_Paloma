@@ -80,8 +80,8 @@
 
 /* MÓVIL */
 
-/* En pantallas de 900px o menos (56.25em) se oculta el menú: en su lugar aparece el menú del móvil */
-@media (max-width: 56.25em){
+/* En pantallas de 900px o menos se oculta el menú: en su lugar aparece el menú del móvil */
+@media (max-width: 900px){
     .Header-nav{
         display: none;
     }
