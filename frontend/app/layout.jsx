@@ -19,6 +19,17 @@ const fontText = Inter_Tight({
     variable: '--font-text'
 })
 
+/* Título de la pestaña y descripción para Google de toda la web.
+El template completa el título de cada página: la carta pone "Carta" y se ve "Carta · Mesón La Paloma".
+El default es el título de la portada, a la que no se le aplica el template */
+export const metadata = {
+    title: {
+        template: '%s · Mesón La Paloma',
+        default: 'Mesón La Paloma · Cocina americana y mediterránea en Madrid'
+    },
+    description: 'Mesón familiar en Valdezarza, Madrid, con más de 20 años de historia. Cocina americana y mediterránea, menús y noches temáticas.'
+}
+
 /* Layout raíz: Next lo pide obligatoriamente y envuelve todas las páginas.
 Es el único sitio donde van las etiquetas <html> y <body>.
 El Header y el Footer van aquí para que salgan en todas las páginas, encima y debajo de cada una,
