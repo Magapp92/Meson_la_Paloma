@@ -1,0 +1,47 @@
+
+/* MAP EMBED */
+
+/* Recuadro del mapa con esquinas redondeadas, como las tarjetas del modelo B1.
+   El alto es fijo porque el mapa (un iframe) necesita saber cuánto ocupar; crece con la pantalla */
+.MapEmbed{
+    height: clamp(14rem, 28vw, 20rem);
+    border: 1px solid var(--border);
+    border-radius: 1.125rem;
+    background: var(--bg);
+
+    overflow: hidden;
+}
+
+/* El mapa ocupa todo el recuadro */
+.MapEmbed-frame{
+    height: 100%;
+}
+
+/* Antes de cargar el mapa: la dirección, la nota y el botón, centrados */
+.MapEmbed-placeholder{
+    height: 100%;
+    padding: 1.5rem;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: .8rem;
+
+    text-align: center;
+}
+
+/* Dirección en crema y algo más grande */
+.MapEmbed-address{
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+/* Aviso de las cookies de Google, pequeño y en gris */
+.MapEmbed-note{
+    font-size: .875rem;
+    color: var(--faint);
+    line-height: 1.4;
+}

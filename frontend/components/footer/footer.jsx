@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Icon } from '@components/icon/icon.jsx'
+import { MapEmbed } from '@components/map-embed/map-embed.jsx'
 import { CONTACT, SOCIAL_LINKS, DAY_NAMES, OPENING_HOURS } from '@const/business.js'
 import './footer.css'
 
@@ -106,6 +107,10 @@ export const Footer = () => {
                         )}
                     </dl>
                 </div>
+            </div>
+            {/* El mapa, debajo de las columnas y a todo el ancho del contenido */}
+            <div className="Container Footer-map">
+                <MapEmbed />
             </div>
             {/* En la línea final agrupamos el copyright a la izquierda y, a la derecha,
             los enlaces legales junto al crédito de la autora de la web */}

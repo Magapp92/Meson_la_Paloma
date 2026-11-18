@@ -151,6 +151,14 @@
 }
 
 
+/* MAPA */
+
+/* Espacio debajo del mapa antes de la línea final */
+.Footer-map{
+    padding-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
+
 /* LÍNEA FINAL */
 
 /* Copyright y enlaces legales en una fila separada por una línea fina; bajan de línea si no caben */

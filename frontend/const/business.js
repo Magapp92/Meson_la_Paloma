@@ -2,14 +2,16 @@
 /* Datos del mesón que usan varias partes de la web */
 
 /* Datos de contacto. El teléfono va dos veces: como se lee y como lo entiende el móvil para llamar
-(tel: con el prefijo de España y sin espacios). directionsHref abre Google Maps con la dirección */
+(tel: con el prefijo de España y sin espacios). directionsHref abre Google Maps con la dirección
+y mapEmbedSrc es el mapa para insertar en la web (el mismo que tenía la web antigua) */
 export const CONTACT = Object.freeze({
     phone: '608 83 65 64',
     phoneHref: 'tel:+34608836564',
     email: 'info@mesonlapaloma.com',
     street: 'C/ Artajona, 9',
     city: '28039 Madrid',
-    directionsHref: 'https://www.google.com/maps/search/?api=1&query=Calle%20de%20Artajona%209%2C%2028039%20Madrid'
+    directionsHref: 'https://www.google.com/maps/search/?api=1&query=Calle%20de%20Artajona%209%2C%2028039%20Madrid',
+    mapEmbedSrc: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3034.601229524345!2d-3.7229303851056427!3d40.454406279364575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd42284269d4db13%3A0xc10ef3e24183d5e0!2sCalle%20de%20Artajona%2C%209%2C%2028039%20Madrid%2C%20Spain!5e0!3m2!1ses!2ses'
 })
 
 /* Redes sociales, con los enlaces de la web antigua. Pendiente de confirmar con el mesón que siguen activas */
