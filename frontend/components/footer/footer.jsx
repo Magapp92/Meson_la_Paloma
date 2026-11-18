@@ -4,12 +4,13 @@ import Image from 'next/image'
 import { Icon } from '@components/icon/icon.jsx'
 import { MapEmbed } from '@components/map-embed/map-embed.jsx'
 import { CONTACT, SOCIAL_LINKS, DAY_NAMES, OPENING_HOURS } from '@const/business.js'
+import { ROUTES } from '@const/routes.js'
 import './footer.css'
 
 /* Enlaces legales. De momento llevan a la portada: cambiarán cuando creemos sus páginas */
 const LEGAL_LINKS = Object.freeze([
-    { text: 'Privacidad', href: '/', title: 'Ir a la política de privacidad' },
-    { text: 'Cookies', href: '/', title: 'Ir a la política de cookies' }
+    { text: 'Privacidad', href: ROUTES.HOME, title: 'Ir a la política de privacidad' },
+    { text: 'Cookies', href: ROUTES.HOME, title: 'Ir a la política de cookies' }
 ])
 
 /* Autora de la web, con el enlace a su portfolio */
@@ -63,7 +64,7 @@ export const Footer = () => {
             <div className="Container Footer-inner">
                 {/* En la marca agrupamos el logo, el texto del mesón y las redes sociales */}
                 <div className="Footer-brand">
-                    <Link href="/" className="Footer-logo" title="Ir a la página de inicio">
+                    <Link href={ROUTES.HOME} className="Footer-logo" title="Ir a la página de inicio">
                         <Image className="Footer-logoImg" src="/img/logo-meson.webp" alt="" width={56} height={56} />
                         <span className="Footer-logoText">
                             Mesón{' '}

@@ -2,6 +2,7 @@
 import { Button } from '@components/button/button.jsx'
 import { Icon } from '@components/icon/icon.jsx'
 import { CONTACT } from '@const/business.js'
+import { ROUTES } from '@const/routes.js'
 import './mobile-bar.css'
 
 /* Barra fija abajo en el móvil con las dos acciones más importantes: llamar y reservar.
@@ -16,7 +17,7 @@ export const MobileBar = () => {
             </a>
             {/* De momento lleva a la portada: cambiará a la página de reservas cuando la creemos */}
             <div className="MobileBar-reserve">
-                <Button href="/" title="Ir a reservar mesa">Reservar mesa</Button>
+                <Button href={ROUTES.HOME} title="Ir a reservar mesa">Reservar mesa</Button>
             </div>
         </div>
     )

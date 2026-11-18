@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { TodayHours } from '@components/today-hours/today-hours.jsx'
 import { MobileMenu } from '@components/mobile-menu/mobile-menu.jsx'
 import { NAV_LINKS } from '@const/navigation.js'
+import { ROUTES } from '@const/routes.js'
 import './header.css'
 
 /* Cabecera de todas las páginas con la franja del horario, el logo y el menú.
@@ -19,7 +20,7 @@ export const Header = () => {
                 width y height son el tamaño en pantalla: Next genera una versión de ese tamaño
                 y otra del doble para las pantallas de alta densidad.
                 El nombre va en dos líneas, como el título de la portada, pero todo en crema */}
-                <Link href="/" className="Header-logo" title="Ir a la página de inicio">
+                <Link href={ROUTES.HOME} className="Header-logo" title="Ir a la página de inicio">
                     <Image className="Header-logoImg" src="/img/logo-meson.webp" alt="" width={56} height={56} loading="eager" />
                     <span className="Header-logoText">
                         Mesón{' '}

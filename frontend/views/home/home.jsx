@@ -1,5 +1,6 @@
 
 import { Button } from '@components/button/button.jsx'
+import { ROUTES } from '@const/routes.js'
 import './home.css'
 
 /* Portada de la web: lo que se ve en la ruta / */
@@ -17,9 +18,9 @@ export const Home = () => {
                     <span className="Hero-titleAccent">La Paloma</span>
                 </h1>
                 <div className="Hero-actions">
-                    {/* De momento llevan a la portada: cambiarán a su página cuando la creemos */}
-                    <Button href="/" title="Ir a reservar mesa">Reservar mesa</Button>
-                    <Button href="/" variant="ghost" title="Ir a la carta">Ver la carta</Button>
+                    {/* Reservar lleva de momento a la portada: cambiará cuando creemos la página de reservas */}
+                    <Button href={ROUTES.HOME} title="Ir a reservar mesa">Reservar mesa</Button>
+                    <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta</Button>
                 </div>
             </section>
         </main>
