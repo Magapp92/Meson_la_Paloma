@@ -228,6 +228,43 @@
 }
 
 
+/* HISTORIA */
+
+/* Foto y texto en dos columnas iguales, centrados en vertical */
+.Story{
+    padding-block: 0 clamp(3rem, 7vw, 6rem);
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+}
+
+/* Foto con esquinas redondeadas; el alto sale de su proporción */
+.Story-photo{
+    height: auto;
+    border-radius: 1.125rem;
+}
+
+/* Título de la sección, igual que los demás */
+.Story-title{
+    font-family: var(--font-title);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Texto en gris claro con un ancho máximo y separado del botón */
+.Story-text{
+    max-width: 34rem;
+    margin-block: 1.25rem 1.75rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+
 /* MÓVIL */
 
 /* En pantallas de 900px o menos la tira se desliza de lado: cada foto ocupa el 80% del ancho
@@ -264,6 +301,11 @@
 
     /* Los platos, en una sola columna */
     .FeaturedDishes-list{
+        grid-template-columns: 1fr;
+    }
+
+    /* La historia también: la foto arriba y el texto debajo */
+    .Story{
         grid-template-columns: 1fr;
     }
 }
