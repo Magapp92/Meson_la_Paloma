@@ -8,7 +8,7 @@ export const Home = () => {
 
     return (
         <main>
-            {/* En la sección hero agrupamos el nombre del mesón en grande y a dos tonos
+            {/* En la sección hero agrupamos el nombre del mesón en grande y a dos tonos, una frase corta
             y los botones para reservar y ver la carta */}
             <section className="Container Hero">
                 <h1 className="Hero-title">
@@ -17,6 +17,7 @@ export const Home = () => {
                     Mesón{' '}
                     <span className="Hero-titleAccent">La Paloma</span>
                 </h1>
+                <p className="Hero-text">Cocina americana y mediterránea con alma de barrio. Más de 20 años en Valdezarza.</p>
                 <div className="Hero-actions">
                     {/* Reservar lleva de momento a la portada: cambiará cuando creemos la página de reservas */}
                     <Button href={ROUTES.HOME} title="Ir a reservar mesa">Reservar mesa</Button>

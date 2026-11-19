@@ -27,6 +27,16 @@
     line-height: inherit;
 }
 
+/* Frase bajo el título, en gris claro y con un ancho máximo para que la línea no sea muy larga */
+.Hero-text{
+    max-width: 34rem;
+    margin-top: 1.5rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
+
 /* Botones de reservar y ver la carta en fila, bajando de línea si no caben */
 .Hero-actions{
     margin-top: 2rem;
