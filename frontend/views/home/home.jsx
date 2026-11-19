@@ -22,8 +22,7 @@ const THEMED_NIGHTS = Object.freeze([
     { day: 'Sábado', name: 'Americano', poster: '/img/saturday-american.webp' }
 ])
 
-/* Platos destacados de la carta, con una nota si hace falta y su foto con el tamaño original.
-Si un plato aún no tiene foto, se ve un hueco */
+/* Platos destacados de la carta, cada uno con su foto y el tamaño original de esta */
 const FEATURED_DISHES = Object.freeze([
     { name: 'Sándwich especial "La Paloma"', image: { src: '/img/paloma-sandwich.webp', width: 960, height: 640 } },
     { name: 'Hamburguesa especial de la casa', image: { src: '/img/house-burger-board.webp', width: 960, height: 640 } },
@@ -104,23 +103,16 @@ export const Home = () => {
                 <ul className="FeaturedDishes-list">
                     { FEATURED_DISHES.map( dish =>
                         <li key={dish.name} className="FeaturedDishes-item">
-                            {/* Foto del plato; alt vacío porque el nombre ya va escrito al lado.
-                            Si aún no tiene foto, un hueco con el mismo tamaño */}
-                            { dish.image
-                                ? <Image
-                                    className="FeaturedDishes-photo"
-                                    src={dish.image.src}
-                                    alt=""
-                                    width={dish.image.width}
-                                    height={dish.image.height}
-                                    sizes="6.5rem"
-                                />
-                                : <span className="FeaturedDishes-photo" aria-hidden="true" />
-                            }
-                            <div className="FeaturedDishes-text">
-                                <p className="FeaturedDishes-name">{dish.name}</p>
-                                { dish.note && <p className="FeaturedDishes-note">{dish.note}</p> }
-                            </div>
+                            {/* Foto del plato; alt vacío porque el nombre ya va escrito al lado */}
+                            <Image
+                                className="FeaturedDishes-photo"
+                                src={dish.image.src}
+                                alt=""
+                                width={dish.image.width}
+                                height={dish.image.height}
+                                sizes="6.5rem"
+                            />
+                            <p className="FeaturedDishes-name">{dish.name}</p>
                         </li>
                     )}
                 </ul>
