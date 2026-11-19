@@ -45,3 +45,46 @@
     flex-flow: row wrap;
     gap: .8rem;
 }
+
+
+/* TIRA DE FOTOS */
+
+/* Tres fotos en fila, del mismo ancho */
+.Hero-photos{
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+/* Todas las fotos con la misma proporción (aunque las originales no la tengan) y esquinas redondeadas.
+   object-fit cover recorta lo que sobra en vez de deformarlas */
+.Hero-photoImg{
+    height: auto;
+    border-radius: 1.125rem;
+
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+
+/* MÓVIL */
+
+/* En pantallas de 900px o menos la tira se desliza de lado: cada foto ocupa el 80% del ancho
+   y al soltar el dedo se queda encajada en una foto (scroll-snap) */
+@media (max-width: 900px){
+    .Hero-photos{
+        display: flex;
+        gap: .75rem;
+
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+    .Hero-photo{
+        flex: 0 0 80%;
+
+        scroll-snap-align: start;
+    }
+}
