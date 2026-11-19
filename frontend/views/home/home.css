@@ -156,15 +156,16 @@
     gap: 1.25rem;
 }
 
-/* Foto redonda del plato: cuadrada con aspect-ratio y recortada con object-fit para no deformarse.
+/* Foto del plato entera, con la proporción de las originales (3:2) y esquinas redondeadas.
+   object-fit evita que se deforme si alguna foto tiene otra proporción.
    En mostaza mientras no hay foto. flex-shrink 0 para que el texto largo no la aplaste */
 .FeaturedDishes-photo{
-    width: 4.5rem;
+    width: 6.5rem;
     height: auto;
-    border-radius: 50%;
+    border-radius: .75rem;
 
     flex-shrink: 0;
-    aspect-ratio: 1;
+    aspect-ratio: 3 / 2;
     object-fit: cover;
 
     background-color: var(--accent);

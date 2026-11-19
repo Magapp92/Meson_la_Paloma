@@ -113,7 +113,7 @@ export const Home = () => {
                                     alt=""
                                     width={dish.image.width}
                                     height={dish.image.height}
-                                    sizes="4.5rem"
+                                    sizes="6.5rem"
                                 />
                                 : <span className="FeaturedDishes-photo" aria-hidden="true" />
                             }
