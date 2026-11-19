@@ -30,9 +30,9 @@ const FEATURED_DISHES = Object.freeze([
     { name: 'Pollo asado con patatas', image: { src: '/img/roast-chickens.webp', width: 960, height: 640 } },
     { name: 'Entrecot con patatas', image: { src: '/img/entrecote-plate.webp', width: 960, height: 640 } },
     { name: 'T-bone', image: { src: '/img/t-bone-steak.webp', width: 960, height: 640 } },
-    { name: 'Costillas asadas barbacoa + refresco', image: { src: '/img/bbq-ribs-plate.webp', width: 960, height: 640 } },
+    { name: 'Costillas asadas barbacoa', image: { src: '/img/bbq-ribs-plate.webp', width: 960, height: 640 } },
     { name: 'Chuletón', image: { src: '/img/rib-steak-plate.webp', width: 960, height: 640 } },
-    { name: 'Tomahawk steak', note: 'Con patata americana y mazorca' }
+    { name: 'Tomahawk steak' }
 ])
 
 /* Número de personas de los botones de "¿Mesa para cuántos?". Más de 6 es un grupo y se reserva por teléfono */
