@@ -1,5 +1,6 @@
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { Button } from '@components/button/button.jsx'
 import { CONTACT } from '@const/business.js'
 import { ROUTES } from '@const/routes.js'
@@ -32,6 +33,14 @@ const FEATURED_DISHES = Object.freeze([
     { name: 'Costillas asadas barbacoa + refresco' },
     { name: 'Chuletón' },
     { name: 'Tomahawk steak', note: 'Con patata americana y mazorca' }
+])
+
+/* Número de personas de los botones de "¿Mesa para cuántos?": el texto del botón y cómo se lee */
+const PARTY_SIZES = Object.freeze([
+    { text: '2', title: '2 personas' },
+    { text: '4', title: '4 personas' },
+    { text: '6', title: '6 personas' },
+    { text: '8+', title: '8 personas o más' }
 ])
 
 /* Portada de la web: lo que se ve en la ruta / */
@@ -140,6 +149,25 @@ export const Home = () => {
                     <p className="Story-text">Somos un mesón familiar de barrio. Llevamos más de 20 años en Valdezarza, de los desayunos a las cenas, con cocina americana y mediterránea y el trato cercano de siempre.</p>
                     {/* Conócenos lleva de momento a la portada: cambiará cuando creemos la página Nosotros */}
                     <Button href={ROUTES.HOME} variant="ghost" title="Ir a nosotros">Conócenos</Button>
+                </div>
+            </section>
+            {/* En la sección de reserva agrupamos, en una franja mostaza a todo el ancho, la pregunta,
+            los botones con el número de personas y el teléfono */}
+            <section className="BookingBand">
+                <div className="Container BookingBand-inner">
+                    <h2 className="BookingBand-title">¿Mesa para cuántos?</h2>
+                    {/* De momento los números llevan a la portada: cuando creemos las reservas,
+                    abrirán el formulario con ese número de personas ya elegido */}
+                    <ul className="BookingBand-sizes">
+                        { PARTY_SIZES.map( size =>
+                            <li key={size.text}>
+                                <Link href={ROUTES.HOME} className="BookingBand-size" title={`Reservar mesa para ${ size.title }`}>{size.text}</Link>
+                            </li>
+                        )}
+                    </ul>
+                    <p className="BookingBand-phone">
+                        O llámanos al <a href={CONTACT.phoneHref} className="BookingBand-phoneLink" title="Llamar al mesón">{CONTACT.phone}</a>
+                    </p>
                 </div>
             </section>
         </main>

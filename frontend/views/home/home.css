@@ -265,6 +265,83 @@
 }
 
 
+/* RESERVA */
+
+/* Franja mostaza a todo el ancho de la pantalla (el ancho máximo lo pone el Container de dentro) */
+.BookingBand{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* Pregunta, números y teléfono en fila, bajando de línea si no caben */
+.BookingBand-inner{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem 2.5rem;
+}
+
+/* La pregunta en grande con la fuente de títulos */
+.BookingBand-title{
+    font-family: var(--font-title);
+    font-size: clamp(2.25rem, 5.5vw, 4rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Los números en fila */
+.BookingBand-sizes{
+    display: flex;
+    gap: .75rem;
+}
+
+/* Cada número es un círculo con borde oscuro que se rellena al pasar el ratón */
+.BookingBand-size{
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 1.25rem;
+    font-weight: 700;
+
+    transition: background .2s, color .2s;
+}
+.BookingBand-size:hover{
+    background-color: var(--bg);
+
+    color: var(--accent);
+}
+
+/* Al llegar con el teclado, un borde oscuro separado del círculo */
+.BookingBand-size:focus-visible{
+    outline: 2px solid var(--bg);
+    outline-offset: 3px;
+}
+
+/* Línea del teléfono */
+.BookingBand-phone{
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* El número de teléfono subrayado para que se vea que se puede pulsar */
+.BookingBand-phoneLink{
+    font-weight: 700;
+    line-height: inherit;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+
 /* MÓVIL */
 
 /* En pantallas de 900px o menos la tira se desliza de lado: cada foto ocupa el 80% del ancho
