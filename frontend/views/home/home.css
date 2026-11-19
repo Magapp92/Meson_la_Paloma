@@ -184,6 +184,50 @@
 }
 
 
+/* CELEBRACIONES */
+
+/* Separación con la sección de arriba */
+.Celebrations{
+    padding-block: 0 clamp(3rem, 7vw, 6rem);
+}
+
+/* Caja con el fondo un poco más claro y borde mostaza a la izquierda para que destaque */
+.Celebrations-box{
+    padding: clamp(1.75rem, 4vw, 3rem);
+    border-left: .25rem solid var(--accent);
+    border-radius: 1.125rem;
+
+    background-color: var(--surface);
+}
+
+/* Título de la caja, algo más pequeño que el de las secciones */
+.Celebrations-title{
+    font-family: var(--font-title);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Frase en gris claro con un ancho máximo para que la línea no sea muy larga */
+.Celebrations-text{
+    max-width: 36rem;
+    margin-top: 1rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* Botones en fila, bajando de línea si no caben */
+.Celebrations-actions{
+    margin-top: 1.75rem;
+
+    display: flex;
+    flex-flow: row wrap;
+    gap: .8rem;
+}
+
+
 /* MÓVIL */
 
 /* En pantallas de 900px o menos la tira se desliza de lado: cada foto ocupa el 80% del ancho

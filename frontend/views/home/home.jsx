@@ -1,6 +1,7 @@
 
 import Image from 'next/image'
 import { Button } from '@components/button/button.jsx'
+import { CONTACT } from '@const/business.js'
 import { ROUTES } from '@const/routes.js'
 import './home.css'
 
@@ -109,6 +110,19 @@ export const Home = () => {
                     )}
                 </ul>
                 <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta completa</Button>
+            </section>
+            {/* En la sección de celebraciones agrupamos la invitación a grupos y eventos,
+            con los botones para llamar y ver los menús */}
+            <section className="Container Celebrations">
+                <div className="Celebrations-box">
+                    <h2 className="Celebrations-title">Celebraciones y grupos</h2>
+                    <p className="Celebrations-text">Cumpleaños, comidas de empresa o una mesa grande con la familia: llámanos y lo hablamos.</p>
+                    <div className="Celebrations-actions">
+                        <Button href={CONTACT.phoneHref} title="Llamar al mesón">Llamar al {CONTACT.phone}</Button>
+                        {/* Ver menús lleva de momento a la portada: cambiará cuando creemos la página de menús y eventos */}
+                        <Button href={ROUTES.HOME} variant="ghost" title="Ir a menús y eventos">Ver menús</Button>
+                    </div>
+                </div>
             </section>
         </main>
     )
