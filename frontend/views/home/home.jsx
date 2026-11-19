@@ -1,7 +1,6 @@
 
 import Image from 'next/image'
 import { Button } from '@components/button/button.jsx'
-import { PosterDialog } from '@components/poster-dialog/poster-dialog.jsx'
 import { ROUTES } from '@const/routes.js'
 import './home.css'
 
@@ -64,8 +63,8 @@ export const Home = () => {
                 <ul className="Experiences-list">
                     { THEMED_NIGHTS.map( night =>
                         <li key={night.name} className="Experiences-item">
-                            {/* Al pulsar el cartel se abre en grande para poder leerlo */}
-                            <PosterDialog
+                            <Image
+                                className="Experiences-poster"
                                 src={night.poster}
                                 alt={`Cartel con la carta de la noche de ${ night.name.toLowerCase() } del ${ night.day.toLowerCase() }`}
                                 width={675}
