@@ -23,15 +23,15 @@ const THEMED_NIGHTS = Object.freeze([
 ])
 
 /* Platos destacados de la carta, con una nota si hace falta y su foto con el tamaño original.
-Los que aún no tienen foto esperan a las del Instagram del mesón */
+Si un plato aún no tiene foto, se ve un hueco */
 const FEATURED_DISHES = Object.freeze([
-    { name: 'Sándwich especial "La Paloma"' },
-    { name: 'Hamburguesa especial de la casa', image: { src: '/img/burger.webp', width: 736, height: 491 } },
-    { name: 'Pollo asado con patatas', image: { src: '/img/roast-chicken.webp', width: 736, height: 491 } },
-    { name: 'Entrecot con patatas' },
-    { name: 'T-bone', image: { src: '/img/t-bone.webp', width: 736, height: 491 } },
+    { name: 'Sándwich especial "La Paloma"', image: { src: '/img/paloma-sandwich.webp', width: 960, height: 640 } },
+    { name: 'Hamburguesa especial de la casa', image: { src: '/img/house-burger.webp', width: 960, height: 640 } },
+    { name: 'Pollo asado con patatas', image: { src: '/img/roast-chickens.webp', width: 960, height: 640 } },
+    { name: 'Entrecot con patatas', image: { src: '/img/entrecote.webp', width: 960, height: 640 } },
+    { name: 'T-bone', image: { src: '/img/t-bone-steak.webp', width: 960, height: 640 } },
     { name: 'Costillas asadas barbacoa + refresco', image: { src: '/img/bbq-ribs.webp', width: 720, height: 491 } },
-    { name: 'Chuletón' },
+    { name: 'Chuletón', image: { src: '/img/rib-steak.webp', width: 960, height: 640 } },
     { name: 'Tomahawk steak', note: 'Con patata americana y mazorca' }
 ])
 
