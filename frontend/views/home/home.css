@@ -93,12 +93,6 @@
     gap: 1.25rem;
 }
 
-/* El cartel entero, sin recortar: el alto sale de su proporción */
-.Experiences-poster{
-    height: auto;
-    border-radius: .75rem;
-}
-
 /* Nombre de la noche bajo el cartel */
 .Experiences-name{
     margin-top: .9rem;
