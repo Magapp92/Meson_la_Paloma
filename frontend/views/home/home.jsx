@@ -12,6 +12,14 @@ const HERO_PHOTOS = Object.freeze([
     { src: '/img/burger.webp', alt: 'Hamburguesa con queso, lechuga y tomate', width: 736, height: 491 }
 ])
 
+/* Noches temáticas: el día, el nombre y su cartel (todos miden 675 × 958) */
+const THEMED_NIGHTS = Object.freeze([
+    { day: 'Miércoles', name: 'Picoteo', poster: '/img/wednesday-tapas.webp' },
+    { day: 'Jueves', name: 'Mexicano', poster: '/img/thursday-mexican.webp' },
+    { day: 'Viernes', name: 'Francés', poster: '/img/friday-french.webp' },
+    { day: 'Sábado', name: 'Americano', poster: '/img/saturday-american.webp' }
+])
+
 /* Portada de la web: lo que se ve en la ruta / */
 export const Home = () => {
 
@@ -44,6 +52,29 @@ export const Home = () => {
                                 height={photo.height}
                                 sizes="(max-width: 900px) 80vw, 33vw"
                             />
+                        </li>
+                    )}
+                </ul>
+            </section>
+            {/* En la sección experiencias agrupamos las cuatro noches temáticas: cada una con su cartel entero,
+            sin recortar, y debajo el día y el nombre en texto para que se lea bien */}
+            <section className="Container Experiences">
+                <h2 className="Experiences-title">Cada día, una experiencia</h2>
+                <ul className="Experiences-list">
+                    { THEMED_NIGHTS.map( night =>
+                        <li key={night.name} className="Experiences-item">
+                            <Image
+                                className="Experiences-poster"
+                                src={night.poster}
+                                alt={`Cartel con la carta de la noche de ${ night.name.toLowerCase() } del ${ night.day.toLowerCase() }`}
+                                width={675}
+                                height={958}
+                                sizes="(max-width: 900px) 70vw, 25vw"
+                            />
+                            <p className="Experiences-name">
+                                <span className="Experiences-day">{night.day}</span>
+                                {night.name}
+                            </p>
                         </li>
                     )}
                 </ul>

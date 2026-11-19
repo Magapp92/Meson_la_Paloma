@@ -69,6 +69,58 @@
 }
 
 
+/* EXPERIENCIAS */
+
+/* Separación con el hero y con lo que venga debajo */
+.Experiences{
+    padding-block: clamp(3rem, 7vw, 6rem);
+}
+
+/* Título de la sección con la fuente de títulos, en mayúsculas desde el CSS */
+.Experiences-title{
+    font-family: var(--font-title);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Cuatro carteles en fila, del mismo ancho */
+.Experiences-list{
+    margin-top: clamp(2rem, 4vw, 3rem);
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+}
+
+/* El cartel entero, sin recortar: el alto sale de su proporción */
+.Experiences-poster{
+    height: auto;
+    border-radius: .75rem;
+}
+
+/* Nombre de la noche bajo el cartel */
+.Experiences-name{
+    margin-top: .9rem;
+
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* El día va encima del nombre, en mostaza y más pequeño */
+.Experiences-day{
+    display: block;
+
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: inherit;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+
 /* MÓVIL */
 
 /* En pantallas de 900px o menos la tira se desliza de lado: cada foto ocupa el 80% del ancho
@@ -84,6 +136,21 @@
     }
     .Hero-photo{
         flex: 0 0 80%;
+
+        scroll-snap-align: start;
+    }
+
+    /* Los carteles hacen lo mismo que las fotos: carrusel deslizable con un cartel al 70% del ancho */
+    .Experiences-list{
+        display: flex;
+        gap: 1rem;
+
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+    .Experiences-item{
+        flex: 0 0 70%;
 
         scroll-snap-align: start;
     }
