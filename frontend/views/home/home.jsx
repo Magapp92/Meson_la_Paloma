@@ -22,26 +22,21 @@ const THEMED_NIGHTS = Object.freeze([
     { day: 'Sábado', name: 'Americano', poster: '/img/saturday-american.webp' }
 ])
 
-/* Platos destacados de la carta, con una nota si hace falta.
-Las fotos se añadirán cuando tengamos las del Instagram del mesón */
+/* Platos destacados de la carta, con una nota si hace falta y su foto con el tamaño original.
+Los que aún no tienen foto esperan a las del Instagram del mesón */
 const FEATURED_DISHES = Object.freeze([
     { name: 'Sándwich especial "La Paloma"' },
-    { name: 'Hamburguesa especial de la casa' },
-    { name: 'Pollo asado con patatas' },
+    { name: 'Hamburguesa especial de la casa', image: { src: '/img/burger.webp', width: 736, height: 491 } },
+    { name: 'Pollo asado con patatas', image: { src: '/img/roast-chicken.webp', width: 736, height: 491 } },
     { name: 'Entrecot con patatas' },
-    { name: 'T-bone' },
-    { name: 'Costillas asadas barbacoa + refresco' },
+    { name: 'T-bone', image: { src: '/img/t-bone.webp', width: 736, height: 491 } },
+    { name: 'Costillas asadas barbacoa + refresco', image: { src: '/img/bbq-ribs.webp', width: 720, height: 491 } },
     { name: 'Chuletón' },
     { name: 'Tomahawk steak', note: 'Con patata americana y mazorca' }
 ])
 
-/* Número de personas de los botones de "¿Mesa para cuántos?": el texto del botón y cómo se lee */
-const PARTY_SIZES = Object.freeze([
-    { text: '2', title: '2 personas' },
-    { text: '4', title: '4 personas' },
-    { text: '6', title: '6 personas' },
-    { text: '8+', title: '8 personas o más' }
-])
+/* Número de personas de los botones de "¿Mesa para cuántos?". Más de 6 es un grupo y se reserva por teléfono */
+const PARTY_SIZES = Object.freeze([ 2, 3, 4, 5, 6 ])
 
 /* Portada de la web: lo que se ve en la ruta / */
 export const Home = () => {
@@ -109,8 +104,19 @@ export const Home = () => {
                 <ul className="FeaturedDishes-list">
                     { FEATURED_DISHES.map( dish =>
                         <li key={dish.name} className="FeaturedDishes-item">
-                            {/* Hueco de la foto con su tamaño final, hasta que tengamos las fotos de los platos */}
-                            <span className="FeaturedDishes-photo" aria-hidden="true" />
+                            {/* Foto del plato; alt vacío porque el nombre ya va escrito al lado.
+                            Si aún no tiene foto, un hueco con el mismo tamaño */}
+                            { dish.image
+                                ? <Image
+                                    className="FeaturedDishes-photo"
+                                    src={dish.image.src}
+                                    alt=""
+                                    width={dish.image.width}
+                                    height={dish.image.height}
+                                    sizes="4.5rem"
+                                />
+                                : <span className="FeaturedDishes-photo" aria-hidden="true" />
+                            }
                             <div className="FeaturedDishes-text">
                                 <p className="FeaturedDishes-name">{dish.name}</p>
                                 { dish.note && <p className="FeaturedDishes-note">{dish.note}</p> }
@@ -120,17 +126,21 @@ export const Home = () => {
                 </ul>
                 <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta completa</Button>
             </section>
-            {/* En la sección de celebraciones agrupamos la invitación a grupos y eventos,
-            con los botones para llamar y ver los menús */}
-            <section className="Container Celebrations">
-                <div className="Celebrations-box">
-                    <h2 className="Celebrations-title">Celebraciones y grupos</h2>
-                    <p className="Celebrations-text">Cumpleaños, comidas de empresa o una mesa grande con la familia: llámanos y lo hablamos.</p>
-                    <div className="Celebrations-actions">
-                        <Button href={CONTACT.phoneHref} title="Llamar al mesón">Llamar al {CONTACT.phone}</Button>
-                        {/* Ver menús lleva de momento a la portada: cambiará cuando creemos la página de menús y eventos */}
-                        <Button href={ROUTES.HOME} variant="ghost" title="Ir a menús y eventos">Ver menús</Button>
-                    </div>
+            {/* En la sección de reserva agrupamos la pregunta, el aviso de los grupos
+            y los botones con el número de personas */}
+            <section className="Container Booking">
+                <div className="Booking-box">
+                    <h2 className="Booking-title">¿Mesa para cuántos?</h2>
+                    <p className="Booking-text">Elige cuántos sois y reserva tu mesa. Si sois más de 6, es una reserva de grupo: llámanos al {CONTACT.phone}.</p>
+                    {/* De momento los números llevan a la portada: cuando creemos las reservas,
+                    abrirán el formulario con ese número de personas ya elegido */}
+                    <ul className="Booking-sizes">
+                        { PARTY_SIZES.map( size =>
+                            <li key={size}>
+                                <Link href={ROUTES.HOME} className="Booking-size" title={`Reservar mesa para ${ size } personas`}>{size}</Link>
+                            </li>
+                        )}
+                    </ul>
                 </div>
             </section>
             {/* En la sección historia agrupamos la foto del equipo en la puerta del mesón,
@@ -151,23 +161,20 @@ export const Home = () => {
                     <Button href={ROUTES.HOME} variant="ghost" title="Ir a nosotros">Conócenos</Button>
                 </div>
             </section>
-            {/* En la sección de reserva agrupamos, en una franja mostaza a todo el ancho, la pregunta,
-            los botones con el número de personas y el teléfono */}
-            <section className="BookingBand">
-                <div className="Container BookingBand-inner">
-                    <h2 className="BookingBand-title">¿Mesa para cuántos?</h2>
-                    {/* De momento los números llevan a la portada: cuando creemos las reservas,
-                    abrirán el formulario con ese número de personas ya elegido */}
-                    <ul className="BookingBand-sizes">
-                        { PARTY_SIZES.map( size =>
-                            <li key={size.text}>
-                                <Link href={ROUTES.HOME} className="BookingBand-size" title={`Reservar mesa para ${ size.title }`}>{size.text}</Link>
-                            </li>
-                        )}
-                    </ul>
-                    <p className="BookingBand-phone">
-                        O llámanos al <a href={CONTACT.phoneHref} className="BookingBand-phoneLink" title="Llamar al mesón">{CONTACT.phone}</a>
-                    </p>
+            {/* En la sección de grupos agrupamos, en una franja mostaza a todo el ancho, la invitación
+            a celebraciones y grupos, el teléfono para reservar y el enlace a los menús */}
+            <section className="GroupsBand">
+                <div className="Container GroupsBand-inner">
+                    <h2 className="GroupsBand-title">Celebraciones y grupos</h2>
+                    <div className="GroupsBand-content">
+                        <p className="GroupsBand-text">Cumpleaños, comidas de empresa o mesas de más de 6 personas: las reservas de grupo se hacen por teléfono.</p>
+                        <p className="GroupsBand-links">
+                            Llámanos al <a href={CONTACT.phoneHref} className="GroupsBand-link" title="Llamar al mesón">{CONTACT.phone}</a>
+                            {' · '}
+                            {/* Ver menús lleva de momento a la portada: cambiará cuando creemos la página de menús y eventos */}
+                            <Link href={ROUTES.HOME} className="GroupsBand-link" title="Ir a menús y eventos">Ver menús</Link>
+                        </p>
+                    </div>
                 </div>
             </section>
         </main>

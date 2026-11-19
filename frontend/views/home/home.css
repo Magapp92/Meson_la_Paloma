@@ -156,14 +156,16 @@
     gap: 1.25rem;
 }
 
-/* Hueco redondo de la foto con su tamaño final; en mostaza mientras no hay foto.
-   flex-shrink 0 para que el texto largo no lo aplaste */
+/* Foto redonda del plato: cuadrada con aspect-ratio y recortada con object-fit para no deformarse.
+   En mostaza mientras no hay foto. flex-shrink 0 para que el texto largo no la aplaste */
 .FeaturedDishes-photo{
     width: 4.5rem;
+    height: auto;
     border-radius: 50%;
 
     flex-shrink: 0;
     aspect-ratio: 1;
+    object-fit: cover;
 
     background-color: var(--accent);
 }
@@ -184,15 +186,15 @@
 }
 
 
-/* CELEBRACIONES */
+/* RESERVA */
 
 /* Separación con la sección de arriba */
-.Celebrations{
+.Booking{
     padding-block: 0 clamp(3rem, 7vw, 6rem);
 }
 
 /* Caja con el fondo un poco más claro y borde mostaza a la izquierda para que destaque */
-.Celebrations-box{
+.Booking-box{
     padding: clamp(1.75rem, 4vw, 3rem);
     border-left: .25rem solid var(--accent);
     border-radius: 1.125rem;
@@ -201,7 +203,7 @@
 }
 
 /* Título de la caja, algo más pequeño que el de las secciones */
-.Celebrations-title{
+.Booking-title{
     font-family: var(--font-title);
     font-size: clamp(2rem, 4.5vw, 3.25rem);
     line-height: 1;
@@ -209,7 +211,7 @@
 }
 
 /* Frase en gris claro con un ancho máximo para que la línea no sea muy larga */
-.Celebrations-text{
+.Booking-text{
     max-width: 36rem;
     margin-top: 1rem;
 
@@ -218,13 +220,41 @@
     line-height: 1.5;
 }
 
-/* Botones en fila, bajando de línea si no caben */
-.Celebrations-actions{
+/* Los números en fila, bajando de línea si no caben */
+.Booking-sizes{
     margin-top: 1.75rem;
 
     display: flex;
     flex-flow: row wrap;
-    gap: .8rem;
+    gap: .75rem;
+}
+
+/* Cada número es un círculo con borde que se rellena de mostaza al pasar el ratón */
+.Booking-size{
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 1.25rem;
+    font-weight: 700;
+
+    transition: background .2s, border-color .2s, color .2s;
+}
+.Booking-size:hover{
+    border-color: var(--accent);
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* Al llegar con el teclado, un borde mostaza separado del círculo */
+.Booking-size:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
 }
 
 
@@ -265,10 +295,10 @@
 }
 
 
-/* RESERVA */
+/* GRUPOS */
 
 /* Franja mostaza a todo el ancho de la pantalla (el ancho máximo lo pone el Container de dentro) */
-.BookingBand{
+.GroupsBand{
     padding-block: clamp(2.5rem, 6vw, 4.5rem);
 
     background-color: var(--accent);
@@ -276,8 +306,14 @@
     color: var(--bg);
 }
 
-/* Pregunta, números y teléfono en fila, bajando de línea si no caben */
-.BookingBand-inner{
+/* En la portada la franja va pegada al pie: le quitamos al pie su margen de arriba
+   para que no quede una tira negra entre los dos. En las demás páginas el pie lo conserva */
+body:has(.GroupsBand) .Footer{
+    margin-top: 0;
+}
+
+/* Título a un lado y el bloque de frase y enlaces al otro, bajando de línea si no caben */
+.GroupsBand-inner{
     display: flex;
     flex-flow: row wrap;
     justify-content: space-between;
@@ -285,56 +321,37 @@
     gap: 1.5rem 2.5rem;
 }
 
-/* La pregunta en grande con la fuente de títulos */
-.BookingBand-title{
+/* El título en grande con la fuente de títulos */
+.GroupsBand-title{
     font-family: var(--font-title);
     font-size: clamp(2.25rem, 5.5vw, 4rem);
     line-height: 1;
     text-transform: uppercase;
 }
 
-/* Los números en fila */
-.BookingBand-sizes{
-    display: flex;
-    gap: .75rem;
+/* Frase y enlaces, uno debajo del otro, con un ancho máximo para que no se estiren demasiado */
+.GroupsBand-content{
+    max-width: 28rem;
 }
 
-/* Cada número es un círculo con borde oscuro que se rellena al pasar el ratón */
-.BookingBand-size{
-    min-width: 3.5rem;
-    min-height: 3.5rem;
-    border: 2px solid var(--bg);
-    border-radius: 50%;
+/* Frase separada de los enlaces */
+.GroupsBand-text{
+    margin-bottom: .75rem;
 
-    display: grid;
-    place-items: center;
-
-    font-size: 1.25rem;
-    font-weight: 700;
-
-    transition: background .2s, color .2s;
-}
-.BookingBand-size:hover{
-    background-color: var(--bg);
-
-    color: var(--accent);
-}
-
-/* Al llegar con el teclado, un borde oscuro separado del círculo */
-.BookingBand-size:focus-visible{
-    outline: 2px solid var(--bg);
-    outline-offset: 3px;
-}
-
-/* Línea del teléfono */
-.BookingBand-phone{
     font-size: 1.1rem;
     font-weight: 500;
     line-height: 1.4;
 }
 
-/* El número de teléfono subrayado para que se vea que se puede pulsar */
-.BookingBand-phoneLink{
+/* Línea del teléfono y de los menús */
+.GroupsBand-links{
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Enlaces subrayados para que se vea que se pueden pulsar */
+.GroupsBand-link{
     font-weight: 700;
     line-height: inherit;
     text-decoration: underline;
