@@ -121,6 +121,82 @@
 }
 
 
+/* PLATOS DESTACADOS */
+
+/* Separación con la sección de arriba y con el pie */
+.FeaturedDishes{
+    padding-block: 0 clamp(3rem, 7vw, 6rem);
+}
+
+/* Título de la sección, igual que el de experiencias */
+.FeaturedDishes-title{
+    font-family: var(--font-title);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Dos columnas de platos con mucho aire entre ellas */
+.FeaturedDishes-list{
+    margin-block: clamp(2rem, 4vw, 3rem);
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: clamp(2rem, 6vw, 5rem);
+}
+
+/* Cada plato separado del siguiente por una línea fina, como en una carta */
+.FeaturedDishes-item{
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Nombre a la izquierda y precio a la derecha, alineados por abajo */
+.FeaturedDishes-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+
+    font-size: 1.15rem;
+    line-height: 1.4;
+}
+
+/* El reset pone a los span su propio interlineado: que hereden el de la fila */
+.FeaturedDishes-name{
+    line-height: inherit;
+}
+
+/* Precio en mostaza y sin partirse en dos líneas */
+.FeaturedDishes-price{
+    font-weight: 600;
+    color: var(--accent);
+    line-height: inherit;
+    white-space: nowrap;
+}
+
+/* Nota bajo el nombre, en gris claro */
+.FeaturedDishes-note{
+    margin-top: .3rem;
+
+    font-size: .95rem;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+/* Opciones del plato, un poco metidas hacia dentro */
+.FeaturedDishes-options{
+    margin-top: .4rem;
+    padding-left: 1rem;
+}
+
+/* Cada opción, más pequeña y en gris claro, con el precio igual que el resto */
+.FeaturedDishes-row--option{
+    font-size: 1rem;
+    color: var(--muted);
+}
+
+
 /* MÓVIL */
 
 /* En pantallas de 900px o menos la tira se desliza de lado: cada foto ocupa el 80% del ancho
@@ -153,5 +229,10 @@
         flex: 0 0 70%;
 
         scroll-snap-align: start;
+    }
+
+    /* Los platos, en una sola columna */
+    .FeaturedDishes-list{
+        grid-template-columns: 1fr;
     }
 }
