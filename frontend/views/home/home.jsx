@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@components/button/button.jsx'
 import { CONTACT } from '@const/business.js'
 import { ROUTES } from '@const/routes.js'
+import { THEMED_NIGHTS } from '@const/themed-nights.js'
 import './home.css'
 
 /* Fotos de la tira del hero, con su tamaño original para que Image reserve el hueco.
@@ -12,14 +13,6 @@ const HERO_PHOTOS = Object.freeze([
     { src: '/img/garlic-prawns.webp', alt: 'Gambas al ajillo en cazuela de barro', width: 736, height: 491 },
     { src: '/img/meson-bar.webp', alt: 'La barra del mesón', width: 640, height: 427 },
     { src: '/img/burger.webp', alt: 'Hamburguesa con queso, lechuga y tomate', width: 736, height: 491 }
-])
-
-/* Noches temáticas: el día, el nombre y su cartel (todos miden 675 × 958) */
-const THEMED_NIGHTS = Object.freeze([
-    { day: 'Miércoles', name: 'Picoteo', poster: '/img/wednesday-tapas.webp' },
-    { day: 'Jueves', name: 'Mexicano', poster: '/img/thursday-mexican.webp' },
-    { day: 'Viernes', name: 'Francés', poster: '/img/friday-french.webp' },
-    { day: 'Sábado', name: 'Americano', poster: '/img/saturday-american.webp' }
 ])
 
 /* Platos destacados de la carta, cada uno con su foto y el tamaño original de esta */
