@@ -19,7 +19,7 @@ export const FOOD_MENU = Object.freeze([
         id: 'ofertas',
         title: 'Ofertas de la casa',
         dishes: [
-            { name: 'Pintxo individual', prices: [ 1.5 ] },
+            { name: 'Pintxo individual', note: 'Según disponibilidad', prices: [ 1.5 ] },
             { name: 'Tortilla de patatas entera', prices: [ 12 ] },
             { name: 'Pintxo de tortilla de patatas', prices: [ 2.5 ] },
             { name: 'Tortilla rellena', prices: [ 15 ] },
@@ -72,7 +72,7 @@ export const FOOD_MENU = Object.freeze([
     {
         id: 'hamburguesas',
         title: 'Hamburguesas',
-        note: 'Complemento: patatas fritas',
+        note: 'Todas las hamburguesas llevan patatas fritas.',
         dishes: [
             { name: 'Hamburguesa especial de la casa', prices: [ 10 ] },
             { name: 'Hamburguesa clásica', prices: [ 6 ] },
