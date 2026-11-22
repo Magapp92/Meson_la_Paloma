@@ -71,11 +71,6 @@
     opacity: .14;
 }
 
-/* España: rojo, amarillo el doble de ancho y rojo, en franjas horizontales */
-.Night-card--es::before{
-    background: linear-gradient(to bottom, #aa151b 25%, #f1bf00 25% 75%, #aa151b 75%);
-}
-
 /* México: verde, blanco y rojo en franjas verticales */
 .Night-card--mx::before{
     background: linear-gradient(to right, #006847 33.33%, #fff 33.33% 66.66%, #ce1126 66.66%);

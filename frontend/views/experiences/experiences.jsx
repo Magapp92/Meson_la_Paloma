@@ -17,11 +17,11 @@ export const Experiences = () => {
                 </h1>
                 <p className="ExperiencesPage-intro">De miércoles a sábado, en las cenas, una cocina distinta cada noche.</p>
             </section>
-            {/* En cada noche agrupamos, sobre la bandera de su país, el día, el nombre y su carta por secciones */}
+            {/* En cada noche agrupamos, sobre la bandera de su país si la tiene, el día, el nombre y su carta por secciones */}
             { THEMED_NIGHTS.map( night =>
                 <section key={night.id} id={night.id} className="Container Night">
-                    {/* La variante de la tarjeta (Night-card--mx…) elige la bandera del fondo */}
-                    <div className={`Night-card Night-card--${ night.flag }`}>
+                    {/* La variante de la tarjeta (Night-card--mx…) elige la bandera del fondo; sin flag, no hay bandera */}
+                    <div className={`Night-card ${ night.flag ? `Night-card--${ night.flag }` : '' }`}>
                         <p className="Night-day">{night.day} · cenas</p>
                         <h2 className="Night-name">{night.name}</h2>
                         <div className="Night-sections">
