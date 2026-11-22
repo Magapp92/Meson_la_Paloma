@@ -1,6 +1,7 @@
 
 /* Noches temáticas del mesón, en las cenas de miércoles a sábado. Las usan la portada y la página Experiencias.
-Cada noche tiene un id (su ancla), el día, el nombre, su cartel (todos miden 675 × 958) y su carta por secciones.
+Cada noche tiene un id (su ancla), el día, el nombre, su cartel (todos miden 675 × 958), la bandera de su país
+(código de dos letras: es, mx, fr, us) y su carta por secciones.
 Cada sección puede llevar título y una descripción, y sus platos tienen la misma forma que los de la carta */
 export const THEMED_NIGHTS = Object.freeze([
     {
@@ -8,6 +9,7 @@ export const THEMED_NIGHTS = Object.freeze([
         day: 'Miércoles',
         name: 'Picoteo',
         poster: '/img/wednesday-tapas.webp',
+        flag: 'es',
         sections: [
             {
                 dishes: [
@@ -27,6 +29,7 @@ export const THEMED_NIGHTS = Object.freeze([
         day: 'Jueves',
         name: 'Mexicano',
         poster: '/img/thursday-mexican.webp',
+        flag: 'mx',
         sections: [
             {
                 title: 'Burritos',
@@ -69,6 +72,7 @@ export const THEMED_NIGHTS = Object.freeze([
         day: 'Viernes',
         name: 'Francés',
         poster: '/img/friday-french.webp',
+        flag: 'fr',
         sections: [
             {
                 title: 'Crepes salados',
@@ -96,6 +100,7 @@ export const THEMED_NIGHTS = Object.freeze([
         day: 'Sábado',
         name: 'Americano',
         poster: '/img/saturday-american.webp',
+        flag: 'us',
         sections: [
             {
                 title: 'Hamburguesas',

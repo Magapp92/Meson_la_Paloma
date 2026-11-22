@@ -1,7 +1,8 @@
 
 /* DISH LIST */
 
-/* Cada plato: el nombre ocupa lo que sobra y el precio va a la derecha, separado del siguiente por una línea fina */
+/* Cada plato: el nombre ocupa lo que sobra y el precio va a la derecha, separado del siguiente por una línea fina.
+   Si la lista se reparte en columnas, un plato nunca se parte entre dos (el nombre en una y la nota en otra) */
 .DishList-dish{
     padding-block: .7rem;
     border-bottom: 1px solid var(--border);
@@ -10,6 +11,8 @@
     grid-template-columns: 1fr auto;
     align-items: baseline;
     column-gap: 1rem;
+
+    break-inside: avoid;
 }
 
 /* Con dos precios, dos columnas fijas de 5rem: la cabecera de las columnas debe usar el mismo ancho
