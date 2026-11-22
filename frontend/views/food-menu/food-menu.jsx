@@ -19,6 +19,17 @@ export const FoodMenu = () => {
                 </h1>
                 <p className="FoodMenu-intro">Cocina americana y mediterránea, de la barra a la mesa.</p>
             </section>
+            {/* En el índice agrupamos un enlace a cada categoría. Se queda pegado arriba al bajar,
+            y cada enlace salta a su categoría por su id (#bocadillos…) */}
+            <nav className="FoodMenu-index" aria-label="Categorías de la carta">
+                <ul className="Container FoodMenu-indexList">
+                    { FOOD_MENU.map( category =>
+                        <li key={category.id}>
+                            <a href={`#${ category.id }`} className="FoodMenu-indexLink">{category.title}</a>
+                        </li>
+                    )}
+                </ul>
+            </nav>
             {/* En las categorías agrupamos toda la carta: cada categoría con su título, sus platos y sus precios */}
             <div className="Container FoodMenu-categories">
                 { FOOD_MENU.map( category =>

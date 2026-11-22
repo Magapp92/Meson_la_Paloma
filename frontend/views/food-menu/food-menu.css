@@ -34,6 +34,61 @@
 }
 
 
+/* ÍNDICE */
+
+/* Barra del índice a todo el ancho: al bajar se queda pegada arriba (sticky) con el fondo de la página
+   para tapar lo que pasa por debajo. z-index 4: por debajo de la barra del móvil (5) y del menú (10) */
+.FoodMenu-index{
+    border-block: 1px solid var(--border);
+
+    position: sticky;
+    top: 0;
+    z-index: 4;
+
+    background-color: var(--bg);
+}
+
+/* Los enlaces en una sola fila; si no caben, la fila se desliza de lado sin mover la página */
+.FoodMenu-indexList{
+    padding-block: .75rem;
+
+    display: flex;
+    gap: .5rem;
+
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+/* Cada enlace es una píldora con borde que se vuelve mostaza al pasar el ratón */
+.FoodMenu-indexLink{
+    min-height: 2.5rem;
+    padding-inline: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 100vmax;
+
+    display: inline-flex;
+    align-items: center;
+
+    font-size: .95rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+
+    transition: border-color .2s, color .2s;
+}
+.FoodMenu-indexLink:hover{
+    border-color: var(--accent);
+
+    color: var(--accent);
+}
+
+/* Al llegar con el teclado, un borde mostaza separado de la píldora */
+.FoodMenu-indexLink:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+
 /* CATEGORÍAS */
 
 /* La carta en dos columnas de texto, como un periódico: las categorías van llenando
@@ -45,11 +100,14 @@
     column-gap: clamp(2.5rem, 6vw, 6rem);
 }
 
-/* Cada categoría entera en la misma columna, sin partirse entre las dos */
+/* Cada categoría entera en la misma columna, sin partirse entre las dos.
+   scroll-margin-top: al saltar desde el índice, la categoría se para un poco más abajo
+   para que su título no quede tapado por el índice pegado arriba */
 .FoodMenu-category{
     padding-bottom: clamp(2rem, 4vw, 3rem);
 
     break-inside: avoid;
+    scroll-margin-top: 5.5rem;
 }
 
 /* Título de la categoría a la izquierda y, si las hay, las cabeceras de precio a la derecha */
