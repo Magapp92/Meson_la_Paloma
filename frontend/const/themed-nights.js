@@ -2,6 +2,7 @@
 /* Noches temáticas del mesón, en las cenas de miércoles a sábado. Las usan la portada y la página Experiencias.
 Cada noche tiene un id (su ancla), el día, el nombre, su cartel (todos miden 675 × 958), la bandera de su país
 si es de un solo país (código de dos letras: mx, fr, us; el picoteo mezcla platos y no lleva) y su carta por secciones.
+otherDays marca la noche que también se sirve otros días (el picoteo): en Experiencias no se le pone día.
 Cada sección puede llevar título y una descripción, y sus platos tienen la misma forma que los de la carta */
 export const THEMED_NIGHTS = Object.freeze([
     {
@@ -9,6 +10,7 @@ export const THEMED_NIGHTS = Object.freeze([
         day: 'Miércoles',
         name: 'Picoteo',
         poster: '/img/wednesday-tapas.webp',
+        otherDays: true,
         sections: [
             {
                 dishes: [

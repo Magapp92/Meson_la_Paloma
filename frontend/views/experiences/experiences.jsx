@@ -22,7 +22,8 @@ export const Experiences = () => {
                 <section key={night.id} id={night.id} className="Container Night">
                     {/* La variante de la tarjeta (Night-card--mx…) elige la bandera del fondo; sin flag, no hay bandera */}
                     <div className={`Night-card ${ night.flag ? `Night-card--${ night.flag }` : '' }`}>
-                        <p className="Night-day">{night.day} · cenas</p>
+                        {/* El día solo en las noches que no se sirven otros días */}
+                        { !night.otherDays && <p className="Night-day">{night.day} · cenas</p> }
                         <h2 className="Night-name">{night.name}</h2>
                         <div className="Night-sections">
                             { night.sections.map( ( section, index ) =>
