@@ -5,7 +5,7 @@ import { ROUTES } from '@const/routes.js'
 Los que aún no tienen página llevan a la portada: cambiarán a su ruta cuando la creemos */
 export const NAV_LINKS = Object.freeze([
     { text: 'Carta', href: ROUTES.FOOD_MENU, title: 'Ir a la carta' },
-    { text: 'Experiencias', href: ROUTES.HOME, title: 'Ir a las experiencias' },
+    { text: 'Experiencias', href: ROUTES.EXPERIENCES, title: 'Ir a las experiencias' },
     { text: 'Menús y eventos', href: ROUTES.HOME, title: 'Ir a los menús y eventos' },
     { text: 'Nosotros', href: ROUTES.HOME, title: 'Ir a la historia del mesón' },
     { text: 'Mi reserva', href: ROUTES.HOME, title: 'Ir a gestionar mi reserva' }

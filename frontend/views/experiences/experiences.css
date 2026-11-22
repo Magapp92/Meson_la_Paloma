@@ -1,0 +1,123 @@
+
+/* EXPERIENCES PAGE */
+
+/* HERO */
+
+/* Cabecera de la página, igual que la de la carta */
+.ExperiencesPage-hero{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) 1rem;
+}
+
+/* Título a dos tonos, del mismo tamaño que el de la carta */
+.ExperiencesPage-title{
+    font-size: clamp(3.5rem, 11vw, 8rem);
+    line-height: .9;
+    text-transform: uppercase;
+}
+
+/* Segunda línea del título en mostaza, en su propia línea y con el mismo interlineado */
+.ExperiencesPage-titleAccent{
+    display: block;
+
+    color: var(--accent);
+    line-height: inherit;
+}
+
+/* Entradilla bajo el título, en gris claro y con un ancho máximo */
+.ExperiencesPage-intro{
+    max-width: 36rem;
+    margin-top: 1.5rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+
+/* NOCHE */
+
+/* Cada noche: la carta a la izquierda y el cartel a la derecha, separada de la anterior por una línea */
+.Night{
+    margin-top: clamp(3rem, 7vw, 5rem);
+    padding-top: clamp(2.5rem, 5vw, 4rem);
+    border-top: 1px solid var(--border);
+
+    display: grid;
+    grid-template-columns: 1fr minmax(14rem, 22rem);
+    align-items: start;
+    gap: clamp(2rem, 6vw, 5rem);
+}
+
+/* La última noche deja espacio antes del pie */
+.Night:last-child{
+    margin-bottom: clamp(3rem, 7vw, 6rem);
+}
+
+/* Día de la noche, pequeño y en mostaza, encima del nombre */
+.Night-day{
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+/* Nombre de la noche en grande con la fuente de títulos */
+.Night-name{
+    margin-top: .4rem;
+
+    font-family: var(--font-title);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Cada sección de la carta (Burritos, Tacos…) separada de la anterior */
+.Night-section{
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+/* Título de la sección con la línea mostaza debajo, como las categorías de la carta */
+.Night-sectionTitle{
+    padding-bottom: .6rem;
+    border-bottom: 2px solid var(--accent);
+
+    font-family: var(--font-title);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Descripción de la sección, en gris claro */
+.Night-sectionText{
+    margin-top: .75rem;
+
+    font-size: .95rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* El cartel entero con esquinas redondeadas. Se queda a la vista (sticky) mientras se lee la carta de su noche */
+.Night-poster{
+    height: auto;
+    border-radius: .75rem;
+
+    position: sticky;
+    top: 2rem;
+}
+
+
+/* MÓVIL */
+
+/* En pantallas de 900px o menos, una sola columna: primero la carta y debajo el cartel, más pequeño */
+@media (max-width: 900px){
+    .Night{
+        grid-template-columns: 1fr;
+    }
+    .Night-poster{
+        max-width: 20rem;
+
+        position: static;
+    }
+}

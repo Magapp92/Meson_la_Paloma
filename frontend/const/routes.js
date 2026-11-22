@@ -3,5 +3,6 @@
 Cada página nueva añade aquí su línea */
 export const ROUTES = Object.freeze({
     HOME: '/',
-    FOOD_MENU: '/carta'
+    FOOD_MENU: '/carta',
+    EXPERIENCES: '/experiencias'
 })
