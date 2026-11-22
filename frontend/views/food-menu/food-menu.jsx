@@ -1,9 +1,7 @@
 
+import { DishList } from '@components/dish-list/dish-list.jsx'
 import { FOOD_MENU } from '@const/food-menu.js'
 import './food-menu.css'
-
-/* Escribe un precio a la española: 6.5 pasa a "6,50 €" */
-const formatPrice = price => new Intl.NumberFormat( 'es-ES', { style: 'currency', currency: 'EUR' }).format( price )
 
 /* Página de la carta: el título y todas las categorías con sus platos y precios */
 export const FoodMenu = () => {
@@ -33,12 +31,7 @@ export const FoodMenu = () => {
             {/* En las categorías agrupamos toda la carta: cada categoría con su título, sus platos y sus precios */}
             <div className="Container FoodMenu-categories">
                 { FOOD_MENU.map( category =>
-                    /* Las categorías con dos precios llevan la variante --columns para alinearlos en columnas */
-                    <section
-                        key={category.id}
-                        id={category.id}
-                        className={`FoodMenu-category ${ category.priceLabels ? 'FoodMenu-category--columns' : '' }`}
-                    >
+                    <section key={category.id} id={category.id} className="FoodMenu-category">
                         <div className="FoodMenu-categoryHead">
                             <h2 className="FoodMenu-categoryTitle">{category.title}</h2>
                             {/* Cabecera de las columnas de precio (Normal / Montado, Ración / Media).
@@ -51,23 +44,7 @@ export const FoodMenu = () => {
                                 </p>
                             }
                         </div>
-                        <ul className="FoodMenu-dishes">
-                            { category.dishes.map( dish =>
-                                <li key={dish.name} className="FoodMenu-dish">
-                                    <p className="FoodMenu-dishName">
-                                        {dish.name}
-                                        { dish.note && <span className="FoodMenu-dishNote">{dish.note}</span> }
-                                    </p>
-                                    { dish.prices.map( ( price, index ) =>
-                                        <p key={index} className="FoodMenu-price">
-                                            {/* Nombre de la columna solo para lectores de pantalla: "Media: 5,00 €" */}
-                                            { category.priceLabels && <span className="FoodMenu-srOnly">{category.priceLabels[index]}: </span> }
-                                            {formatPrice( price )}
-                                        </p>
-                                    )}
-                                </li>
-                            )}
-                        </ul>
+                        <DishList dishes={category.dishes} priceLabels={category.priceLabels} />
                         { category.note && <p className="FoodMenu-categoryNote">{category.note}</p> }
                     </section>
                 )}

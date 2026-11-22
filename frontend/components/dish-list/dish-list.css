@@ -1,0 +1,55 @@
+
+/* DISH LIST */
+
+/* Cada plato: el nombre ocupa lo que sobra y el precio va a la derecha, separado del siguiente por una línea fina */
+.DishList-dish{
+    padding-block: .7rem;
+    border-bottom: 1px solid var(--border);
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    column-gap: 1rem;
+}
+
+/* Con dos precios, dos columnas fijas de 5rem: la cabecera de las columnas debe usar el mismo ancho
+   para que los precios queden justo debajo de su nombre */
+.DishList--columns .DishList-dish{
+    grid-template-columns: 1fr repeat(2, 5rem);
+}
+
+/* Nombre del plato */
+.DishList-name{
+    font-size: 1.05rem;
+    line-height: 1.4;
+}
+
+/* Nota del plato en su propia línea, más pequeña y en gris */
+.DishList-note{
+    display: block;
+
+    font-size: .9rem;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+/* Precio en mostaza, alineado a la derecha y sin partirse */
+.DishList-price{
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.4;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Texto que solo leen los lectores de pantalla: existe, pero no ocupa sitio ni se ve */
+.DishList-srOnly{
+    width: 1px;
+    height: 1px;
+
+    overflow: hidden;
+    position: absolute;
+
+    clip-path: inset(50%);
+    white-space: nowrap;
+}

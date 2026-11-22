@@ -148,67 +148,13 @@
 }
 
 
-/* PLATOS */
-
-/* Cada plato: el nombre ocupa lo que sobra y el precio va a la derecha, separado del siguiente por una línea fina */
-.FoodMenu-dish{
-    padding-block: .7rem;
-    border-bottom: 1px solid var(--border);
-
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: baseline;
-    column-gap: 1rem;
-}
-
-/* Con dos precios, dos columnas fijas del mismo ancho que sus cabeceras para que queden alineados */
-.FoodMenu-category--columns .FoodMenu-dish{
-    grid-template-columns: 1fr repeat(2, 5rem);
-}
-
-/* Nombre del plato */
-.FoodMenu-dishName{
-    font-size: 1.05rem;
-    line-height: 1.4;
-}
-
-/* Nota del plato en su propia línea, más pequeña y en gris */
-.FoodMenu-dishNote{
-    display: block;
-
-    font-size: .9rem;
-    color: var(--muted);
-    line-height: 1.4;
-}
-
-/* Precio en mostaza, alineado a la derecha y sin partirse */
-.FoodMenu-price{
-    font-weight: 600;
-    color: var(--accent);
-    line-height: 1.4;
-    text-align: right;
-    white-space: nowrap;
-}
-
-/* Nota de la categoría al final (el suplemento de los bocadillos, el complemento de las hamburguesas) */
+/* Nota de la categoría al final (el suplemento de los bocadillos, las patatas de las hamburguesas) */
 .FoodMenu-categoryNote{
     margin-top: .75rem;
 
     font-size: .95rem;
     color: var(--muted);
     line-height: 1.4;
-}
-
-/* Texto que solo leen los lectores de pantalla: existe, pero no ocupa sitio ni se ve */
-.FoodMenu-srOnly{
-    width: 1px;
-    height: 1px;
-
-    overflow: hidden;
-    position: absolute;
-
-    clip-path: inset(50%);
-    white-space: nowrap;
 }
 
 
