@@ -39,7 +39,7 @@ export const About = () => {
                     <p className="AboutStory-text">En 2022 decidimos darle una vuelta al mesón y sacar su mejor versión. Ampliamos el espacio, renovamos el local y mejoramos la cocina, y volvimos a abrir con la idea de siempre: un sitio familiar donde juntarte con los tuyos y celebrar lo que haga falta.</p>
                     <p className="AboutStory-text">Porque venir a comer o a tomar algo no tiene por qué ser solo eso. Queremos que sea una experiencia.</p>
                 </div>
-                {/* Las dos fachadas, una encima de otra, cada una con su rótulo encima */}
+                {/* Las dos fachadas, una al lado de la otra, cada una con su rótulo encima */}
                 <div className="Facades">
                     { FACADES.map( facade =>
                         <figure key={facade.label} className="Facades-item">
@@ -50,7 +50,7 @@ export const About = () => {
                                 alt={facade.alt}
                                 width={facade.width}
                                 height={facade.height}
-                                sizes="(max-width: 900px) 50vw, 15rem"
+                                sizes="(max-width: 900px) 50vw, 25vw"
                             />
                         </figure>
                     )}

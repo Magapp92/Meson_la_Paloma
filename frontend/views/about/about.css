@@ -34,16 +34,14 @@
 
 /* HISTORIA */
 
-/* El texto a la izquierda y las fachadas justo a su lado, en una columna estrecha de 15rem:
-   así las dos fotos juntas miden más o menos lo mismo que el texto y no quedan huecos.
-   El texto mide como mucho 42rem y justify-content start pega las dos columnas a la izquierda */
+/* El texto a la izquierda y las fachadas a la derecha, en dos mitades iguales que llenan todo el ancho.
+   align-items center centra las dos columnas en vertical para que ninguna deje un hueco debajo */
 .AboutStory{
     padding-top: 1.5rem;
 
     display: grid;
-    grid-template-columns: minmax(0, 42rem) 15rem;
-    justify-content: start;
-    align-items: start;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: center;
     gap: clamp(2rem, 5vw, 4rem);
 }
 
@@ -64,17 +62,18 @@
 
 /* ANTES Y AHORA */
 
-/* Las dos fachadas una encima de otra */
+/* Las dos fachadas una al lado de la otra: primero antes y luego ahora */
 .Facades{
     display: grid;
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
 }
 
 /* Rótulo "Antes" / "Ahora" encima de la foto, pequeño y en mostaza, como el día de las noches en Experiencias */
 .Facades-label{
     margin-bottom: .5rem;
 
-    font-size: .9rem;
+    font-size: 1.6rem;
     font-weight: 600;
     color: var(--accent);
     line-height: 1.4;
@@ -165,15 +164,11 @@ body:has(.AboutBooking) .Footer{
 
 /* MÓVIL */
 
-/* En pantallas de 900px o menos: el texto arriba y las fachadas debajo, una al lado de la otra,
+/* En pantallas de 900px o menos: el texto arriba y las fachadas debajo (siguen una al lado de la otra),
    y la galería en dos columnas */
 @media (max-width: 900px){
     .AboutStory{
         grid-template-columns: 1fr;
-    }
-    .Facades{
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
     }
     .Venue-list{
         grid-template-columns: repeat(2, 1fr);
