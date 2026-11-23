@@ -1,6 +1,7 @@
 
 import Image from 'next/image'
 import { PartySizes } from '@components/party-sizes/party-sizes.jsx'
+import { CONTACT } from '@const/business.js'
 import './about.css'
 
 /* La fachada antes y ahora, las dos en 4:3 con su tamaño original */
@@ -38,19 +39,19 @@ export const About = () => {
                     <p className="AboutStory-text">En 2022 decidimos darle una vuelta al mesón y sacar su mejor versión. Ampliamos el espacio, renovamos el local y mejoramos la cocina, y volvimos a abrir con la idea de siempre: un sitio familiar donde juntarte con los tuyos y celebrar lo que haga falta.</p>
                     <p className="AboutStory-text">Porque venir a comer o a tomar algo no tiene por qué ser solo eso. Queremos que sea una experiencia.</p>
                 </div>
-                {/* Las dos fachadas, una encima de otra, cada una con su rótulo */}
+                {/* Las dos fachadas, una encima de otra, cada una con su rótulo encima */}
                 <div className="Facades">
                     { FACADES.map( facade =>
                         <figure key={facade.label} className="Facades-item">
+                            <figcaption className="Facades-label">{facade.label}</figcaption>
                             <Image
                                 className="Facades-photo"
                                 src={facade.src}
                                 alt={facade.alt}
                                 width={facade.width}
                                 height={facade.height}
-                                sizes="(max-width: 900px) 100vw, 26rem"
+                                sizes="(max-width: 900px) 50vw, 15rem"
                             />
-                            <figcaption className="Facades-label">{facade.label}</figcaption>
                         </figure>
                     )}
                 </div>
@@ -73,11 +74,14 @@ export const About = () => {
                     )}
                 </ul>
             </section>
-            {/* En la franja de reserva agrupamos, a todo el ancho y en mostaza, la invitación a reservar
-            y los círculos con el número de personas */}
+            {/* En la franja de reserva agrupamos, a todo el ancho y en mostaza, la invitación a reservar,
+            el aviso de los grupos y los círculos con el número de personas */}
             <section className="AboutBooking">
                 <div className="Container AboutBooking-inner">
-                    <h2 className="AboutBooking-title">Reserva tu mesa ahora</h2>
+                    <div className="AboutBooking-content">
+                        <h2 className="AboutBooking-title">Reserva tu mesa ahora</h2>
+                        <p className="AboutBooking-text">Elige cuántos sois y reserva tu mesa. Si sois más de 6, es una reserva de grupo: llámanos al {CONTACT.phone}.</p>
+                    </div>
                     <PartySizes onAccent />
                 </div>
             </section>

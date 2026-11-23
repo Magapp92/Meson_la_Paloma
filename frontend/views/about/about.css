@@ -34,15 +34,17 @@
 
 /* HISTORIA */
 
-/* El texto a la izquierda y las fachadas a la derecha. La columna de las fachadas mide como mucho 26rem:
-   la foto antigua solo mide 333 px y, más grande, se vería borrosa */
+/* El texto a la izquierda y las fachadas justo a su lado, en una columna estrecha de 15rem:
+   así las dos fotos juntas miden más o menos lo mismo que el texto y no quedan huecos.
+   El texto mide como mucho 42rem y justify-content start pega las dos columnas a la izquierda */
 .AboutStory{
     padding-top: 1.5rem;
 
     display: grid;
-    grid-template-columns: 1fr minmax(16rem, 26rem);
+    grid-template-columns: minmax(0, 42rem) 15rem;
+    justify-content: start;
     align-items: start;
-    gap: clamp(2rem, 6vw, 5rem);
+    gap: clamp(2rem, 5vw, 4rem);
 }
 
 /* Cada párrafo en gris claro y grande, con un ancho máximo para que las líneas no sean muy largas */
@@ -65,12 +67,19 @@
 /* Las dos fachadas una encima de otra */
 .Facades{
     display: grid;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
-/* Cada fachada es una caja con la foto y su rótulo encima, abajo a la izquierda */
-.Facades-item{
-    position: relative;
+/* Rótulo "Antes" / "Ahora" encima de la foto, pequeño y en mostaza, como el día de las noches en Experiencias */
+.Facades-label{
+    margin-bottom: .5rem;
+
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: .08em;
 }
 
 /* Foto en 4:3 con esquinas redondeadas */
@@ -80,25 +89,6 @@
 
     aspect-ratio: 4 / 3;
     object-fit: cover;
-}
-
-/* Rótulo "Antes" / "Ahora" en una píldora mostaza sobre la foto */
-.Facades-label{
-    padding: .4rem 1rem;
-    border-radius: 100vmax;
-
-    font-size: .9rem;
-    font-weight: 700;
-    color: var(--bg);
-    line-height: 1.2;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-
-    position: absolute;
-    left: 1rem;
-    bottom: 1rem;
-
-    background-color: var(--accent);
 }
 
 
@@ -162,13 +152,28 @@ body:has(.AboutBooking) .Footer{
     text-transform: uppercase;
 }
 
+/* El aviso de los grupos bajo el título, con un ancho máximo para que no se estire */
+.AboutBooking-text{
+    max-width: 34rem;
+    margin-top: .75rem;
+
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
 
 /* MÓVIL */
 
-/* En pantallas de 900px o menos: el texto arriba y las fachadas debajo, y la galería en dos columnas */
+/* En pantallas de 900px o menos: el texto arriba y las fachadas debajo, una al lado de la otra,
+   y la galería en dos columnas */
 @media (max-width: 900px){
     .AboutStory{
         grid-template-columns: 1fr;
+    }
+    .Facades{
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
     .Venue-list{
         grid-template-columns: repeat(2, 1fr);
