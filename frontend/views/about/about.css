@@ -62,8 +62,12 @@
 
 /* ANTES Y AHORA */
 
-/* Las dos fachadas una al lado de la otra: primero antes y luego ahora */
+/* Las dos fachadas una al lado de la otra: primero antes y luego ahora.
+   El rótulo de encima empuja las fotos hacia abajo; el margen de abajo sube el bloque la mitad de lo que mide
+   (está centrado en su celda), y así el centro de las fotos queda a la altura del centro del texto */
 .Facades{
+    margin-bottom: 2.75rem;
+
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
@@ -169,6 +173,11 @@ body:has(.AboutBooking) .Footer{
 @media (max-width: 900px){
     .AboutStory{
         grid-template-columns: 1fr;
+    }
+
+    /* Debajo del texto ya no hace falta subir las fachadas */
+    .Facades{
+        margin-bottom: 0;
     }
     .Venue-list{
         grid-template-columns: repeat(2, 1fr);
