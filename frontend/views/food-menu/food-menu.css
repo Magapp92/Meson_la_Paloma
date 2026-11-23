@@ -94,10 +94,16 @@
 /* La carta en dos columnas de texto, como un periódico: las categorías van llenando
    la primera columna y siguen en la segunda */
 .FoodMenu-categories{
-    padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 7vw, 6rem);
+    padding-top: clamp(2rem, 5vw, 4rem);
 
     columns: 2;
     column-gap: clamp(2.5rem, 6vw, 6rem);
+}
+
+/* El espacio entre la carta y la franja de reserva va fuera del bloque de la carta,
+   para que el índice desaparezca en cuanto se acaba el texto */
+.FoodMenu-body + .BookingBand{
+    margin-top: clamp(3rem, 7vw, 6rem);
 }
 
 /* Cada categoría entera en la misma columna, sin partirse entre las dos.
