@@ -32,7 +32,8 @@ export const About = () => {
             {/* En la historia agrupamos el texto sobre el mesón */}
             <section className="Container AboutStory">
                 <p className="AboutStory-text">El Mesón La Paloma es un mesón familiar de barrio, en la calle Artajona, en Valdezarza. Llevamos más de 20 años abriendo cada día para los vecinos y para quien pasa por aquí: desayunos, comidas, raciones para compartir y cenas.</p>
-                <p className="AboutStory-text">Con los años el mesón ha cambiado de cara, pero seguimos siendo un sitio de trato cercano, con cocina americana y mediterránea y noches temáticas que cambian cada día.</p>
+                <p className="AboutStory-text">En 2022 decidimos darle una vuelta al mesón y sacar su mejor versión. Ampliamos el espacio, renovamos el local y mejoramos la cocina, y volvimos a abrir con la idea de siempre: un sitio familiar donde juntarte con los tuyos y celebrar lo que haga falta.</p>
+                <p className="AboutStory-text">Porque venir a comer o a tomar algo no tiene por qué ser solo eso. Queremos que sea una experiencia.</p>
             </section>
             {/* En antes y ahora agrupamos las dos fachadas, una al lado de la otra, cada una con su rótulo */}
             <section className="Container Facades">
