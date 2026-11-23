@@ -15,7 +15,7 @@ export const Experiences = () => {
                     Nuestras{' '}
                     <span className="ExperiencesPage-titleAccent">Experiencias</span>
                 </h1>
-                <p className="ExperiencesPage-intro">Cada noche, una cocina distinta: jueves mexicano, viernes francés y sábado americano. Y para picar, nuestro picoteo.</p>
+                <p className="ExperiencesPage-intro">Cada noche, una cocina distinta: jueves mexicano, viernes francés y sábado americano. Ven a disfrutar del picoteo.</p>
             </section>
             {/* En cada noche agrupamos, sobre la bandera de su país si la tiene, el día, el nombre y su carta por secciones */}
             { THEMED_NIGHTS.map( night =>
