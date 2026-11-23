@@ -76,14 +76,24 @@ export const Home = () => {
                             <Image
                                 className="Experiences-poster"
                                 src={night.poster}
-                                alt={`Cartel con la carta de la noche de ${ night.name.toLowerCase() } del ${ night.day.toLowerCase() }`}
+                                alt={ night.otherDays
+                                    ? `Cartel con la carta de las noches de ${ night.name.toLowerCase() }`
+                                    : `Cartel con la carta de la noche de ${ night.name.toLowerCase() } del ${ night.day.toLowerCase() }`
+                                }
                                 width={675}
                                 height={958}
                                 sizes="(max-width: 900px) 70vw, 25vw"
                             />
+                            {/* Las noches de un día fijo llevan el día encima del nombre;
+                            la que se sirve otros días (el picoteo) se llama "Noches de…" y no lleva día */}
                             <p className="Experiences-name">
-                                <span className="Experiences-day">{night.day}</span>
-                                {night.name}
+                                { night.otherDays
+                                    ? `Noches de ${ night.name.toLowerCase() }`
+                                    : <>
+                                        <span className="Experiences-day">{night.day}</span>
+                                        {night.name}
+                                    </>
+                                }
                             </p>
                         </li>
                     )}
