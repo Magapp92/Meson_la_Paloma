@@ -1,4 +1,5 @@
 
+import { BookingBand } from '@components/booking-band/booking-band.jsx'
 import { DishList } from '@components/dish-list/dish-list.jsx'
 import { THEMED_NIGHTS } from '@const/themed-nights.js'
 import './experiences.css'
@@ -37,6 +38,7 @@ export const Experiences = () => {
                     </div>
                 </section>
             )}
+            <BookingBand />
         </main>
     )
 }

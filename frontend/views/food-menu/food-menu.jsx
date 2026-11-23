@@ -1,4 +1,5 @@
 
+import { BookingBand } from '@components/booking-band/booking-band.jsx'
 import { DishList } from '@components/dish-list/dish-list.jsx'
 import { FOOD_MENU } from '@const/food-menu.js'
 import './food-menu.css'
@@ -49,6 +50,7 @@ export const FoodMenu = () => {
                     </section>
                 )}
             </div>
+            <BookingBand />
         </main>
     )
 }

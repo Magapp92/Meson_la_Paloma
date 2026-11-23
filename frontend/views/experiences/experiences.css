@@ -41,9 +41,9 @@
     margin-top: clamp(2rem, 5vw, 3.5rem);
 }
 
-/* La última noche deja espacio antes del pie */
-.Night:last-child{
-    margin-bottom: clamp(3rem, 7vw, 6rem);
+/* La franja de reserva, que va justo después de la última noche, se separa de ella */
+.Night + .BookingBand{
+    margin-top: clamp(3rem, 7vw, 6rem);
 }
 
 /* Tarjeta de cada noche con borde y esquinas redondeadas.

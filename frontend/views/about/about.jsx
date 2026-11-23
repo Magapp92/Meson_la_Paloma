@@ -1,7 +1,6 @@
 
 import Image from 'next/image'
-import { PartySizes } from '@components/party-sizes/party-sizes.jsx'
-import { CONTACT } from '@const/business.js'
+import { BookingBand } from '@components/booking-band/booking-band.jsx'
 import './about.css'
 
 /* La fachada antes y ahora, las dos en 4:3 con su tamaño original */
@@ -74,17 +73,7 @@ export const About = () => {
                     )}
                 </ul>
             </section>
-            {/* En la franja de reserva agrupamos, a todo el ancho y en mostaza, la invitación a reservar,
-            el aviso de los grupos y los círculos con el número de personas */}
-            <section className="AboutBooking">
-                <div className="Container AboutBooking-inner">
-                    <div className="AboutBooking-content">
-                        <h2 className="AboutBooking-title">Reserva tu mesa ahora</h2>
-                        <p className="AboutBooking-text">Elige cuántos sois y reserva tu mesa. Si sois más de 6, es una reserva de grupo: llámanos al {CONTACT.phone}.</p>
-                    </div>
-                    <PartySizes onAccent />
-                </div>
-            </section>
+            <BookingBand />
         </main>
     )
 }

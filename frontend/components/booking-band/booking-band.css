@@ -1,0 +1,43 @@
+
+/* BOOKING BAND */
+
+/* Franja mostaza a todo el ancho de la pantalla (el ancho máximo lo pone el Container de dentro) */
+.BookingBand{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* La franja va pegada al pie: en las páginas que la tienen, le quitamos al pie su margen de arriba */
+body:has(.BookingBand) .Footer{
+    margin-top: 0;
+}
+
+/* El título y el aviso a un lado y los círculos al otro, bajando de línea si no caben */
+.BookingBand-inner{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem 2.5rem;
+}
+
+/* El título en grande con la fuente de títulos */
+.BookingBand-title{
+    font-family: var(--font-title);
+    font-size: clamp(2.25rem, 5.5vw, 4rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* El aviso de los grupos bajo el título, con un ancho máximo para que no se estire */
+.BookingBand-text{
+    max-width: 34rem;
+    margin-top: .75rem;
+
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
