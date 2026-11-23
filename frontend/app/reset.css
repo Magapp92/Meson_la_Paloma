@@ -190,12 +190,21 @@ body{
 
 /* BASE */
 
-/* Damos al body el fondo y la tipografía de la web: Inter Tight para los textos */
+/* Damos al body el fondo y la tipografía de la web: Inter Tight para los textos.
+   hyphens none anula la partición de palabras con guion que activa el reset: una palabra que no cabe
+   pasa entera a la línea siguiente. Lo heredan todos los textos de la web */
 body{
     background: var(--bg);
 
     color: var(--text);
     font-family: var(--font-text), sans-serif;
+    -webkit-hyphens: none;
+    hyphens: none;
+}
+
+/* Los formularios tienen su propio hyphens auto en el reset: también lo anulamos */
+form, input, textarea, select, button, label{
+    hyphens: none;
 }
 
 /* Los títulos usan Anton, la letra de cartel del modelo B1 */
