@@ -138,22 +138,21 @@ export const Home = () => {
                     </ul>
                 </div>
             </section>
-            {/* En la sección historia agrupamos la foto del equipo en la puerta del mesón,
+            {/* En la sección historia agrupamos una foto del local,
             un texto corto sobre quiénes somos y el enlace para conocernos más */}
             <section className="Container Story">
                 <Image
                     className="Story-photo"
-                    src="/img/team-entrance.webp"
-                    alt="El equipo del mesón en la puerta del local, bajo el rótulo Mesón La Paloma"
-                    width={903}
-                    height={656}
+                    src="/img/dining-bar.webp"
+                    alt="La barra con taburetes y las mesas del comedor del mesón"
+                    width={520}
+                    height={346}
                     sizes="(max-width: 900px) 100vw, 50vw"
                 />
                 <div className="Story-content">
                     <h2 className="Story-title">Nuestra historia</h2>
                     <p className="Story-text">Somos un mesón familiar de barrio. Llevamos más de 20 años en Valdezarza, de los desayunos a las cenas, con cocina americana y mediterránea y el trato cercano de siempre.</p>
-                    {/* Conócenos lleva de momento a la portada: cambiará cuando creemos la página Nosotros */}
-                    <Button href={ROUTES.HOME} variant="ghost" title="Ir a nosotros">Conócenos</Button>
+                    <Button href={ROUTES.ABOUT} variant="ghost" title="Ir a nosotros">Conócenos</Button>
                 </div>
             </section>
             {/* En la sección de grupos agrupamos, en una franja mostaza a todo el ancho, la invitación
