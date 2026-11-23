@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@components/button/button.jsx'
+import { PartySizes } from '@components/party-sizes/party-sizes.jsx'
 import { CONTACT } from '@const/business.js'
 import { ROUTES } from '@const/routes.js'
 import { THEMED_NIGHTS } from '@const/themed-nights.js'
@@ -26,9 +27,6 @@ const FEATURED_DISHES = Object.freeze([
     { name: 'Chuletón', image: { src: '/img/rib-steak-plate.webp', width: 960, height: 640 } },
     { name: 'Tomahawk steak', image: { src: '/img/tomahawk-steak.webp', width: 960, height: 640 } }
 ])
-
-/* Número de personas de los botones de "¿Mesa para cuántos?". Más de 6 es un grupo y se reserva por teléfono */
-const PARTY_SIZES = Object.freeze([ 2, 3, 4, 5, 6 ])
 
 /* Portada de la web: lo que se ve en la ruta / */
 export const Home = () => {
@@ -127,15 +125,9 @@ export const Home = () => {
                 <div className="Booking-box">
                     <h2 className="Booking-title">¿Mesa para cuántos?</h2>
                     <p className="Booking-text">Elige cuántos sois y reserva tu mesa. Si sois más de 6, es una reserva de grupo: llámanos al {CONTACT.phone}.</p>
-                    {/* De momento los números llevan a la portada: cuando creemos las reservas,
-                    abrirán el formulario con ese número de personas ya elegido */}
-                    <ul className="Booking-sizes">
-                        { PARTY_SIZES.map( size =>
-                            <li key={size}>
-                                <Link href={ROUTES.HOME} className="Booking-size" title={`Reservar mesa para ${ size } personas`}>{size}</Link>
-                            </li>
-                        )}
-                    </ul>
+                    <div className="Booking-sizes">
+                        <PartySizes />
+                    </div>
                 </div>
             </section>
             {/* En la sección historia agrupamos una foto del local,

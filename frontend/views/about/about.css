@@ -34,12 +34,18 @@
 
 /* HISTORIA */
 
-/* El texto con un ancho máximo para que las líneas no sean muy largas */
+/* El texto a la izquierda y las fachadas a la derecha. La columna de las fachadas mide como mucho 26rem:
+   la foto antigua solo mide 333 px y, más grande, se vería borrosa */
 .AboutStory{
     padding-top: 1.5rem;
+
+    display: grid;
+    grid-template-columns: 1fr minmax(16rem, 26rem);
+    align-items: start;
+    gap: clamp(2rem, 6vw, 5rem);
 }
 
-/* Cada párrafo en gris claro y grande, separado del siguiente */
+/* Cada párrafo en gris claro y grande, con un ancho máximo para que las líneas no sean muy largas */
 .AboutStory-text{
     max-width: 42rem;
 
@@ -47,6 +53,8 @@
     color: var(--muted);
     line-height: 1.6;
 }
+
+/* Separación entre párrafos: solo en el que va justo después de otro */
 .AboutStory-text + .AboutStory-text{
     margin-top: 1.25rem;
 }
@@ -54,19 +62,9 @@
 
 /* ANTES Y AHORA */
 
-/* Separación con la historia */
+/* Las dos fachadas una encima de otra */
 .Facades{
-    margin-top: clamp(3rem, 7vw, 5rem);
-}
-
-/* Las dos fachadas en dos columnas iguales. Ancho máximo de 50rem: la foto antigua solo mide 333 px
-   y, más grande, se vería borrosa */
-.Facades-list{
-    max-width: 50rem;
-    margin-top: clamp(1.5rem, 3vw, 2.5rem);
-
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
 }
 
@@ -106,9 +104,9 @@
 
 /* EL LOCAL */
 
-/* Separación con antes y ahora y con el pie */
+/* Separación con la historia y con la franja de reserva */
 .Venue{
-    margin-block: clamp(3rem, 7vw, 5rem) clamp(3rem, 7vw, 6rem);
+    padding-block: clamp(3rem, 7vw, 5rem);
 }
 
 /* Cuatro fotos en fila, del mismo ancho */
@@ -130,11 +128,46 @@
 }
 
 
+/* RESERVA */
+
+/* Franja mostaza a todo el ancho de la pantalla, como la de grupos de la portada
+   (el ancho máximo lo pone el Container de dentro) */
+.AboutBooking{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* La franja va pegada al pie: le quitamos al pie su margen de arriba en esta página */
+body:has(.AboutBooking) .Footer{
+    margin-top: 0;
+}
+
+/* El título a un lado y los círculos al otro, bajando de línea si no caben */
+.AboutBooking-inner{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem 2.5rem;
+}
+
+/* El título en grande con la fuente de títulos */
+.AboutBooking-title{
+    font-family: var(--font-title);
+    font-size: clamp(2.25rem, 5.5vw, 4rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+
 /* MÓVIL */
 
-/* En pantallas de 900px o menos: las fachadas una debajo de otra y la galería en dos columnas */
+/* En pantallas de 900px o menos: el texto arriba y las fachadas debajo, y la galería en dos columnas */
 @media (max-width: 900px){
-    .Facades-list{
+    .AboutStory{
         grid-template-columns: 1fr;
     }
     .Venue-list{

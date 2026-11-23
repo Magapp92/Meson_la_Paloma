@@ -210,41 +210,9 @@
     line-height: 1.5;
 }
 
-/* Los números en fila, bajando de línea si no caben */
+/* Los círculos de número de personas (componente PartySizes), separados de la frase */
 .Booking-sizes{
     margin-top: 1.75rem;
-
-    display: flex;
-    flex-flow: row wrap;
-    gap: .75rem;
-}
-
-/* Cada número es un círculo con borde que se rellena de mostaza al pasar el ratón */
-.Booking-size{
-    min-width: 3.5rem;
-    min-height: 3.5rem;
-    border: 2px solid var(--border);
-    border-radius: 50%;
-
-    display: grid;
-    place-items: center;
-
-    font-size: 1.25rem;
-    font-weight: 700;
-
-    transition: background .2s, border-color .2s, color .2s;
-}
-.Booking-size:hover{
-    border-color: var(--accent);
-    background-color: var(--accent);
-
-    color: var(--bg);
-}
-
-/* Al llegar con el teclado, un borde mostaza separado del círculo */
-.Booking-size:focus-visible{
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
 }
 
 

@@ -1,5 +1,6 @@
 
 import Image from 'next/image'
+import { PartySizes } from '@components/party-sizes/party-sizes.jsx'
 import './about.css'
 
 /* La fachada antes y ahora, las dos en 4:3 con su tamaño original */
@@ -16,7 +17,8 @@ const VENUE_PHOTOS = Object.freeze([
     { src: '/img/kitchen.webp', alt: 'La cocina del mesón', width: 540, height: 360 }
 ])
 
-/* Página Nosotros: la historia del mesón, la fachada antes y ahora y una galería del local */
+/* Página Nosotros: la historia del mesón junto a la fachada antes y ahora, una galería del local
+y una franja para reservar */
 export const About = () => {
 
     return (
@@ -29,16 +31,15 @@ export const About = () => {
                     <span className="AboutPage-titleAccent">Historia</span>
                 </h1>
             </section>
-            {/* En la historia agrupamos el texto sobre el mesón */}
+            {/* En la historia agrupamos, en dos columnas, el texto sobre el mesón y la fachada antes y ahora */}
             <section className="Container AboutStory">
-                <p className="AboutStory-text">El Mesón La Paloma es un mesón familiar de barrio, en la calle Artajona, en Valdezarza. Llevamos más de 20 años abriendo cada día para los vecinos y para quien pasa por aquí: desayunos, comidas, raciones para compartir y cenas.</p>
-                <p className="AboutStory-text">En 2022 decidimos darle una vuelta al mesón y sacar su mejor versión. Ampliamos el espacio, renovamos el local y mejoramos la cocina, y volvimos a abrir con la idea de siempre: un sitio familiar donde juntarte con los tuyos y celebrar lo que haga falta.</p>
-                <p className="AboutStory-text">Porque venir a comer o a tomar algo no tiene por qué ser solo eso. Queremos que sea una experiencia.</p>
-            </section>
-            {/* En antes y ahora agrupamos las dos fachadas, una al lado de la otra, cada una con su rótulo */}
-            <section className="Container Facades">
-                <h2 className="AboutPage-sectionTitle">Antes y ahora</h2>
-                <div className="Facades-list">
+                <div className="AboutStory-content">
+                    <p className="AboutStory-text">El Mesón La Paloma es un mesón familiar de barrio, en la calle Artajona, en Valdezarza. Llevamos más de 20 años abriendo cada día para los vecinos y para quien pasa por aquí: desayunos, comidas, raciones para compartir y cenas.</p>
+                    <p className="AboutStory-text">En 2022 decidimos darle una vuelta al mesón y sacar su mejor versión. Ampliamos el espacio, renovamos el local y mejoramos la cocina, y volvimos a abrir con la idea de siempre: un sitio familiar donde juntarte con los tuyos y celebrar lo que haga falta.</p>
+                    <p className="AboutStory-text">Porque venir a comer o a tomar algo no tiene por qué ser solo eso. Queremos que sea una experiencia.</p>
+                </div>
+                {/* Las dos fachadas, una encima de otra, cada una con su rótulo */}
+                <div className="Facades">
                     { FACADES.map( facade =>
                         <figure key={facade.label} className="Facades-item">
                             <Image
@@ -47,7 +48,7 @@ export const About = () => {
                                 alt={facade.alt}
                                 width={facade.width}
                                 height={facade.height}
-                                sizes="(max-width: 900px) 100vw, 25rem"
+                                sizes="(max-width: 900px) 100vw, 26rem"
                             />
                             <figcaption className="Facades-label">{facade.label}</figcaption>
                         </figure>
@@ -71,6 +72,14 @@ export const About = () => {
                         </li>
                     )}
                 </ul>
+            </section>
+            {/* En la franja de reserva agrupamos, a todo el ancho y en mostaza, la invitación a reservar
+            y los círculos con el número de personas */}
+            <section className="AboutBooking">
+                <div className="Container AboutBooking-inner">
+                    <h2 className="AboutBooking-title">Reserva tu mesa ahora</h2>
+                    <PartySizes onAccent />
+                </div>
             </section>
         </main>
     )
