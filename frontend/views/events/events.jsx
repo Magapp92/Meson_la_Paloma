@@ -9,7 +9,7 @@ Los de temporada llevan months: los meses en los que se muestran (1 enero … 12
 Los que no lo llevan se muestran todo el año */
 const EVENT_TYPES = Object.freeze([
     { title: 'Cumpleaños', text: 'Celebra tu día con la familia y los amigos, alrededor de una buena mesa.' },
-    { title: 'Comidas de empresa', text: 'Comidas y cenas con tu equipo, para un día cualquiera o para cerrar el año.' },
+    { title: 'Comidas de empresa', text: 'Comidas y cenas con tu equipo, ven a celebrarlo con nosotros.' },
     { title: 'Grupos y reuniones', text: 'Quedadas de amigos, peñas o mesas de más de 6 personas.' },
     { title: 'Comidas y cenas de Navidad', text: 'Las fechas más especiales del año, con los tuyos. Reserva con tiempo.', months: [ 11, 12 ] }
 ])
