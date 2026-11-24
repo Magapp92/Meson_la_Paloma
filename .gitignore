@@ -3,3 +3,7 @@ node_modules/
 
 # Carpeta que Next genera al arrancar (npm run dev) o compilar: se recrea sola
 .next/
+
+# Variables de entorno con datos privados (contraseñas, cadena de conexión a Mongo): nunca se suben
+.env
+.env.local
