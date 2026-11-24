@@ -1,0 +1,148 @@
+
+/* EVENTS PAGE */
+
+/* HERO */
+
+/* Cabecera de la página, igual que la de la carta */
+.EventsPage-hero{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) 1rem;
+}
+
+/* Título a dos tonos, del mismo tamaño que el de la carta */
+.EventsPage-title{
+    font-size: clamp(3.5rem, 11vw, 8rem);
+    line-height: .9;
+    text-transform: uppercase;
+}
+
+/* Segunda línea del título en mostaza, en su propia línea y con el mismo interlineado */
+.EventsPage-titleAccent{
+    display: block;
+
+    color: var(--accent);
+    line-height: inherit;
+}
+
+/* Entradilla bajo el título, en gris claro y con un ancho máximo */
+.EventsPage-intro{
+    max-width: 36rem;
+    margin-top: 1.5rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+
+/* TIPOS DE CELEBRACIÓN */
+
+/* Separación con el hero */
+.EventTypes{
+    padding-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* Cuatro tarjetas en fila, del mismo ancho */
+.EventTypes-list{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+/* Cada tarjeta con el fondo un poco más claro, esquinas redondeadas y una línea mostaza arriba */
+.EventTypes-item{
+    padding: clamp(1.5rem, 2.5vw, 2rem);
+    border-top: .25rem solid var(--accent);
+    border-radius: 1.125rem;
+
+    background-color: var(--surface);
+}
+
+/* Número de la tarjeta (01, 02…) en mostaza con la fuente de títulos */
+.EventTypes-number{
+    display: block;
+
+    font-family: var(--font-title);
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+}
+
+/* Nombre de la celebración */
+.EventTypes-title{
+    margin-top: 1rem;
+
+    font-family: var(--font-title);
+    font-size: clamp(1.5rem, 2.2vw, 1.9rem);
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+/* Texto corto de la tarjeta, en gris claro */
+.EventTypes-text{
+    margin-top: .75rem;
+
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+
+/* PRESUPUESTO */
+
+/* Separación con las tarjetas y con la franja de reserva */
+.Quote{
+    padding-block: clamp(2.5rem, 5vw, 4rem) clamp(3rem, 7vw, 6rem);
+}
+
+/* Caja con el fondo un poco más claro y borde mostaza a la izquierda, como "¿Mesa para cuántos?" de la portada */
+.Quote-box{
+    padding: clamp(1.75rem, 4vw, 3rem);
+    border-left: .25rem solid var(--accent);
+    border-radius: 1.125rem;
+
+    background-color: var(--surface);
+}
+
+/* Título de la caja con la fuente de títulos */
+.Quote-title{
+    font-family: var(--font-title);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Frase en gris claro con un ancho máximo */
+.Quote-text{
+    max-width: 40rem;
+    margin-top: 1rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* Botones en fila, bajando de línea si no caben */
+.Quote-actions{
+    margin-top: 1.75rem;
+
+    display: flex;
+    flex-flow: row wrap;
+    gap: .8rem;
+}
+
+
+/* MÓVIL */
+
+/* En pantallas de 900px o menos, las tarjetas en dos columnas */
+@media (max-width: 900px){
+    .EventTypes-list{
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* En pantallas de 600px o menos, una sola columna */
+@media (max-width: 600px){
+    .EventTypes-list{
+        grid-template-columns: 1fr;
+    }
+}

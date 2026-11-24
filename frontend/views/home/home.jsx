@@ -157,8 +157,7 @@ export const Home = () => {
                         <p className="GroupsBand-links">
                             Llámanos al <a href={CONTACT.phoneHref} className="GroupsBand-link" title="Llamar al mesón">{CONTACT.phone}</a>
                             {' · '}
-                            {/* Ver menús lleva de momento a la portada: cambiará cuando creemos la página de menús y eventos */}
-                            <Link href={ROUTES.HOME} className="GroupsBand-link" title="Ir a menús y eventos">Ver menús</Link>
+                            <Link href={ROUTES.EVENTS} className="GroupsBand-link" title="Ir a menús y eventos">Ver menús</Link>
                         </p>
                     </div>
                 </div>
