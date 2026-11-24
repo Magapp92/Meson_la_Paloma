@@ -6,6 +6,7 @@ console.log( 'Iniciando la API del Mesón La Paloma' )
 const express = require( 'express' )
 const cors = require( 'cors' )
 const { connect } = require( './db' )
+const { router } = require( './router' )
 const { notFound, errorHandler } = require( './middlewares' )
 
 /* Leemos las variables del .env: el puerto (la conexión a Mongo la lee db.js) */
@@ -32,13 +33,8 @@ app.use( async ( req, res, next ) => {
     }
 })
 
-/* Ruta de prueba: si responde, la API está en marcha */
-app.get( '/api', ( req, res ) => {
-    res.status( 200 ).json({
-        message: 'API del Mesón La Paloma en marcha',
-        data: null
-    })
-})
+/* Todas las rutas cuelgan de /api */
+app.use( '/api', router )
 
 /* Si ninguna ruta coincide devolvemos 404, y recogemos todos los errores */
 app.use( notFound )
