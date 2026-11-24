@@ -7,7 +7,8 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon index",
-    "start": "node index"
+    "start": "node index",
+    "seed": "node seed"
   },
   "dependencies": {
     "cors": "^2.8.6",
