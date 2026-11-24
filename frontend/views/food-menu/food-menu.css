@@ -106,6 +106,32 @@
     margin-top: clamp(3rem, 7vw, 6rem);
 }
 
+
+/* AVISO SI LA CARTA NO CARGA */
+
+/* Bloque del aviso, separado del hero y de la franja de reserva */
+.FoodMenu-error{
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 7vw, 6rem);
+}
+
+/* El aviso en gris claro, grande y con un ancho máximo */
+.FoodMenu-errorText{
+    max-width: 36rem;
+
+    font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* El teléfono en mostaza y subrayado para que se vea que se puede pulsar */
+.FoodMenu-errorLink{
+    font-weight: 700;
+    color: var(--accent);
+    line-height: inherit;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
 /* Cada categoría entera en la misma columna, sin partirse entre las dos.
    scroll-margin-top: al saltar desde el índice, la categoría se para un poco más abajo
    para que su título no quede tapado por el índice pegado arriba */
