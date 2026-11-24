@@ -41,10 +41,12 @@
     padding-top: clamp(2.5rem, 5vw, 4rem);
 }
 
-/* Cuatro tarjetas en fila, del mismo ancho */
+/* Las tarjetas en fila, del mismo ancho. Según el mes hay tres o cuatro: auto-fit crea tantas columnas
+   de al menos 14rem como quepan y las reparte entre las tarjetas que haya, sin dejar huecos.
+   En el móvil caben menos y bajan solas de línea, sin media query */
 .EventTypes-list{
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: 1rem;
 }
 
@@ -57,20 +59,8 @@
     background-color: var(--surface);
 }
 
-/* Número de la tarjeta (01, 02…) en mostaza con la fuente de títulos */
-.EventTypes-number{
-    display: block;
-
-    font-family: var(--font-title);
-    font-size: 2rem;
-    color: var(--accent);
-    line-height: 1;
-}
-
 /* Nombre de la celebración */
 .EventTypes-title{
-    margin-top: 1rem;
-
     font-family: var(--font-title);
     font-size: clamp(1.5rem, 2.2vw, 1.9rem);
     line-height: 1.1;
@@ -131,18 +121,3 @@
 }
 
 
-/* MÓVIL */
-
-/* En pantallas de 900px o menos, las tarjetas en dos columnas */
-@media (max-width: 900px){
-    .EventTypes-list{
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* En pantallas de 600px o menos, una sola columna */
-@media (max-width: 600px){
-    .EventTypes-list{
-        grid-template-columns: 1fr;
-    }
-}
