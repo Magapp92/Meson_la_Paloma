@@ -44,7 +44,7 @@ const tableSchema = new mongoose.Schema(
     {
         _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
         number: { type: mongoose.Schema.Types.Number, required: true, unique: true },
-        seats: { type: mongoose.Schema.Types.Number, required: true, min: 1 },
+        seats: { type: mongoose.Schema.Types.Number, required: true, min: 2 },
         active: { type: mongoose.Schema.Types.Boolean, default: true }
     },
     {
@@ -63,7 +63,7 @@ const reservationSchema = new mongoose.Schema(
         _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
         date: { type: mongoose.Schema.Types.String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
         time: { type: mongoose.Schema.Types.String, required: true, match: /^\d{2}:\d{2}$/ },
-        partySize: { type: mongoose.Schema.Types.Number, required: true, min: 1, max: 6 },
+        partySize: { type: mongoose.Schema.Types.Number, required: true, min: 2, max: 6 },
         name: { type: mongoose.Schema.Types.String, required: true, trim: true },
         phone: { type: mongoose.Schema.Types.String, required: true, trim: true },
         email: { type: mongoose.Schema.Types.String, required: true, trim: true, lowercase: true, match: /^\S+@\S+\.\S+$/ },
