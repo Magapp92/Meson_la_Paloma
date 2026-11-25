@@ -2,7 +2,7 @@
 /* Controlador de las reservas */
 const crypto = require( 'node:crypto' )
 const { Table, Reservation } = require( '../models' )
-const { getAvailableTimes, pickTable, parseDate, toMinutes } = require( '../availability' )
+const { getAvailableTimes, getDaySlots, pickTable, parseDate, daysBetween, toMinutes } = require( '../availability' )
 const { getMadridNow } = require( '../madrid-time' )
 const { BOOKING_RULES } = require( '../booking-rules' )
 
@@ -13,6 +13,8 @@ const fail = ( res, status, message ) => res.status( status ).json({ message, da
 const validate = ({ date, time, partySize, name, phone, email, notes }) => {
     if ( !parseDate( date ) ) return 'La fecha no es válida: tiene que ser AAAA-MM-DD'
     if ( typeof time !== 'string' || !/^\d{2}:\d{2}$/.test( time ) ) return 'La hora no es válida: tiene que ser HH:MM'
+    /* La hora tiene que ser una de las franjas de ese día: descarta los días cerrados y las horas fuera de servicio o sueltas (21:10) */
+    if ( !getDaySlots( date ).includes( time ) ) return 'Ese día o a esa hora no se puede reservar. Elige una de las horas disponibles'
     if ( !Number.isInteger( partySize ) || partySize < BOOKING_RULES.minPartySize || partySize > BOOKING_RULES.maxPartySize ) {
         return `Se reserva para ${ BOOKING_RULES.minPartySize } a ${ BOOKING_RULES.maxPartySize } personas. Para grupos más grandes, llámanos`
     }
@@ -56,14 +58,22 @@ const postReservation = async ( req, res, next ) => {
         const error = validate({ date, time, partySize, name, phone, email, notes })
         if ( error ) return fail( res, 400, error )
 
+        /* La fecha tiene que estar entre hoy y dentro de maxDaysAhead días (en hora de Madrid) */
+        const now = getMadridNow()
+        const daysAhead = daysBetween( now.date, date )
+        if ( daysAhead < 0 || daysAhead > BOOKING_RULES.maxDaysAhead ) {
+            return fail( res, 400, `Se puede reservar desde hoy hasta dentro de ${ BOOKING_RULES.maxDaysAhead } días` )
+        }
+
         /* Las mesas en uso y las reservas confirmadas de ese día */
         const [ tables, reservations ] = await Promise.all([
             Table.find({ active: true }).lean(),
             Reservation.find({ date, status: 'confirmed' }, { table: 1, time: 1, status: 1 }).lean()
         ])
 
-        /* ¿Sigue libre esa hora? Con el mismo cálculo que la disponibilidad: respeta todas las reglas */
-        const times = getAvailableTimes({ date, partySize, tables, reservations, now: getMadridNow() })
+        /* ¿Sigue libre esa hora? Con el mismo cálculo que la disponibilidad: si entre tanto ha pasado
+        el margen de 2 horas o se han ocupado las mesas, ya no aparece */
+        const times = getAvailableTimes({ date, partySize, tables, reservations, now })
         if ( !times.includes( time ) ) {
             return fail( res, 409, 'Esa hora ya no está libre. Elige otra, por favor' )
         }

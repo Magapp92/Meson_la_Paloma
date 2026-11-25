@@ -100,6 +100,7 @@ module.exports = {
     toMinutes,
     toTime,
     parseDate,
+    daysBetween,
     getDaySlots,
     pickTable,
     getAvailableTimes
