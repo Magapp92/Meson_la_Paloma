@@ -49,8 +49,10 @@
     gap: 1rem;
 }
 
-/* Cada bloque es una caja con el fondo un poco más claro y borde mostaza a la izquierda, como "¿Mesa para cuántos?" de la portada */
+/* Cada bloque es una caja con el fondo un poco más claro y borde mostaza a la izquierda, como "¿Mesa para cuántos?" de la portada.
+   min-width 0: un fieldset no se estrecha por debajo de su contenido; así la fila de días se desliza dentro en vez de ensancharlo */
 .BookingStep{
+    min-width: 0;
     padding: clamp(1.5rem, 3vw, 2.25rem);
     border: 0;
     border-left: .25rem solid var(--accent);
@@ -115,6 +117,20 @@
 }
 
 
+/* Los radios de todos los bloques, ocultos a la vista pero no a los lectores de pantalla ni al teclado.
+   Lo que se ve es el elemento que va justo después (círculo, día…) */
+.BookingForm-radio{
+    width: 1px;
+    height: 1px;
+
+    overflow: hidden;
+    position: absolute;
+
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+
 /* PERSONAS */
 
 /* Los círculos en fila, bajando de línea si no caben */
@@ -127,18 +143,6 @@
 /* Cada opción es un label: al pulsar el círculo se marca su radio */
 .PartyPicker-option{
     cursor: pointer;
-}
-
-/* El radio, oculto a la vista pero no a los lectores de pantalla ni al teclado */
-.PartyPicker-input{
-    width: 1px;
-    height: 1px;
-
-    overflow: hidden;
-    position: absolute;
-
-    clip-path: inset(50%);
-    white-space: nowrap;
 }
 
 /* El círculo, igual que los de la portada */
@@ -163,7 +167,7 @@
 }
 
 /* El elegido, relleno de mostaza */
-.PartyPicker-input:checked + .PartyPicker-circle{
+.BookingForm-radio:checked + .PartyPicker-circle{
     border-color: var(--accent);
     background-color: var(--accent);
 
@@ -171,13 +175,126 @@
 }
 
 /* Al llegar con el teclado, un borde mostaza separado del círculo */
-.PartyPicker-input:focus-visible + .PartyPicker-circle{
+.BookingForm-radio:focus-visible + .PartyPicker-circle{
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
 
 
+/* DÍAS */
+
+/* Los días en filas, bajando de línea: en pantallas anchas se ven todos de un vistazo */
+.DayPicker{
+    display: flex;
+    flex-flow: row wrap;
+    gap: .6rem;
+}
+
+/* Cada día es un label que no se encoge */
+.DayPicker-option{
+    flex-shrink: 0;
+
+    cursor: pointer;
+}
+
+/* El día: una tarjeta con borde y tres líneas (semana, número y mes) */
+.DayPicker-day{
+    width: 4.25rem;
+    padding-block: .6rem;
+    border: 2px solid var(--border);
+    border-radius: .9rem;
+
+    display: grid;
+    justify-items: center;
+    gap: .1rem;
+
+    transition: background .2s, border-color .2s, color .2s;
+}
+
+/* Al pasar el ratón, el borde en mostaza */
+.DayPicker-option:hover .DayPicker-day{
+    border-color: var(--accent);
+}
+
+/* Día de la semana y mes, pequeños y en mayúsculas */
+.DayPicker-weekday,
+.DayPicker-month{
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+/* El número del día, grande con la fuente de títulos */
+.DayPicker-number{
+    font-family: var(--font-title);
+    font-size: 1.6rem;
+    line-height: 1.1;
+}
+
+/* El elegido, relleno de mostaza */
+.BookingForm-radio:checked + .DayPicker-day{
+    border-color: var(--accent);
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* Al llegar con el teclado, un borde mostaza separado de la tarjeta */
+.BookingForm-radio:focus-visible + .DayPicker-day{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* AVISO */
+
+/* Si la API no responde: el aviso en gris claro, grande y con un ancho máximo, como el de la carta */
+.BookingPage-error{
+    max-width: 36rem;
+
+    font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* El teléfono en mostaza y subrayado */
+.BookingPage-errorLink{
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+
 /* MÓVIL */
+
+/* En esta página no se ve la barra fija del móvil: su botón "Reservar mesa" no tiene sentido aquí
+   y el teléfono ya está en el formulario. Se quita también el hueco que deja para ella al final */
+@media (max-width: 900px){
+    body:has(.BookingForm) .MobileBar{
+        display: none;
+    }
+    body:has(.BookingForm){
+        padding-bottom: 0;
+    }
+}
+
+/* En el móvil los días van en una sola fila que se desliza de lado (en varias filas ocuparían media pantalla).
+   El día cortado en el borde avisa de que hay más; scroll-snap hace que al soltar quede un día justo en el borde.
+   El padding deja sitio al contorno del foco, que overflow recortaría */
+@media (max-width: 600px){
+    .DayPicker{
+        padding: .25rem .25rem 1rem;
+
+        flex-wrap: nowrap;
+
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+    }
+    .DayPicker-option{
+        scroll-snap-align: start;
+    }
+}
 
 /* En pantallas estrechas, los círculos y su separación algo más pequeños para que los cinco quepan en una fila */
 @media (max-width: 480px){

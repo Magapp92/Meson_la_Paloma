@@ -4,7 +4,7 @@ Usan las mesas reales (data/tables.js) y reservas inventadas, y fijan "ahora" pa
 miércoles 25 de noviembre de 2026 a las 10:00. El 29 es domingo, el 30 lunes y el 1 de diciembre martes */
 const { test } = require( 'node:test' )
 const assert = require( 'node:assert/strict' )
-const { toMinutes, toTime, parseDate, getDaySlots, pickTable, getAvailableTimes } = require( './availability' )
+const { toMinutes, toTime, parseDate, getDaySlots, pickTable, getAvailableTimes, getOpenDays } = require( './availability' )
 const { TABLES } = require( './data/tables' )
 
 const NOW = { date: '2026-11-25', time: '10:00' }
@@ -106,4 +106,21 @@ test( 'si todas las mesas que valen están ocupadas, esa hora no sale', () => {
     assert.ok( !times.includes( '19:45' ) )
     assert.ok( !times.includes( '22:00' ) )
     assert.ok( times.includes( '13:00' ) )
+})
+
+test( 'los días que abre: de hoy a dentro de 30 días, sin los lunes', () => {
+    const days = getOpenDays( NOW )
+
+    assert.equal( days[ 0 ], '2026-11-25' )
+    assert.equal( days.at( -1 ), '2026-12-25' )
+    assert.ok( !days.includes( '2026-11-30' ) )
+    assert.ok( days.includes( '2026-11-29' ) )
+    /* 31 fechas menos 4 lunes (30-11, 7-12, 14-12 y 21-12) */
+    assert.equal( days.length, 27 )
+})
+
+test( 'hoy no sale si ya no queda ninguna hora con 2 horas de antelación', () => {
+    assert.equal( getOpenDays({ date: '2026-11-25', time: '21:00' })[ 0 ], '2026-11-26' )
+    /* El domingo a las 15:00: la última comida es a las 16:00, a menos de 2 horas */
+    assert.equal( getOpenDays({ date: '2026-11-29', time: '15:00' })[ 0 ], '2026-12-01' )
 })

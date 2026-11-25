@@ -96,6 +96,19 @@ const getAvailableTimes = ({ date, partySize, tables, reservations, now }) => {
         .filter( time => pickTable({ tables, reservations, time, partySize }) )
 }
 
+/* Suma días a una fecha 'AAAA-MM-DD': ( '2026-11-30', 2 ) → '2026-12-02' */
+const addDays = ( date, days ) => new Date( parseDate( date ).getTime() + days * MS_PER_DAY ).toISOString().slice( 0, 10 )
+
+/* Días en los que se puede reservar, desde hoy hasta dentro de maxDaysAhead días.
+Un día sale si tiene alguna hora de entrada; hoy, solo si queda alguna con la antelación mínima.
+No mira las mesas: eso depende de cuántas personas sean y lo calcula getAvailableTimes */
+const getOpenDays = now => {
+    const minMinutesToday = toMinutes( now.time ) + BOOKING_RULES.minNoticeMinutes
+
+    return Array.from({ length: BOOKING_RULES.maxDaysAhead + 1 }, ( _, index ) => addDays( now.date, index ) )
+        .filter( date => getDaySlots( date ).some( time => date !== now.date || toMinutes( time ) >= minMinutesToday ) )
+}
+
 module.exports = {
     toMinutes,
     toTime,
@@ -103,5 +116,6 @@ module.exports = {
     daysBetween,
     getDaySlots,
     pickTable,
-    getAvailableTimes
+    getAvailableTimes,
+    getOpenDays
 }

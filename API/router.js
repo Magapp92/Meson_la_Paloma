@@ -2,7 +2,7 @@
 /* Router con todos los endpoints de la API. Cuelgan de /api (lo pone index.js) */
 const express = require( 'express' )
 const { getMenu } = require( './controllers/menu' )
-const { getAvailability } = require( './controllers/availability' )
+const { getAvailability, getDays } = require( './controllers/availability' )
 const { postReservation } = require( './controllers/reservations' )
 
 const router = express.Router()
@@ -19,6 +19,10 @@ router.route( '/' )
 /* La carta */
 router.route( '/menu' )
     .get( getMenu )
+
+/* Los días en los que se puede reservar */
+router.route( '/days' )
+    .get( getDays )
 
 /* Las horas libres para reservar: ?date=AAAA-MM-DD&partySize=4 */
 router.route( '/availability' )

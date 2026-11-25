@@ -1,7 +1,7 @@
 
 /* Controlador de la disponibilidad: qué horas quedan libres un día para un número de personas */
 const { Table, Reservation } = require( '../models' )
-const { getAvailableTimes, parseDate } = require( '../availability' )
+const { getAvailableTimes, getOpenDays, parseDate } = require( '../availability' )
 const { getMadridNow } = require( '../madrid-time' )
 const { BOOKING_RULES } = require( '../booking-rules' )
 
@@ -45,7 +45,19 @@ const getAvailability = async ( req, res, next ) => {
     }
 }
 
+/* GET /api/days
+Devuelve { days }: los días en los que se puede reservar ('2026-11-25', '2026-11-26'…), en hora de Madrid */
+const getDays = ( req, res ) => {
+    const days = getOpenDays( getMadridNow() )
+
+    res.status( 200 ).json({
+        message: 'Días en los que se puede reservar',
+        data: { days }
+    })
+}
+
 /* Exportamos los controllers para el router */
 module.exports = {
-    getAvailability
+    getAvailability,
+    getDays
 }
