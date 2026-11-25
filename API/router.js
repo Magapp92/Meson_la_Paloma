@@ -2,6 +2,7 @@
 /* Router con todos los endpoints de la API. Cuelgan de /api (lo pone index.js) */
 const express = require( 'express' )
 const { getMenu } = require( './controllers/menu' )
+const { getAvailability } = require( './controllers/availability' )
 
 const router = express.Router()
 
@@ -17,6 +18,10 @@ router.route( '/' )
 /* La carta */
 router.route( '/menu' )
     .get( getMenu )
+
+/* Las horas libres para reservar: ?date=AAAA-MM-DD&partySize=4 */
+router.route( '/availability' )
+    .get( getAvailability )
 
 module.exports = {
     router
