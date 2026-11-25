@@ -3,6 +3,7 @@
 const express = require( 'express' )
 const { getMenu } = require( './controllers/menu' )
 const { getAvailability } = require( './controllers/availability' )
+const { postReservation } = require( './controllers/reservations' )
 
 const router = express.Router()
 
@@ -22,6 +23,10 @@ router.route( '/menu' )
 /* Las horas libres para reservar: ?date=AAAA-MM-DD&partySize=4 */
 router.route( '/availability' )
     .get( getAvailability )
+
+/* Las reservas: crear una nueva */
+router.route( '/reservations' )
+    .post( postReservation )
 
 module.exports = {
     router
