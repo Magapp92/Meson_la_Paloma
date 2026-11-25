@@ -246,6 +246,82 @@
 }
 
 
+/* HORAS */
+
+/* Mensaje mientras llegan las horas, si hay un error o si no queda ninguna. Está siempre en la página
+   (para que el lector de pantalla lea sus cambios), pero solo ocupa sitio cuando tiene texto */
+.BookingStep-status{
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+.BookingStep-status:not(:empty){
+    margin-bottom: 1rem;
+}
+
+/* Separación entre comidas y cenas */
+.TimePicker + .TimePicker{
+    margin-top: 1.5rem;
+}
+
+/* Nombre del servicio, pequeño, en mayúsculas y en gris claro */
+.TimePicker-title{
+    margin-bottom: .75rem;
+
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+/* Las horas en filas, bajando de línea */
+.TimePicker-times{
+    display: flex;
+    flex-flow: row wrap;
+    gap: .5rem;
+}
+
+/* Cada hora es un label */
+.TimePicker-option{
+    cursor: pointer;
+}
+
+/* La hora: una pastilla con borde, todas del mismo ancho */
+.TimePicker-time{
+    min-width: 5rem;
+    padding: .55rem .5rem;
+    border: 2px solid var(--border);
+    border-radius: 2rem;
+
+    display: block;
+
+    font-weight: 700;
+    text-align: center;
+
+    transition: background .2s, border-color .2s, color .2s;
+}
+
+/* Al pasar el ratón, el borde en mostaza */
+.TimePicker-option:hover .TimePicker-time{
+    border-color: var(--accent);
+}
+
+/* La elegida, rellena de mostaza */
+.BookingForm-radio:checked + .TimePicker-time{
+    border-color: var(--accent);
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* Al llegar con el teclado, un borde mostaza separado de la pastilla */
+.BookingForm-radio:focus-visible + .TimePicker-time{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
 /* AVISO */
 
 /* Si la API no responde: el aviso en gris claro, grande y con un ancho máximo, como el de la carta */
