@@ -377,6 +377,71 @@ button.BookingProgress-button:focus-visible{
 }
 
 
+/* DATOS */
+
+/* Los campos en dos columnas: nombre, notas y el botón ocupan las dos; teléfono y correo, una cada uno */
+.ContactFields{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Cada campo: el texto encima y la caja debajo */
+.ContactFields-field{
+    display: grid;
+    gap: .4rem;
+
+    cursor: auto;
+}
+.ContactFields-field--full{
+    grid-column: 1 / -1;
+}
+
+/* Texto del campo, pequeño y en gris claro */
+.ContactFields-label{
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+/* "(opcional)", más suave */
+.ContactFields-optional{
+    font-weight: 400;
+}
+
+/* La caja de escribir: fondo oscuro, borde y esquinas redondeadas */
+.ContactFields-input{
+    width: 100%;
+    padding: .75rem .9rem;
+    border: 2px solid var(--border);
+    border-radius: .75rem;
+
+    background-color: var(--bg);
+
+    transition: border-color .2s;
+}
+.ContactFields-input:hover{
+    border-color: var(--muted);
+}
+
+/* Al escribir, el borde en mostaza (sustituye al contorno del navegador) */
+.ContactFields-input:focus{
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* El texto de ejemplo de las notas, en gris */
+.ContactFields-input::placeholder{
+    color: var(--muted);
+    opacity: .7;
+}
+
+/* Las notas se pueden hacer más altas, pero no más anchas */
+.ContactFields-input--notes{
+    resize: vertical;
+}
+
+
 /* AVISO */
 
 /* Si la API no responde: el aviso en gris claro, grande y con un ancho máximo, como el de la carta */
@@ -414,7 +479,8 @@ button.BookingProgress-button:focus-visible{
    - el progreso muestra solo los números, y el paso actual también su nombre;
    - círculos de personas más pequeños, para que los cinco quepan en una fila;
    - días en columnas más estrechas, con letra más pequeña y menos relleno;
-   - horas de cinco en cinco, más juntas */
+   - horas de cinco en cinco, más juntas;
+   - los datos en una sola columna */
 @media (max-width: 480px){
     .BookingProgress-label{
         display: none;
@@ -468,5 +534,9 @@ button.BookingProgress-button:focus-visible{
     }
     .TimePicker + .TimePicker{
         margin-top: 1rem;
+    }
+
+    .ContactFields{
+        grid-template-columns: 1fr;
     }
 }

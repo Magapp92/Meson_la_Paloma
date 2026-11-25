@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Button } from '@components/button/button.jsx'
 import { PARTY_SIZES } from '@const/booking.js'
 import { CONTACT } from '@const/business.js'
 import { useRequest } from '@hooks/use-request.js'
 
 /* Los pasos del formulario, en orden. El número de cada paso es su posición + 1 */
-const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora' ])
+const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Datos' ])
 
 /* Las horas se reparten en comidas y cenas para leerlas mejor: las de antes de las 17:00 son comidas.
 Las horas 'HH:MM' se pueden comparar como texto: '13:15' < '17:00' */
@@ -23,6 +24,9 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
     const [ partySize, setPartySize ] = useState( initialPartySize )
     const [ date, setDate ] = useState( null )
     const [ time, setTime ] = useState( null )
+
+    /* Los datos de contacto, en un solo objeto: cada campo cambia su propiedad */
+    const [ contact, setContact ] = useState({ name: '', phone: '', email: '', notes: '' })
 
     /* Paso actual (1, 2, 3…) y hacia dónde se ha movido, para deslizar desde la derecha o desde la izquierda.
     Si se llega con las personas elegidas (/reservar?personas=4), se empieza en el paso 2 */
@@ -46,7 +50,8 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
     const chosen = [
         partySize && `${ partySize } personas`,
         chosenDay && `${ chosenDay.weekday } ${ chosenDay.day } ${ chosenDay.month }`,
-        time
+        time,
+        null
     ]
 
     /* Se puede ir a un paso si los anteriores están elegidos */
@@ -75,6 +80,18 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
         setDate( day )
         setTime( null )
         goTo( 3 )
+    }
+    const chooseTime = serviceTime => {
+        setTime( serviceTime )
+        goTo( 4 )
+    }
+
+    /* Cada campo de datos guarda su valor en la propiedad que se llama como su name.
+    [ name ]: el nombre de la propiedad sale de una variable */
+    const changeContact = event => {
+        const { name, value } = event.target
+
+        setContact({ ...contact, [ name ]: value })
     }
 
     return (
@@ -110,6 +127,7 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
                     { step === 1 && '¿Cuántos sois?' }
                     { step === 2 && '¿Qué día?' }
                     { step === 3 && '¿A qué hora?' }
+                    { step === 4 && 'Tus datos' }
                 </legend>
                 {/* Paso 1: los círculos para elegir cuántas personas sois */}
                 { step === 1 &&
@@ -175,13 +193,39 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
                                             type="button"
                                             className={`TimePicker-time ${ time === serviceTime ? 'isSelected' : '' }`}
                                             aria-pressed={time === serviceTime}
-                                            onClick={ () => setTime( serviceTime ) }
+                                            onClick={ () => chooseTime( serviceTime ) }
                                         >{serviceTime}</button>
                                     )}
                                 </div>
                             </div>
                         )}
                     </>
+                }
+                {/* Paso 4: los datos de contacto y el botón para confirmar.
+                Cada campo lleva su label (el lector de pantalla lo lee al entrar) y autoComplete,
+                para que el navegador ofrezca rellenarlo con los datos que ya conoce */}
+                { step === 4 &&
+                    <div className="ContactFields">
+                        <label className="ContactFields-field ContactFields-field--full">
+                            <span className="ContactFields-label">Nombre</span>
+                            <input className="ContactFields-input" type="text" name="name" value={contact.name} onChange={changeContact} autoComplete="name" required />
+                        </label>
+                        <label className="ContactFields-field">
+                            <span className="ContactFields-label">Teléfono</span>
+                            <input className="ContactFields-input" type="tel" name="phone" value={contact.phone} onChange={changeContact} autoComplete="tel" required />
+                        </label>
+                        <label className="ContactFields-field">
+                            <span className="ContactFields-label">Correo</span>
+                            <input className="ContactFields-input" type="email" name="email" value={contact.email} onChange={changeContact} autoComplete="email" required />
+                        </label>
+                        <label className="ContactFields-field ContactFields-field--full">
+                            <span className="ContactFields-label">Notas <span className="ContactFields-optional">(opcional)</span></span>
+                            <textarea className="ContactFields-input ContactFields-input--notes" name="notes" value={contact.notes} onChange={changeContact} maxLength={500} rows={3} placeholder="Una trona, una alergia, una celebración…" />
+                        </label>
+                        <div className="ContactFields-field--full">
+                            <Button type="submit">Confirmar reserva</Button>
+                        </div>
+                    </div>
                 }
                 {/* Desde el paso 2, un botón para volver al anterior */}
                 { step > 1 &&
