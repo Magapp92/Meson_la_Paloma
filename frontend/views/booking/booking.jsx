@@ -51,14 +51,12 @@ export const Booking = async ({ searchParams }) => {
 
     return (
         <main>
-            {/* En el hero de reservar agrupamos el título a dos tonos y una entradilla */}
+            {/* En el hero de reservar, el título a dos tonos en una línea: más pequeño que en otras páginas
+            para que el formulario quepa en la pantalla sin bajar */}
             <section className="Container BookingPage-hero">
                 <h1 className="BookingPage-title">
-                    {/* El espacio separa las dos partes para los lectores de pantalla */}
-                    Reserva{' '}
-                    <span className="BookingPage-titleAccent">tu mesa</span>
+                    Reserva <span className="BookingPage-titleAccent">tu mesa</span>
                 </h1>
-                <p className="BookingPage-intro">Elige cuántos sois, el día y la hora. Te confirmamos la mesa al momento.</p>
             </section>
             {/* En el formulario agrupamos los pasos de la reserva; si la API no responde, un aviso con el teléfono */}
             <section className="Container BookingPage-form">

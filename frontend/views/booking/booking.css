@@ -3,54 +3,122 @@
 
 /* HERO */
 
-/* Cabecera de la página, igual que la de la carta */
+/* Cabecera de la página, más baja que en las demás para que el formulario quepa sin bajar */
 .BookingPage-hero{
-    padding-block: clamp(2.5rem, 6vw, 4.5rem) 1rem;
+    padding-block: clamp(1.5rem, 4vw, 2.5rem) 0;
 }
 
-/* Título a dos tonos, del mismo tamaño que el de la carta */
+/* Título a dos tonos en una sola línea, más pequeño que el de otras páginas */
 .BookingPage-title{
-    font-size: clamp(3.5rem, 11vw, 8rem);
-    line-height: .9;
+    font-size: clamp(2.25rem, 6vw, 4rem);
+    line-height: 1;
     text-transform: uppercase;
 }
 
-/* Segunda línea del título en mostaza, en su propia línea y con el mismo interlineado */
+/* Segunda parte del título en mostaza */
 .BookingPage-titleAccent{
-    display: block;
-
     color: var(--accent);
     line-height: inherit;
 }
 
-/* Entradilla bajo el título, en gris claro y con un ancho máximo */
-.BookingPage-intro{
-    max-width: 36rem;
-    margin-top: 1.5rem;
-
-    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
-    color: var(--muted);
-    line-height: 1.5;
-}
-
 /* Separación con el hero y con el pie */
 .BookingPage-form{
-    padding-block: clamp(2rem, 4vw, 3rem) clamp(3rem, 7vw, 6rem);
+    padding-block: clamp(1.25rem, 3vw, 2rem) clamp(3rem, 7vw, 6rem);
 }
 
 
 /* FORMULARIO */
 
-/* Los bloques uno debajo de otro, con un ancho máximo para que no se estiren en pantallas grandes */
+/* El progreso arriba y el paso debajo, con un ancho máximo para que no se estiren en pantallas grandes.
+   overflow-x clip recorta el paso mientras entra deslizándose de lado, sin crear barra de desplazamiento */
 .BookingForm{
     max-width: 48rem;
 
     display: grid;
     gap: 1rem;
+
+    overflow-x: clip;
 }
 
-/* Cada bloque es una caja con el fondo un poco más claro y borde mostaza a la izquierda, como "¿Mesa para cuántos?" de la portada.
-   min-width 0: un fieldset no se estrecha por debajo de su contenido; así la fila de días se desliza dentro en vez de ensancharlo */
+
+/* PROGRESO */
+
+/* Los pasos en fila, cada uno con el mismo ancho */
+.BookingProgress{
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    gap: .5rem;
+}
+
+/* Cada paso: número y lo elegido (o el nombre del paso), con una línea debajo */
+.BookingProgress-button{
+    width: 100%;
+    padding-bottom: .6rem;
+    border-bottom: .2rem solid var(--border);
+
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+
+    color: var(--muted);
+    text-align: left;
+
+    transition: border-color .2s, color .2s;
+}
+
+/* El número en un círculo con borde */
+.BookingProgress-number{
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+/* Lo elegido, en una línea; si no cabe, se corta con puntos suspensivos */
+.BookingProgress-label{
+    overflow: hidden;
+
+    font-size: .95rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Los pasos hechos, en blanco */
+.BookingProgress-step.isDone .BookingProgress-button{
+    color: var(--text);
+}
+
+/* El paso actual, en mostaza y con la línea mostaza */
+.BookingProgress-step.isCurrent .BookingProgress-button{
+    border-color: var(--accent);
+
+    color: var(--accent);
+}
+
+/* Los que se pueden pulsar, con la línea mostaza al pasar el ratón */
+button.BookingProgress-button:hover{
+    border-color: var(--accent);
+}
+
+/* Al llegar con el teclado, un borde mostaza */
+button.BookingProgress-button:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* PASO */
+
+/* El paso es una caja con el fondo un poco más claro y borde mostaza a la izquierda, como "¿Mesa para cuántos?" de la portada.
+   min-width 0: un fieldset no se estrecha por debajo de su contenido */
 .BookingStep{
     min-width: 0;
     padding: clamp(1.5rem, 3vw, 2.25rem);
@@ -61,7 +129,39 @@
     background-color: var(--surface);
 }
 
-/* Título del bloque con la fuente de títulos y su número delante.
+/* Recibe el foco al cambiar de paso (para el teclado y el lector de pantalla), sin dibujar un contorno */
+.BookingStep:focus{
+    outline: none;
+}
+
+/* Al avanzar, el paso entra desde la derecha; al volver, desde la izquierda */
+.BookingStep--forward{
+    animation: slideFromRight .35s ease-out;
+}
+.BookingStep--back{
+    animation: slideFromLeft .35s ease-out;
+}
+
+@keyframes slideFromRight{
+    from{
+        transform: translateX(100%);
+    }
+}
+@keyframes slideFromLeft{
+    from{
+        transform: translateX(-100%);
+    }
+}
+
+/* Quien ha pedido en su sistema menos movimiento, ve el paso sin deslizar */
+@media (prefers-reduced-motion: reduce){
+    .BookingStep--forward,
+    .BookingStep--back{
+        animation: none;
+    }
+}
+
+/* Título del paso con la fuente de títulos y su número delante.
    El navegador coloca el legend sobre el borde del fieldset; con float vuelve a quedar dentro de la caja */
 .BookingStep-title{
     width: 100%;
@@ -78,7 +178,7 @@
     text-transform: uppercase;
 }
 
-/* Número del bloque en un círculo mostaza */
+/* Número del paso en un círculo mostaza */
 .BookingStep-number{
     width: 2.25rem;
     height: 2.25rem;
@@ -116,18 +216,59 @@
     text-underline-offset: .2em;
 }
 
+/* Botón para volver al paso anterior, discreto, en gris claro */
+.BookingStep-back{
+    margin-top: 1.5rem;
+    padding-block: .25rem;
 
-/* Los radios de todos los bloques, ocultos a la vista pero no a los lectores de pantalla ni al teclado.
-   Lo que se ve es el elemento que va justo después (círculo, día…) */
-.BookingForm-radio{
-    width: 1px;
-    height: 1px;
+    font-weight: 700;
+    color: var(--muted);
 
-    overflow: hidden;
-    position: absolute;
+    transition: color .2s;
+}
+.BookingStep-back:hover{
+    color: var(--accent);
+}
+.BookingStep-back:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
 
-    clip-path: inset(50%);
-    white-space: nowrap;
+
+/* OPCIONES */
+
+/* Personas, días y horas: botones con borde que se rellenan de mostaza al elegirlos */
+.PartyPicker-circle,
+.DayPicker-day,
+.TimePicker-time{
+    border: 2px solid var(--border);
+
+    transition: background .2s, border-color .2s, color .2s;
+}
+
+/* Al pasar el ratón, el borde en mostaza */
+.PartyPicker-circle:hover,
+.DayPicker-day:hover,
+.TimePicker-time:hover{
+    border-color: var(--accent);
+}
+
+/* El elegido, relleno de mostaza */
+.PartyPicker-circle.isSelected,
+.DayPicker-day.isSelected,
+.TimePicker-time.isSelected{
+    border-color: var(--accent);
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* Al llegar con el teclado, un borde mostaza separado del botón */
+.PartyPicker-circle:focus-visible,
+.DayPicker-day:focus-visible,
+.TimePicker-time:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
 }
 
 
@@ -140,16 +281,10 @@
     gap: .75rem;
 }
 
-/* Cada opción es un label: al pulsar el círculo se marca su radio */
-.PartyPicker-option{
-    cursor: pointer;
-}
-
 /* El círculo, igual que los de la portada */
 .PartyPicker-circle{
     min-width: 3.5rem;
     min-height: 3.5rem;
-    border: 2px solid var(--border);
     border-radius: 50%;
 
     display: grid;
@@ -157,63 +292,27 @@
 
     font-size: 1.25rem;
     font-weight: 700;
-
-    transition: background .2s, border-color .2s, color .2s;
-}
-
-/* Al pasar el ratón, el borde en mostaza */
-.PartyPicker-option:hover .PartyPicker-circle{
-    border-color: var(--accent);
-}
-
-/* El elegido, relleno de mostaza */
-.BookingForm-radio:checked + .PartyPicker-circle{
-    border-color: var(--accent);
-    background-color: var(--accent);
-
-    color: var(--bg);
-}
-
-/* Al llegar con el teclado, un borde mostaza separado del círculo */
-.BookingForm-radio:focus-visible + .PartyPicker-circle{
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
 }
 
 
 /* DÍAS */
 
-/* Los días en filas, bajando de línea: en pantallas anchas se ven todos de un vistazo */
+/* Los días en una cuadrícula: tantas columnas de al menos 4.25rem como quepan.
+   En el ordenador son 9 por fila; en el móvil la columna mínima es más estrecha (abajo) */
 .DayPicker{
-    display: flex;
-    flex-flow: row wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr));
     gap: .6rem;
 }
 
-/* Cada día es un label que no se encoge */
-.DayPicker-option{
-    flex-shrink: 0;
-
-    cursor: pointer;
-}
-
-/* El día: una tarjeta con borde y tres líneas (semana, número y mes) */
+/* El día: una tarjeta con tres líneas (semana, número y mes) */
 .DayPicker-day{
-    width: 4.25rem;
     padding-block: .6rem;
-    border: 2px solid var(--border);
     border-radius: .9rem;
 
     display: grid;
     justify-items: center;
     gap: .1rem;
-
-    transition: background .2s, border-color .2s, color .2s;
-}
-
-/* Al pasar el ratón, el borde en mostaza */
-.DayPicker-option:hover .DayPicker-day{
-    border-color: var(--accent);
 }
 
 /* Día de la semana y mes, pequeños y en mayúsculas */
@@ -229,20 +328,6 @@
     font-family: var(--font-title);
     font-size: 1.6rem;
     line-height: 1.1;
-}
-
-/* El elegido, relleno de mostaza */
-.BookingForm-radio:checked + .DayPicker-day{
-    border-color: var(--accent);
-    background-color: var(--accent);
-
-    color: var(--bg);
-}
-
-/* Al llegar con el teclado, un borde mostaza separado de la tarjeta */
-.BookingForm-radio:focus-visible + .DayPicker-day{
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
 }
 
 
@@ -275,50 +360,20 @@
     letter-spacing: .08em;
 }
 
-/* Las horas en filas, bajando de línea */
+/* Las horas en una cuadrícula de columnas iguales, tantas como quepan */
 .TimePicker-times{
-    display: flex;
-    flex-flow: row wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
     gap: .5rem;
 }
 
-/* Cada hora es un label */
-.TimePicker-option{
-    cursor: pointer;
-}
-
-/* La hora: una pastilla con borde, todas del mismo ancho */
+/* La hora: una pastilla */
 .TimePicker-time{
-    min-width: 5rem;
     padding: .55rem .5rem;
-    border: 2px solid var(--border);
     border-radius: 2rem;
-
-    display: block;
 
     font-weight: 700;
     text-align: center;
-
-    transition: background .2s, border-color .2s, color .2s;
-}
-
-/* Al pasar el ratón, el borde en mostaza */
-.TimePicker-option:hover .TimePicker-time{
-    border-color: var(--accent);
-}
-
-/* La elegida, rellena de mostaza */
-.BookingForm-radio:checked + .TimePicker-time{
-    border-color: var(--accent);
-    background-color: var(--accent);
-
-    color: var(--bg);
-}
-
-/* Al llegar con el teclado, un borde mostaza separado de la pastilla */
-.BookingForm-radio:focus-visible + .TimePicker-time{
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
 }
 
 
@@ -355,30 +410,63 @@
     }
 }
 
-/* En el móvil los días van en una sola fila que se desliza de lado (en varias filas ocuparían media pantalla).
-   El día cortado en el borde avisa de que hay más; scroll-snap hace que al soltar quede un día justo en el borde.
-   El padding deja sitio al contorno del foco, que overflow recortaría */
-@media (max-width: 600px){
-    .DayPicker{
-        padding: .25rem .25rem 1rem;
-
-        flex-wrap: nowrap;
-
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-    }
-    .DayPicker-option{
-        scroll-snap-align: start;
-    }
-}
-
-/* En pantallas estrechas, los círculos y su separación algo más pequeños para que los cinco quepan en una fila */
+/* En pantallas estrechas todo un poco más compacto para que cada paso quepa sin bajar:
+   - el progreso muestra solo los números, y el paso actual también su nombre;
+   - círculos de personas más pequeños, para que los cinco quepan en una fila;
+   - días en columnas más estrechas, con letra más pequeña y menos relleno;
+   - horas de cinco en cinco, más juntas */
 @media (max-width: 480px){
+    .BookingProgress-label{
+        display: none;
+    }
+    .BookingProgress-step.isCurrent .BookingProgress-label{
+        display: block;
+    }
+    .BookingProgress{
+        grid-auto-columns: auto;
+        justify-content: start;
+        gap: 1rem;
+    }
+
+    .BookingStep{
+        padding: 1.25rem 1rem;
+    }
+
     .PartyPicker{
         gap: .4rem;
     }
     .PartyPicker-circle{
         min-width: 3rem;
         min-height: 3rem;
+    }
+
+    .DayPicker{
+        grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+        gap: .35rem;
+    }
+    .DayPicker-day{
+        padding-block: .35rem;
+        border-radius: .6rem;
+    }
+    .DayPicker-weekday,
+    .DayPicker-month{
+        font-size: .6rem;
+        letter-spacing: 0;
+    }
+    .DayPicker-number{
+        font-size: 1.25rem;
+    }
+
+    .TimePicker-times{
+        grid-template-columns: repeat(5, 1fr);
+        gap: .35rem;
+    }
+    .TimePicker-time{
+        padding: .45rem .15rem;
+
+        font-size: .85rem;
+    }
+    .TimePicker + .TimePicker{
+        margin-top: 1rem;
     }
 }

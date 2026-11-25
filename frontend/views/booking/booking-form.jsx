@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { PARTY_SIZES } from '@const/booking.js'
 import { CONTACT } from '@const/business.js'
 import { useRequest } from '@hooks/use-request.js'
+
+/* Los pasos del formulario, en orden. El número de cada paso es su posición + 1 */
+const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora' ])
 
 /* Las horas se reparten en comidas y cenas para leerlas mejor: las de antes de las 17:00 son comidas.
 Las horas 'HH:MM' se pueden comparar como texto: '13:15' < '17:00' */
@@ -12,7 +15,7 @@ const SERVICES = Object.freeze([
     { title: 'Cenas', isInService: time => time >= '17:00' }
 ])
 
-/* Formulario de reserva, por bloques numerados que se rellenan en orden: cada bloque aparece al completar el anterior.
+/* Formulario de reserva por pasos, como un carrusel: se ve un paso cada vez y, al elegir, se desliza al siguiente.
 Es un componente de cliente porque guarda lo que se va eligiendo (useState).
 days: los días en los que se puede reservar, ya con su etiqueta ({ date, weekday, day, month }) */
 export const BookingForm = ({ initialPartySize = null, days }) => {
@@ -20,6 +23,14 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
     const [ partySize, setPartySize ] = useState( initialPartySize )
     const [ date, setDate ] = useState( null )
     const [ time, setTime ] = useState( null )
+
+    /* Paso actual (1, 2, 3…) y hacia dónde se ha movido, para deslizar desde la derecha o desde la izquierda.
+    Si se llega con las personas elegidas (/reservar?personas=4), se empieza en el paso 2 */
+    const [ step, setStep ] = useState( initialPartySize ? 2 : 1 )
+    const [ direction, setDirection ] = useState( null )
+
+    /* El paso que se ve, para llevarle el foco al cambiar */
+    const stepRef = useRef( null )
 
     /* Las horas libres se piden a la API cuando hay día y personas, y otra vez cada vez que cambia alguno */
     const availabilityPath = date && partySize ? `/availability?date=${ date }&partySize=${ partySize }` : null
@@ -30,114 +41,153 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
         .map( service => ({ title: service.title, times: availability ? availability.times.filter( service.isInService ) : [] }) )
         .filter( service => service.times.length > 0 )
 
-    /* Al cambiar las personas o el día, la hora elegida puede dejar de estar libre: se vuelve a elegir */
+    /* Lo elegido en cada paso, para el resumen de arriba */
+    const chosenDay = days.find( day => day.date === date )
+    const chosen = [
+        partySize && `${ partySize } personas`,
+        chosenDay && `${ chosenDay.weekday } ${ chosenDay.day } ${ chosenDay.month }`,
+        time
+    ]
+
+    /* Se puede ir a un paso si los anteriores están elegidos */
+    const canGoTo = number => chosen.slice( 0, number - 1 ).every( Boolean )
+
+    /* Al cambiar de paso, el foco pasa al paso nuevo: el teclado y el lector de pantalla siguen ahí.
+    Al cargar la página (direction null) no se mueve */
+    useEffect( () => {
+        if ( direction ) stepRef.current?.focus()
+    }, [ step, direction ] )
+
+    /* Va a un paso, recordando si se avanza o se vuelve */
+    const goTo = number => {
+        setDirection( number > step ? 'forward' : 'back' )
+        setStep( number )
+    }
+
+    /* Al elegir, se pasa al paso siguiente. Si cambian las personas o el día, la hora elegida
+    puede dejar de estar libre: se vuelve a elegir */
     const choosePartySize = size => {
         setPartySize( size )
         setTime( null )
+        goTo( 2 )
     }
     const chooseDate = day => {
         setDate( day )
         setTime( null )
+        goTo( 3 )
     }
 
     return (
         <form className="BookingForm" onSubmit={ event => event.preventDefault() }>
-            {/* En el bloque 1 agrupamos los círculos para elegir cuántas personas sois */}
-            <fieldset className="BookingStep">
+            {/* En el progreso agrupamos los pasos con lo elegido en cada uno; los ya hechos se pueden pulsar para volver */}
+            <ol className="BookingProgress">
+                { STEPS.map( ( name, index ) => {
+                    const number = index + 1
+                    const isCurrent = number === step
+                    const label = chosen[ index ] || name
+
+                    return (
+                        <li key={name} className={`BookingProgress-step ${ isCurrent ? 'isCurrent' : '' } ${ chosen[ index ] ? 'isDone' : '' }`}>
+                            { !isCurrent && canGoTo( number )
+                                ? <button type="button" className="BookingProgress-button" onClick={ () => goTo( number ) } title={`Volver al paso ${ number }: ${ name }`}>
+                                    <span className="BookingProgress-number">{number}</span>
+                                    <span className="BookingProgress-label">{label}</span>
+                                </button>
+                                : <span className="BookingProgress-button" aria-current={ isCurrent ? 'step' : undefined }>
+                                    <span className="BookingProgress-number">{number}</span>
+                                    <span className="BookingProgress-label">{label}</span>
+                                </span>
+                            }
+                        </li>
+                    )
+                })}
+            </ol>
+            {/* Solo se pinta el paso actual. key={step} hace que React lo cree de nuevo al cambiar,
+            y así su animación de entrada se repite en cada paso */}
+            <fieldset key={step} ref={stepRef} tabIndex={-1} className={`BookingStep ${ direction ? `BookingStep--${ direction }` : '' }`}>
                 <legend className="BookingStep-title">
-                    <span className="BookingStep-number">1</span>
-                    ¿Cuántos sois?
+                    <span className="BookingStep-number">{step}</span>
+                    { step === 1 && '¿Cuántos sois?' }
+                    { step === 2 && '¿Qué día?' }
+                    { step === 3 && '¿A qué hora?' }
                 </legend>
-                <div className="PartyPicker">
-                    { PARTY_SIZES.map( size =>
-                        <label key={size} className="PartyPicker-option">
-                            {/* El radio de verdad está oculto: se ve el círculo, pero el teclado y los lectores de pantalla usan el radio */}
-                            <input
-                                className="BookingForm-radio"
-                                type="radio"
-                                name="partySize"
-                                value={size}
-                                checked={partySize === size}
-                                onChange={ () => choosePartySize( size ) }
-                            />
-                            <span className="PartyPicker-circle">{size}</span>
-                        </label>
-                    )}
-                </div>
-                <p className="BookingStep-note">
-                    ¿Sois más de 6? Las reservas de grupo se hacen por teléfono:{' '}
-                    <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
-                </p>
-            </fieldset>
-            {/* En el bloque 2 agrupamos los días en los que se puede reservar; aparece al elegir cuántos sois */}
-            { partySize &&
-                <fieldset className="BookingStep">
-                    <legend className="BookingStep-title">
-                        <span className="BookingStep-number">2</span>
-                        ¿Qué día?
-                    </legend>
+                {/* Paso 1: los círculos para elegir cuántas personas sois */}
+                { step === 1 &&
+                    <>
+                        <div className="PartyPicker">
+                            { PARTY_SIZES.map( size =>
+                                <button
+                                    key={size}
+                                    type="button"
+                                    className={`PartyPicker-circle ${ partySize === size ? 'isSelected' : '' }`}
+                                    aria-pressed={partySize === size}
+                                    onClick={ () => choosePartySize( size ) }
+                                    title={`Reservar para ${ size } personas`}
+                                >{size}</button>
+                            )}
+                        </div>
+                        <p className="BookingStep-note">
+                            ¿Sois más de 6? Las reservas de grupo se hacen por teléfono:{' '}
+                            <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
+                        </p>
+                    </>
+                }
+                {/* Paso 2: los días en los que se puede reservar */}
+                { step === 2 &&
                     <div className="DayPicker">
                         { days.map( day =>
-                            <label key={day.date} className="DayPicker-option">
-                                <input
-                                    className="BookingForm-radio"
-                                    type="radio"
-                                    name="date"
-                                    value={day.date}
-                                    checked={date === day.date}
-                                    onChange={ () => chooseDate( day.date ) }
-                                />
-                                <span className="DayPicker-day">
-                                    <span className="DayPicker-weekday">{day.weekday}</span>
-                                    <span className="DayPicker-number">{day.day}</span>
-                                    <span className="DayPicker-month">{day.month}</span>
-                                </span>
-                            </label>
+                            <button
+                                key={day.date}
+                                type="button"
+                                className={`DayPicker-day ${ date === day.date ? 'isSelected' : '' }`}
+                                aria-pressed={date === day.date}
+                                onClick={ () => chooseDate( day.date ) }
+                            >
+                                <span className="DayPicker-weekday">{day.weekday}</span>
+                                <span className="DayPicker-number">{day.day}</span>
+                                <span className="DayPicker-month">{day.month}</span>
+                            </button>
                         )}
                     </div>
-                </fieldset>
-            }
-            {/* En el bloque 3 agrupamos las horas libres de ese día, en comidas y cenas; aparece al elegir el día */}
-            { partySize && date &&
-                <fieldset className="BookingStep">
-                    <legend className="BookingStep-title">
-                        <span className="BookingStep-number">3</span>
-                        ¿A qué hora?
-                    </legend>
-                    {/* Mientras llegan las horas, si hay un error o si no queda ninguna, un mensaje.
-                    role="status" hace que el lector de pantalla lo lea en voz alta cuando cambia */}
-                    <p className="BookingStep-status" role="status">
-                        { isLoading && 'Buscando horas libres…' }
-                        { error && `${ error }.` }
-                        { availability && services.length === 0 &&
-                            <>
-                                Ese día ya no quedan mesas para {partySize}. Prueba otro día o{' '}
-                                <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
-                            </>
-                        }
-                    </p>
-                    { services.map( service =>
-                        <div key={service.title} className="TimePicker">
-                            <h3 className="TimePicker-title">{service.title}</h3>
-                            <div className="TimePicker-times">
-                                { service.times.map( serviceTime =>
-                                    <label key={serviceTime} className="TimePicker-option">
-                                        <input
-                                            className="BookingForm-radio"
-                                            type="radio"
-                                            name="time"
-                                            value={serviceTime}
-                                            checked={time === serviceTime}
-                                            onChange={ () => setTime( serviceTime ) }
-                                        />
-                                        <span className="TimePicker-time">{serviceTime}</span>
-                                    </label>
-                                )}
+                }
+                {/* Paso 3: las horas libres de ese día, en comidas y cenas */}
+                { step === 3 &&
+                    <>
+                        {/* Mientras llegan las horas, si hay un error o si no queda ninguna, un mensaje.
+                        role="status" hace que el lector de pantalla lo lea en voz alta cuando cambia */}
+                        <p className="BookingStep-status" role="status">
+                            { isLoading && 'Buscando horas libres…' }
+                            { error && `${ error }.` }
+                            { availability && services.length === 0 &&
+                                <>
+                                    Ese día ya no quedan mesas para {partySize}. Prueba otro día o{' '}
+                                    <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
+                                </>
+                            }
+                        </p>
+                        { services.map( service =>
+                            <div key={service.title} className="TimePicker">
+                                <h3 className="TimePicker-title">{service.title}</h3>
+                                <div className="TimePicker-times">
+                                    { service.times.map( serviceTime =>
+                                        <button
+                                            key={serviceTime}
+                                            type="button"
+                                            className={`TimePicker-time ${ time === serviceTime ? 'isSelected' : '' }`}
+                                            aria-pressed={time === serviceTime}
+                                            onClick={ () => setTime( serviceTime ) }
+                                        >{serviceTime}</button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </fieldset>
-            }
+                        )}
+                    </>
+                }
+                {/* Desde el paso 2, un botón para volver al anterior */}
+                { step > 1 &&
+                    <button type="button" className="BookingStep-back" onClick={ () => goTo( step - 1 ) }>← Atrás</button>
+                }
+            </fieldset>
         </form>
     )
 }
