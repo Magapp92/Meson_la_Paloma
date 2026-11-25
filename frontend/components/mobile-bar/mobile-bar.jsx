@@ -15,9 +15,8 @@ export const MobileBar = () => {
             <a href={CONTACT.phoneHref} className="MobileBar-call" aria-label={`Llamar al mesón: ${ CONTACT.phone }`} title="Llamar al mesón">
                 <Icon name="phone" />
             </a>
-            {/* De momento lleva a la portada: cambiará a la página de reservas cuando la creemos */}
             <div className="MobileBar-reserve">
-                <Button href={ROUTES.HOME} title="Ir a reservar mesa">Reservar mesa</Button>
+                <Button href={ROUTES.BOOKING} title="Ir a reservar mesa">Reservar mesa</Button>
             </div>
         </div>
     )

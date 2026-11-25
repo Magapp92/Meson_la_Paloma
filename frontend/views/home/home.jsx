@@ -44,8 +44,7 @@ export const Home = () => {
                 </h1>
                 <p className="Hero-text">Cocina americana y mediterránea con alma de barrio. Más de 20 años en Valdezarza.</p>
                 <div className="Hero-actions">
-                    {/* Reservar lleva de momento a la portada: cambiará cuando creemos la página de reservas */}
-                    <Button href={ROUTES.HOME} title="Ir a reservar mesa">Reservar mesa</Button>
+                    <Button href={ROUTES.BOOKING} title="Ir a reservar mesa">Reservar mesa</Button>
                     <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta</Button>
                 </div>
                 {/* Tira de fotos: en fila en el ordenador y deslizable de lado en el móvil */}

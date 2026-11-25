@@ -1,0 +1,191 @@
+
+/* BOOKING PAGE */
+
+/* HERO */
+
+/* Cabecera de la página, igual que la de la carta */
+.BookingPage-hero{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) 1rem;
+}
+
+/* Título a dos tonos, del mismo tamaño que el de la carta */
+.BookingPage-title{
+    font-size: clamp(3.5rem, 11vw, 8rem);
+    line-height: .9;
+    text-transform: uppercase;
+}
+
+/* Segunda línea del título en mostaza, en su propia línea y con el mismo interlineado */
+.BookingPage-titleAccent{
+    display: block;
+
+    color: var(--accent);
+    line-height: inherit;
+}
+
+/* Entradilla bajo el título, en gris claro y con un ancho máximo */
+.BookingPage-intro{
+    max-width: 36rem;
+    margin-top: 1.5rem;
+
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* Separación con el hero y con el pie */
+.BookingPage-form{
+    padding-block: clamp(2rem, 4vw, 3rem) clamp(3rem, 7vw, 6rem);
+}
+
+
+/* FORMULARIO */
+
+/* Los bloques uno debajo de otro, con un ancho máximo para que no se estiren en pantallas grandes */
+.BookingForm{
+    max-width: 48rem;
+
+    display: grid;
+    gap: 1rem;
+}
+
+/* Cada bloque es una caja con el fondo un poco más claro y borde mostaza a la izquierda, como "¿Mesa para cuántos?" de la portada */
+.BookingStep{
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border: 0;
+    border-left: .25rem solid var(--accent);
+    border-radius: 1.125rem;
+
+    background-color: var(--surface);
+}
+
+/* Título del bloque con la fuente de títulos y su número delante.
+   El navegador coloca el legend sobre el borde del fieldset; con float vuelve a quedar dentro de la caja */
+.BookingStep-title{
+    width: 100%;
+    padding-bottom: 1.5rem;
+
+    float: left;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+
+    font-family: var(--font-title);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+/* Número del bloque en un círculo mostaza */
+.BookingStep-number{
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    background-color: var(--accent);
+
+    font-size: 1.2rem;
+    color: var(--bg);
+}
+
+/* Lo que va después del título empieza debajo de él, no a su lado.
+   Con float el margen de arriba de lo siguiente no se aplica: la separación la da el padding del título */
+.BookingStep-title + *{
+    clear: both;
+}
+
+/* Nota bajo las opciones, en gris claro */
+.BookingStep-note{
+    margin-top: 1.25rem;
+
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* Enlace dentro de la nota, en mostaza y subrayado */
+.BookingStep-link{
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+
+/* PERSONAS */
+
+/* Los círculos en fila, bajando de línea si no caben */
+.PartyPicker{
+    display: flex;
+    flex-flow: row wrap;
+    gap: .75rem;
+}
+
+/* Cada opción es un label: al pulsar el círculo se marca su radio */
+.PartyPicker-option{
+    cursor: pointer;
+}
+
+/* El radio, oculto a la vista pero no a los lectores de pantalla ni al teclado */
+.PartyPicker-input{
+    width: 1px;
+    height: 1px;
+
+    overflow: hidden;
+    position: absolute;
+
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* El círculo, igual que los de la portada */
+.PartyPicker-circle{
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 1.25rem;
+    font-weight: 700;
+
+    transition: background .2s, border-color .2s, color .2s;
+}
+
+/* Al pasar el ratón, el borde en mostaza */
+.PartyPicker-option:hover .PartyPicker-circle{
+    border-color: var(--accent);
+}
+
+/* El elegido, relleno de mostaza */
+.PartyPicker-input:checked + .PartyPicker-circle{
+    border-color: var(--accent);
+    background-color: var(--accent);
+
+    color: var(--bg);
+}
+
+/* Al llegar con el teclado, un borde mostaza separado del círculo */
+.PartyPicker-input:focus-visible + .PartyPicker-circle{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* MÓVIL */
+
+/* En pantallas estrechas, los círculos y su separación algo más pequeños para que los cinco quepan en una fila */
+@media (max-width: 480px){
+    .PartyPicker{
+        gap: .4rem;
+    }
+    .PartyPicker-circle{
+        min-width: 3rem;
+        min-height: 3rem;
+    }
+}
