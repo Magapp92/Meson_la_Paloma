@@ -336,6 +336,10 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
                 Si necesitas cambiar algo,{' '}
                 <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
             </p>
+            {/* El enlace a la carta, antes del calendario */}
+            <div className="BookingConfirmation-actions">
+                <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta</Button>
+            </div>
             {/* Guardar la reserva en el calendario: Google Calendar y Outlook se abren en otra pestaña, sin descargar nada.
             Para Apple, una nota: el evento va en el correo de confirmación */}
             <div className="BookingConfirmation-calendar">
@@ -345,10 +349,6 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
                     <Button href={outlookUrl} target="_blank" rel="noopener" title="Añadir a Outlook">Outlook</Button>
                 </div>
                 <p className="BookingConfirmation-hint">¿Usas el calendario de Apple? Añádelo desde el correo de confirmación.</p>
-            </div>
-            {/* El enlace a la carta, debajo */}
-            <div className="BookingConfirmation-actions">
-                <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta</Button>
             </div>
         </section>
     )
