@@ -190,7 +190,6 @@ const postReservation = async ( req, res, next ) => {
                 time: reservation.time,
                 partySize: reservation.partySize,
                 name: reservation.name,
-                durationMinutes: BOOKING_RULES.durationMinutes,
                 token: reservation.token
             }
         })
