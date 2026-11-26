@@ -15,6 +15,9 @@ export const EditBooking = ({ token, reservation, days, children }) => {
 
     const [ isEditing, setIsEditing ] = useState( false )
 
+    /* Si se acaba de guardar un cambio, para avisar. El estado se mantiene tras router.refresh() */
+    const [ isSaved, setIsSaved ] = useState( false )
+
     /* El formulario y el botón de abrirlo, para llevarles el foco al abrir y al cerrar */
     const panelRef = useRef( null )
     const openButtonRef = useRef( null )
@@ -26,19 +29,38 @@ export const EditBooking = ({ token, reservation, days, children }) => {
         else if ( hasClosed.current ) openButtonRef.current?.focus()
     }, [ isEditing ] )
 
+    /* Abre el formulario. Si había aviso de cambio guardado, desaparece */
+    const open = () => {
+        setIsSaved( false )
+        setIsEditing( true )
+    }
+
     /* Cierra el formulario: al guardar o al pulsar "Cerrar sin cambios" */
     const close = () => {
         hasClosed.current = true
         setIsEditing( false )
     }
 
+    /* Al guardar, el formulario llama a onDone con { isSaved: true }: se cierra y se avisa */
+    const finish = ({ isSaved }) => {
+        setIsSaved( isSaved )
+        close()
+    }
+
     /* Antes de pulsar, los dos botones en fila: modificar y cancelar */
     if ( !isEditing ) {
         return (
-            <div className="EditBooking-actions">
-                <Button ref={openButtonRef} onClick={ () => setIsEditing( true ) }>Modificar reserva</Button>
-                {children}
-            </div>
+            <>
+                {/* Tras guardar un cambio, el aviso encima de los botones.
+                role="status" hace que el lector de pantalla lo lea en voz alta al aparecer */}
+                { isSaved &&
+                    <p className="EditBooking-saved" role="status">Reserva modificada. Te hemos enviado un correo con los datos nuevos.</p>
+                }
+                <div className="EditBooking-actions">
+                    <Button ref={openButtonRef} onClick={open}>Modificar reserva</Button>
+                    {children}
+                </div>
+            </>
         )
     }
 
@@ -48,7 +70,7 @@ export const EditBooking = ({ token, reservation, days, children }) => {
                 days={days}
                 editToken={token}
                 initial={{ partySize: reservation.partySize, date: reservation.date, time: reservation.time }}
-                onDone={close}
+                onDone={finish}
             />
             <Button variant="ghost" onClick={close}>Cerrar sin cambios</Button>
         </div>

@@ -120,9 +120,11 @@ const hasEarlierClash = async reservation => {
 Crea una reserva con los datos del formulario. La mesa, el estado y el código secreto los pone la API */
 const postReservation = async ( req, res, next ) => {
     try {
+        /* Si la petición llega sin cuerpo JSON, Express 5 deja req.body en undefined: con {} llega a la validación y responde 400 */
+        const body = req.body ?? {}
         /* Solo cogemos los campos permitidos: si alguien manda status, table o token, se ignoran */
-        const { date, time, name, phone, email, notes } = req.body
-        const partySize = Number( req.body.partySize )
+        const { date, time, name, phone, email, notes } = body
+        const partySize = Number( body.partySize )
 
         const error = validate({ date, time, partySize, name, phone, email, notes })
         if ( error ) return fail( res, 400, error )
@@ -321,9 +323,11 @@ Los demás datos (nombre, teléfono, correo, notas) no se cambian aquí */
 const updateReservation = async ( req, res, next ) => {
     try {
         const { token } = req.params
+        /* Si la petición llega sin cuerpo JSON, Express 5 deja req.body en undefined: con {} llega a la validación y responde 400 */
+        const body = req.body ?? {}
         /* Solo cogemos los campos permitidos: si alguien manda status, table o token, se ignoran */
-        const { date, time } = req.body
-        const partySize = Number( req.body.partySize )
+        const { date, time } = body
+        const partySize = Number( body.partySize )
 
         /* Primero los datos, con los mismos mensajes que al crear */
         const error = validateBooking({ date, time, partySize })

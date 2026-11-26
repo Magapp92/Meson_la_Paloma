@@ -34,7 +34,7 @@ const SERVICES = Object.freeze([
 Es un componente de cliente porque guarda lo que se va eligiendo (useState).
 days: los días en los que se puede reservar, ya con su etiqueta ({ date, weekday, day, month, long }).
 Modo edición ("Mi reserva"): con editToken se modifica esa reserva en lugar de crear una.
-initial: lo que tiene ahora ({ partySize, date, time }), ya elegido al empezar; onDone: se llama al guardar */
+initial: lo que tiene ahora ({ partySize, date, time }), ya elegido al empezar; onDone: se llama al guardar, con { isSaved: true } */
 export const BookingForm = ({ initialPartySize = null, days, editToken, initial, onDone }) => {
 
     const router = useRouter()
@@ -79,13 +79,18 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
         .map( service => ({ title: service.title, times: availability ? availability.times.filter( service.isInService ) : [] }) )
         .filter( service => service.times.length > 0 )
 
+    /* Al modificar, la hora elegida se conserva al cambiar personas o día, pero solo vale si sigue libre.
+    Mientras llegan las horas, se mantiene; cuando han llegado, si no está entre ellas no hay hora */
+    const isTimeTaken = isEditing && Boolean( time ) && Boolean( availability ) && !availability.times.includes( time )
+    const chosenTime = isTimeTaken ? null : time
+
     /* Lo elegido en cada paso, para el resumen de arriba.
     Al modificar, el día de la reserva podría no estar en la lista: entonces su etiqueta se escribe aquí */
     const chosenDay = days.find( day => day.date === date ) || ( date && toDayLabel( date ) )
     const chosen = [
         partySize && `${ partySize } personas`,
         chosenDay && `${ chosenDay.weekday } ${ chosenDay.day } ${ chosenDay.month }`,
-        time,
+        chosenTime,
         null
     ]
 
@@ -105,16 +110,17 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
     }
 
     /* Al elegir, se pasa al paso siguiente. Si cambian las personas o el día, la hora elegida
-    puede dejar de estar libre: se vuelve a elegir */
+    puede dejar de estar libre: al reservar se vuelve a elegir; al modificar se conserva marcada
+    (chosenTime comprueba si sigue libre), para no perder de vista la hora de la reserva */
     const choosePartySize = size => {
         setPartySize( size )
-        setTime( null )
+        if ( !isEditing ) setTime( null )
         setNotice( '' )
         goTo( 2 )
     }
     const chooseDate = day => {
         setDate( day )
-        setTime( null )
+        if ( !isEditing ) setTime( null )
         setNotice( '' )
         goTo( 3 )
     }
@@ -133,7 +139,7 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
     }
 
     /* Al modificar, si personas, día y hora son los de antes no hay nada que guardar */
-    const isUnchanged = isEditing && partySize === initial.partySize && date === initial.date && time === initial.time
+    const isUnchanged = isEditing && partySize === initial.partySize && date === initial.date && chosenTime === initial.time
 
     /* Envía el formulario a la API. El navegador ya ha comprobado los campos obligatorios.
     - Al crear, si va bien, se guarda la reserva y se muestra el resumen.
@@ -151,12 +157,13 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
             if ( isEditing ) {
                 await request( `/reservations/${ encodeURIComponent( editToken ) }`, {
                     method: 'PATCH',
-                    body: { date, time, partySize }
+                    body: { date, time: chosenTime, partySize }
                 })
 
+                /* isSaved: true, para que "Mi reserva" sepa que se ha guardado y avise */
                 startRefresh( () => {
                     router.refresh()
-                    onDone()
+                    onDone({ isSaved: true })
                 })
             } else {
                 const data = await request( '/reservations', {
@@ -266,6 +273,8 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                         role="status" hace que el lector de pantalla lo lea en voz alta cuando cambia */}
                         <p className="BookingStep-status" role="status">
                             { notice && <strong className="BookingStep-notice">{notice}. </strong> }
+                            {/* Al modificar, si la hora de antes no está libre con las personas o el día nuevos */}
+                            { isTimeTaken && <strong className="BookingStep-notice">Las {time} no están libres para esta opción. Elige otra hora. </strong> }
                             { isLoading && 'Buscando horas libres…' }
                             { error && `${ error }.` }
                             { availability && services.length === 0 &&
@@ -283,8 +292,8 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                                         <button
                                             key={serviceTime}
                                             type="button"
-                                            className={`TimePicker-time ${ time === serviceTime ? 'isSelected' : '' }`}
-                                            aria-pressed={time === serviceTime}
+                                            className={`TimePicker-time ${ chosenTime === serviceTime ? 'isSelected' : '' }`}
+                                            aria-pressed={chosenTime === serviceTime}
                                             onClick={ () => chooseTime( serviceTime ) }
                                         >{serviceTime}</button>
                                     )}
@@ -297,7 +306,7 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                 { step === 4 && isEditing &&
                     <BookingReview
                         before={initial}
-                        after={{ partySize, date, time }}
+                        after={{ partySize, date, time: chosenTime }}
                         isUnchanged={isUnchanged}
                         isSending={isSending || isRefreshing}
                         sendError={sendError}

@@ -11,6 +11,21 @@
     gap: .8rem;
 }
 
+/* Aviso de reserva modificada: en mostaza con una línea a la izquierda, como el de reserva pasada.
+   Separado de los datos; los botones de debajo van más cerca, porque el aviso habla de ellos */
+.EditBooking-saved{
+    margin-top: 1.75rem;
+    padding: .6rem .9rem;
+    border-left: .2rem solid var(--accent);
+
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.5;
+}
+.EditBooking-saved + .EditBooking-actions{
+    margin-top: 1rem;
+}
+
 /* Dentro de la fila, cancelar no lleva su separación de arriba: ya la tiene la fila */
 .EditBooking-actions .CancelBooking{
     margin-top: 0;

@@ -28,6 +28,9 @@ const parseDate = date => {
 
     const parsed = new Date( `${ date }T00:00:00Z` )
 
+    /* Con un mes o un día imposibles (2026-13-01) new Date da una fecha inválida, y toISOString lanzaría un error */
+    if ( isNaN( parsed ) ) return null
+
     /* new Date acepta fechas imposibles (2026-02-30 pasa a 2 de marzo): las descartamos */
     return parsed.toISOString().startsWith( date ) ? parsed : null
 }

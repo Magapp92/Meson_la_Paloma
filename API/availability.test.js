@@ -20,6 +20,7 @@ test( 'convierte horas en minutos y al revés', () => {
 
 test( 'descarta las fechas mal escritas o que no existen', () => {
     assert.equal( parseDate( '2026-02-30' ), null )
+    assert.equal( parseDate( '2026-13-01' ), null )
     assert.equal( parseDate( '30/11/2026' ), null )
     assert.notEqual( parseDate( '2026-12-01' ), null )
 })
