@@ -13,17 +13,19 @@ const ManageLayout = ({ children }) => {
 
     return (
         <div className="ManageLayout">
-            {/* En la cabecera agrupamos el logo del mesón, centrado; lleva a la portada.
-            La imagen lleva alt vacío porque el nombre ya está escrito al lado.
-            El nombre va en dos líneas y a dos tonos: "La Paloma" en mostaza */}
+            {/* En la cabecera agrupamos el logo del mesón, a la izquierda como en la cabecera de la web; lleva a la portada.
+            Container lo alinea con el contenido de la página.
+            La imagen lleva alt vacío porque el nombre ya está escrito al lado. El nombre va en dos líneas */}
             <header className="ManageLayout-header">
-                <Link href={ROUTES.HOME} className="ManageLayout-logo" title="Ir a la página de inicio">
-                    <Image className="ManageLayout-logoImg" src="/img/logo-meson.webp" alt="" width={56} height={56} loading="eager" />
-                    <span className="ManageLayout-logoText">
-                        Mesón{' '}
-                        <span className="ManageLayout-logoTextLine">La Paloma</span>
-                    </span>
-                </Link>
+                <div className="Container">
+                    <Link href={ROUTES.HOME} className="ManageLayout-logo" title="Ir a la página de inicio">
+                        <Image className="ManageLayout-logoImg" src="/img/logo-meson.webp" alt="" width={56} height={56} loading="eager" />
+                        <span className="ManageLayout-logoText">
+                            Mesón{' '}
+                            <span className="ManageLayout-logoTextLine">La Paloma</span>
+                        </span>
+                    </Link>
+                </div>
             </header>
             {/* En el main va la página privada */}
             <main className="ManageLayout-main">

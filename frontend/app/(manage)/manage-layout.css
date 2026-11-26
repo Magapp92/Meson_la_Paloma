@@ -12,18 +12,16 @@
 
 /* CABECERA */
 
-/* Cabecera con la línea mostaza que la separa del contenido, como la de la web; el logo en el centro */
+/* Cabecera con la línea mostaza que la separa del contenido, como la de la web */
 .ManageLayout-header{
-    padding: 1rem;
+    padding-block: 1rem;
     border-bottom: 2px solid var(--accent);
-
-    display: flex;
-    justify-content: center;
 }
 
-/* El logo agrupa la imagen y el nombre en una fila */
+/* El logo agrupa la imagen y el nombre en una fila, a la izquierda.
+   inline-flex: ocupa solo lo que mide, así la zona que se pulsa no llega hasta el otro lado */
 .ManageLayout-logo{
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: .8rem;
 }
@@ -42,11 +40,11 @@
     text-transform: uppercase;
 }
 
-/* Segunda línea del nombre en mostaza: el span pasa a bloque para ocupar su propia línea */
+/* Segunda línea del nombre, en crema como la primera (igual que en la cabecera de la web):
+   el span pasa a bloque para ocupar su propia línea */
 .ManageLayout-logoTextLine{
     display: block;
 
-    color: var(--accent);
     line-height: inherit;
 }
 
