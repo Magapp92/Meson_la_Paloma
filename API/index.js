@@ -1,58 +1,36 @@
-
-/* Arranque de la API del Mesón La Paloma: Express, cors, la conexión a Mongo y las rutas */
-console.clear()
+/* Arranque de la API del Mesón La Paloma: lee y comprueba la configuración, conecta con Mongo y abre el puerto.
+La app (middlewares, rutas y errores) está en app.js, separada de aquí para poder probarla sin arrancar el servidor */
 console.log( 'Iniciando la API del Mesón La Paloma' )
 
-const express = require( 'express' )
-const cors = require( 'cors' )
-const { connect } = require( './config/db' )
-const { router } = require( './routes/router' )
-const { notFound, errorHandler } = require( './middlewares/errors' )
-
-/* Leemos las variables del .env: el puerto (la conexión a Mongo la lee db.js) */
+/* Leemos las variables del .env y las comprobamos ANTES de cargar la app: app.js usa SITE_URL para CORS,
+y loadConfig la deja ya sin barra final. En producción, si falta alguna, paramos aquí con un mensaje claro */
 require( 'dotenv' ).config({ quiet: true })
+const { loadConfig } = require( './config/env' )
+
+try {
+    loadConfig()
+} catch ( error ) {
+    console.error( error.message )
+    process.exit( 1 )
+}
+
+const { app } = require( './app' )
+const { connect } = require( './config/db' )
+
 const { PORT = 4000 } = process.env
-
-const app = express()
-
-/* Quitamos la cabecera X-Powered-By: Express, que Express pone en cada respuesta.
-No aporta nada al cliente y le dice a un atacante qué tecnología usamos */
-app.disable( 'x-powered-by' )
-
-/* CORS: solo la web del mesón (SITE_URL) puede llamar a la API desde el navegador.
-Si SITE_URL no está definida, no abrimos la API a cualquier web: permitimos solo la web en local (localhost:3000) */
-app.use( cors({ origin: process.env.SITE_URL || 'http://localhost:3000' }) )
-
-/* Leemos el body en JSON, con un máximo de 10 kb: una reserva ocupa mucho menos.
-Si llega algo más grande, express.json lo rechaza (413) sin leerlo entero */
-app.use( express.json({ limit: '10kb' }) )
-
-/* Antes de cada petición comprobamos que hay conexión con Mongo; si no, respondemos 503 */
-app.use( async ( req, res, next ) => {
-    try {
-        await connect()
-        next()
-    } catch ( error ) {
-        console.log( `Sin conexión a MongoDB: ${ error.message }` )
-        res.status( 503 ).json({
-            message: 'Base de datos no disponible, inténtalo en unos segundos',
-            data: null
-        })
-    }
-})
-
-/* Todas las rutas cuelgan de /api */
-app.use( '/api', router )
-
-/* Si ninguna ruta coincide devolvemos 404, y recogemos todos los errores */
-app.use( notFound )
-app.use( errorHandler )
 
 /* Conectamos al arrancar para ver en la consola si Mongo responde (sin mostrar la cadena de conexión) */
 connect()
     .then( () => console.log( 'Conectado a MongoDB' ) )
     .catch( error => console.log( `Sin conexión a MongoDB: ${ error.message }` ) )
 
-app.listen( PORT, () => {
+/* En Express 5 el callback de listen recibe el error si no se puede abrir el puerto (por ejemplo, porque ya está ocupado).
+Sin esto la API se quedaría "arrancada" sin escuchar; así lo vemos en la consola y el proceso termina */
+app.listen( PORT, error => {
+    if ( error ) {
+        console.error( `No se ha podido arrancar la API en el puerto ${ PORT }: ${ error.message }` )
+        process.exit( 1 )
+    }
+
     console.log( `API en http://localhost:${ PORT }/api` )
 })

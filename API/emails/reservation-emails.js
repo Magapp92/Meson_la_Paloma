@@ -83,7 +83,6 @@ const buildCancellationMessage = reservation => {
 /* Exportamos los correos para el controller de reservas */
 module.exports = {
     getSequence,
-    buildInviteAttachment,
     buildReservationEmail,
     buildCancellationMessage
 }

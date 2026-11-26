@@ -68,10 +68,7 @@ const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl,
     return { subject, html, text }
 }
 
-/* Exportamos el correo para los controllers. formatLongDate y escapeHtml viven en format.js,
-pero se siguen exportando desde aquí para los tests y para quien ya los importaba de este archivo */
+/* Exportamos el correo para reservation-emails.js, que le añade la invitación de calendario */
 module.exports = {
-    buildConfirmationEmail,
-    formatLongDate,
-    escapeHtml
+    buildConfirmationEmail
 }

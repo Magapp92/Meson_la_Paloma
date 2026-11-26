@@ -9,7 +9,11 @@ const fake = require( '../test-helpers/fake-db' )
 
 /* Los dobles tienen que estar en require.cache antes de cargar el controller */
 fake.install()
-const { postReservation, getReservation, updateReservation, cancelReservation, TOKEN_PATTERN } = require( './reservations' )
+const { postReservation, getReservation, updateReservation, cancelReservation } = require( './reservations' )
+const { TOKEN_PATTERN } = require( '../services/reservation-validation' )
+const { sendEmailSafely } = require( '../services/notifications' )
+/* Los modelos falsos que ha puesto install(): para forzar fallos con t.mock.method */
+const { Reservation } = require( '../models' )
 
 process.env.SITE_URL = 'http://localhost:3000'
 process.env.MAIL_FROM = 'meson@ejemplo.es'
@@ -207,6 +211,69 @@ describe( 'POST /api/reservations (postReservation)', () => {
         assert.equal( createdReservation().status, 'confirmed' )
         assert.equal( fake.mailer.calls.length, 1 )
         assert.equal( consoleError.mock.callCount(), 1 )
+    })
+
+    /* Si el correo falla queda apuntado en la reserva (emailFailedAt) para que el mesón vea a quién no le llegó.
+    En la consola sale el _id, el día y la hora, pero no los datos personales */
+    test( 'si falla el correo, apunta emailFailedAt y la consola no lleva datos personales', async t => {
+        const consoleError = t.mock.method( console, 'error', () => {} )
+        fake.mailer.shouldFail = true
+
+        await fake.callHandler( postReservation, { body: validBody() } )
+
+        const saved = createdReservation()
+        assert.ok( saved.emailFailedAt instanceof Date )
+        const logged = consoleError.mock.calls[ 0 ].arguments.join( ' ' )
+        assert.ok( logged.includes( saved._id ) )
+        assert.ok( logged.includes( '2026-12-01 21:00' ) )
+        for ( const personal of [ 'Lucía', 'lucia@ejemplo.es', '600 123 456' ] ) assert.ok( !logged.includes( personal ) )
+    })
+
+    /* Si el correo sale bien, no se apunta nada */
+    test( 'si el correo sale bien, no hay emailFailedAt', async () => {
+        await fake.callHandler( postReservation, { body: validBody() } )
+
+        assert.equal( 'emailFailedAt' in createdReservation(), false )
+    })
+
+    /* Si falla el correo y además falla guardar emailFailedAt, la respuesta sigue siendo 201 y los dos fallos van a la consola */
+    test( 'si no se puede guardar emailFailedAt, responde 201 igual', async t => {
+        const consoleError = t.mock.method( console, 'error', () => {} )
+        t.mock.method( Reservation, 'updateOne', async () => { throw new Error( 'Fallo simulado de la base de datos' ) } )
+        fake.mailer.shouldFail = true
+
+        const { res, error } = await fake.callHandler( postReservation, { body: validBody() } )
+
+        assert.equal( error, null )
+        assert.equal( res.statusCode, 201 )
+        assert.equal( 'emailFailedAt' in createdReservation(), false )
+        assert.equal( consoleError.mock.callCount(), 2 )
+    })
+
+    /* Doble clic o reintento del navegador: la segunda petición igual (mismo correo, aunque llegue con mayúsculas
+    o espacios, día y hora) no crea otra reserva ni manda otro correo, y responde 201 con los mismos datos */
+    test( 'una reserva repetida en menos de 10 minutos no crea otra ni manda otro correo', async () => {
+        const first = await fake.callHandler( postReservation, { body: validBody() } )
+        const second = await fake.callHandler( postReservation, { body: validBody({ email: '  LUCIA@ejemplo.es ' }) } )
+
+        assert.equal( second.res.statusCode, 201 )
+        assert.deepEqual( second.res.body, first.res.body )
+        assert.equal( 'token' in second.res.body.data, false )
+        assert.equal( fake.store.reservations.length, 1 )
+        assert.equal( fake.mailer.calls.length, 1 )
+    })
+
+    /* Pasados los 10 minutos, o si la anterior está cancelada, sí se crea una nueva */
+    test( 'una reserva igual de hace más de 10 minutos o cancelada no cuenta como repetida', async () => {
+        const previous = { date: '2026-12-01', time: '21:00', partySize: 4, name: 'Lucía Pérez', phone: '600123456', email: 'lucia@ejemplo.es' }
+        fake.insertReservation({ ...previous, table: 1, token: TOKEN_B, createdAt: new Date( Date.now() - 11 * 60 * 1000 ) })
+        fake.insertReservation({ ...previous, table: 2, token: TOKEN_MISSING, status: 'cancelled' })
+
+        const { res } = await fake.callHandler( postReservation, { body: validBody() } )
+
+        assert.equal( res.statusCode, 201 )
+        assert.equal( fake.store.reservations.length, 3 )
+        assert.equal( fake.mailer.calls.length, 1 )
     })
 
     /* Dos reservas a la vez en la misma mesa: justo después de guardar la nueva, otra petición guarda una
@@ -513,6 +580,125 @@ describe( 'PATCH /api/reservations/:token (updateReservation)', () => {
         assert.equal( saved.status, 'confirmed' )
         assert.equal( fake.mailer.calls.length, 0 )
     })
+
+    /* Al deshacer, el hueco antiguo (13:00 en la mesa 1) también lo ha ocupado otra reserva entretanto:
+    no hay sitio seguro. Se apunta en la consola (_id, día y hora, sin datos personales) y responde 409 */
+    test( 'si al deshacer el hueco antiguo también está ocupado, lo apunta en la consola y responde 409', async t => {
+        const consoleError = t.mock.method( console, 'error', () => {} )
+        const stored = storedReservation()
+        const other = { partySize: 2, name: 'Otra', phone: '600000000', email: 'otra@ejemplo.es' }
+        fake.hooks.afterUpdate = updated => {
+            fake.insertReservation({ ...other, date: updated.date, time: updated.time, table: updated.table, token: TOKEN_B })
+            fake.insertReservation({ ...other, date: '2026-12-01', time: '13:00', table: 1, token: TOKEN_MISSING })
+        }
+
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-01', time: '21:00', partySize: 2 }
+        })
+
+        assert.equal( res.statusCode, 409 )
+        assert.deepEqual( res.body, { message: NOT_FREE, data: null } )
+        assert.equal( fake.getReservationByToken( TOKEN_A ).time, '13:00' )
+        assert.equal( consoleError.mock.callCount(), 1 )
+        const logged = consoleError.mock.calls[ 0 ].arguments.join( ' ' )
+        assert.ok( logged.includes( stored._id ) )
+        assert.ok( logged.includes( '2026-12-01 13:00' ) )
+        for ( const personal of [ 'Lucía', 'lucia@ejemplo.es', '600123456' ] ) assert.ok( !logged.includes( personal ) )
+        assert.equal( fake.mailer.calls.length, 0 )
+    })
+
+    /* Mientras se guardaba el cambio, otra petición cancela la reserva. Al deshacer no se pisa la cancelación:
+    la reserva queda cancelada con los datos que tenía al cancelarse (los nuevos), no con los antiguos */
+    test( 'si se cancela a la vez, deshacer no pisa la cancelación', async t => {
+        const consoleError = t.mock.method( console, 'error', () => {} )
+        storedReservation()
+        fake.hooks.afterUpdate = updated => {
+            fake.insertReservation({
+                date: updated.date, time: updated.time, partySize: 2, name: 'Otra', phone: '600000000',
+                email: 'otra@ejemplo.es', table: updated.table, token: TOKEN_B
+            })
+            fake.store.reservations.find( item => item.token === TOKEN_A ).status = 'cancelled'
+        }
+
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-01', time: '21:00', partySize: 2 }
+        })
+
+        assert.equal( res.statusCode, 409 )
+        const saved = fake.getReservationByToken( TOKEN_A )
+        assert.equal( saved.status, 'cancelled' )
+        assert.equal( saved.time, '21:00' )
+        assert.equal( saved.partySize, 2 )
+        assert.equal( saved.table, 10 )
+        assert.equal( consoleError.mock.callCount(), 0 )
+        assert.equal( fake.mailer.calls.length, 0 )
+    })
+
+    /* Modificar contra cancelar: la reserva se cancela entre la lectura y la escritura. findOneAndUpdate
+    no la encuentra confirmada (devuelve null): 409 "cancelada", sin cambiar nada ni mandar correo */
+    test( 'si se cancela entre la lectura y el guardado responde 409 "cancelada"', async () => {
+        storedReservation()
+        fake.hooks.beforeUpdate = () => {
+            fake.store.reservations.find( item => item.token === TOKEN_A ).status = 'cancelled'
+        }
+
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-01', time: '21:00', partySize: 2 }
+        })
+
+        assert.equal( res.statusCode, 409 )
+        assert.deepEqual( res.body, { message: 'Esta reserva está cancelada', data: null } )
+        const saved = fake.getReservationByToken( TOKEN_A )
+        assert.equal( saved.time, '13:00' )
+        assert.equal( saved.status, 'cancelled' )
+        assert.equal( fake.mailer.calls.length, 0 )
+    })
+
+    /* Dentro de las 2 horas de antelación no se cambia por la web: 409 con el mensaje de llamar, sin tocar nada.
+    La reserva es de hoy a las 11:30 (el "ahora" fijo es las 10:00): no ha empezado, pero faltan 90 minutos */
+    test( 'a menos de 2 horas de la reserva responde 409 "llámanos"', async () => {
+        storedReservation({ date: '2026-11-25', time: '11:30' })
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-01', time: '21:00', partySize: 4 }
+        })
+
+        assert.equal( res.statusCode, 409 )
+        assert.deepEqual( res.body, { message: 'Faltan menos de 2 horas para tu reserva: para cambiarla, llámanos', data: null } )
+        assert.equal( fake.getReservationByToken( TOKEN_A ).date, '2026-11-25' )
+        assert.equal( fake.mailer.calls.length, 0 )
+    })
+
+    /* Justo a 2 horas (12:00) todavía se puede cambiar */
+    test( 'a 2 horas justas de la reserva todavía se puede cambiar', async () => {
+        storedReservation({ date: '2026-11-25', time: '12:00' })
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-01', time: '21:00', partySize: 4 }
+        })
+
+        assert.equal( res.statusCode, 200 )
+    })
+
+    /* Si el correo de "modificada" falla, el cambio se mantiene y queda apuntado emailFailedAt */
+    test( 'si falla el correo de modificada, apunta emailFailedAt', async t => {
+        t.mock.method( console, 'error', () => {} )
+        fake.mailer.shouldFail = true
+        storedReservation()
+
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-01', time: '21:00', partySize: 2 }
+        })
+
+        assert.equal( res.statusCode, 200 )
+        const saved = fake.getReservationByToken( TOKEN_A )
+        assert.equal( saved.time, '21:00' )
+        assert.ok( saved.emailFailedAt instanceof Date )
+    })
 })
 
 describe( 'PATCH /api/reservations/:token/cancel (cancelReservation)', () => {
@@ -586,5 +772,59 @@ describe( 'PATCH /api/reservations/:token/cancel (cancelReservation)', () => {
         assert.equal( res.statusCode, 200 )
         assert.equal( res.body.message, 'La reserva ya estaba cancelada' )
         assert.equal( res.body.data.isPast, true )
+    })
+
+    /* Cancelar contra cancelar: otra petición la cancela entre la lectura y la escritura.
+    findOneAndUpdate no la encuentra confirmada: 200 "ya estaba cancelada" y sin otro correo */
+    test( 'si otra petición la cancela a la vez responde 200 "ya estaba cancelada"', async () => {
+        storedReservation()
+        fake.hooks.beforeUpdate = () => {
+            fake.store.reservations.find( item => item.token === TOKEN_A ).status = 'cancelled'
+        }
+
+        const { res } = await fake.callHandler( cancelReservation, { params: { token: TOKEN_A } } )
+
+        assert.equal( res.statusCode, 200 )
+        assert.equal( res.body.message, 'La reserva ya estaba cancelada' )
+        assert.equal( res.body.data.status, 'cancelled' )
+        assert.equal( fake.mailer.calls.length, 0 )
+    })
+
+    /* Si el correo de cancelación falla, la reserva queda cancelada y con emailFailedAt */
+    test( 'si falla el correo de cancelación, apunta emailFailedAt', async t => {
+        t.mock.method( console, 'error', () => {} )
+        fake.mailer.shouldFail = true
+        storedReservation()
+
+        const { res } = await fake.callHandler( cancelReservation, { params: { token: TOKEN_A } } )
+
+        assert.equal( res.statusCode, 200 )
+        const saved = fake.getReservationByToken( TOKEN_A )
+        assert.equal( saved.status, 'cancelled' )
+        assert.ok( saved.emailFailedAt instanceof Date )
+    })
+})
+
+describe( 'sendEmailSafely (services/notifications.js)', () => {
+
+    /* Devuelve true si el correo sale y false si falla; con un texto como contexto, lo añade al mensaje de la consola */
+    test( 'devuelve true o false y añade el contexto al mensaje de la consola', async t => {
+        const consoleError = t.mock.method( console, 'error', () => {} )
+
+        assert.equal( await sendEmailSafely( () => ({ subject: 'Prueba' }), 'prueba', 'contexto de prueba' ), true )
+        assert.equal( consoleError.mock.callCount(), 0 )
+
+        fake.mailer.shouldFail = true
+        assert.equal( await sendEmailSafely( () => ({ subject: 'Prueba' }), 'prueba', 'contexto de prueba' ), false )
+        assert.equal( consoleError.mock.callCount(), 1 )
+        assert.ok( consoleError.mock.calls[ 0 ].arguments[ 0 ].includes( '(contexto de prueba)' ) )
+    })
+
+    /* Si montar el correo falla también devuelve false, sin lanzar el error */
+    test( 'si falla al montar el correo devuelve false', async t => {
+        t.mock.method( console, 'error', () => {} )
+
+        assert.equal( await sendEmailSafely( () => { throw new Error( 'Fallo al montar' ) }, 'prueba' ), false )
+        assert.equal( fake.mailer.calls.length, 0 )
     })
 })

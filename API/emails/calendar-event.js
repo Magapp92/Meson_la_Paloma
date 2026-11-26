@@ -4,23 +4,47 @@ Apple Mail, Gmail y Outlook ofrecen añadirlo al calendario, y los correos sigui
 o lo quitan. Es una función pura: recibe los datos y el "ahora", y devuelve el texto del archivo.
 El formato es iCalendar (RFC 5545): texto plano, una propiedad por línea con la forma NOMBRE:valor,
 dentro de bloques BEGIN:… / END:… */
+const { toMinutes } = require( '../services/availability' )
+const { CONTROL_CHARACTERS } = require( '../services/control-characters' )
 
 /* El estándar exige que cada línea termine en \r\n (retorno de carro + salto de línea), no solo
 en \n. Algunos calendarios son tolerantes, pero otros rechazan el archivo si no se cumple */
 const LINE_BREAK = '\r\n'
 
-/* Caracteres de control: del 0 al 31 (saltos de línea, retornos de carro, tabuladores…) y el 127 */
-const CONTROL_CHARACTERS = /[\x00-\x1F\x7F]/g
+/* Los caracteres de control de services/control-characters.js, con la bandera g para cambiarlos todos con replace */
+const ALL_CONTROL_CHARACTERS = new RegExp( CONTROL_CHARACTERS.source, 'g' )
+
+/* Definición de la zona horaria de Madrid, el bloque VTIMEZONE. El formato exige que cada TZID que se usa
+(DTSTART;TZID=Europe/Madrid…) esté definido en el propio archivo; muchos calendarios lo deducen por el nombre,
+pero algunas versiones de Outlook sin él ponen mal la hora del evento.
+Madrid tiene dos horarios, cada uno con la regla (RRULE) de cuándo empieza:
+- DAYLIGHT, el de verano (CEST, +0200): desde el último domingo de marzo a las 02:00, que pasan a ser las 03:00.
+- STANDARD, el de invierno (CET, +0100): desde el último domingo de octubre a las 03:00, que pasan a ser las 02:00.
+El DTSTART de 1970 es solo el punto de partida de cada regla; BYDAY=-1SU es el último domingo del mes */
+const TIME_ZONES = {
+    'Europe/Madrid': [
+        'BEGIN:VTIMEZONE',
+        'TZID:Europe/Madrid',
+        'BEGIN:DAYLIGHT',
+        'TZOFFSETFROM:+0100',
+        'TZOFFSETTO:+0200',
+        'TZNAME:CEST',
+        'DTSTART:19700329T020000',
+        'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+        'END:DAYLIGHT',
+        'BEGIN:STANDARD',
+        'TZOFFSETFROM:+0200',
+        'TZOFFSETTO:+0100',
+        'TZNAME:CET',
+        'DTSTART:19701025T030000',
+        'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+        'END:STANDARD',
+        'END:VTIMEZONE'
+    ]
+}
 
 /* Rellena con un cero a la izquierda hasta dos cifras: 5 → '05' */
 const pad = number => String( number ).padStart( 2, '0' )
-
-/* Pasa una hora 'HH:MM' a minutos desde las 00:00: '21:00' → 1260 */
-const minutesFromTime = time => {
-    const [ hours, minutes ] = time.split( ':' ).map( Number )
-
-    return hours * 60 + minutes
-}
 
 /* Junta una fecha 'AAAA-MM-DD' y unos minutos desde las 00:00 en el formato de iCalendar
 'AAAAMMDDTHHMMSS': ( '2026-11-28', 1260 ) → '20261128T210000'.
@@ -49,26 +73,30 @@ const escapeText = value => String( value )
     .replace( /,/g, '\\,' )
     .replace( /;/g, '\\;' )
     .replace( /\r?\n/g, '\\n' )
-    .replace( CONTROL_CHARACTERS, ' ' )
+    .replace( ALL_CONTROL_CHARACTERS, ' ' )
 
 /* Escapa un nombre para el parámetro CN de ORGANIZER y ATTENDEE. En los parámetros no vale la barra
 invertida de escapeText: si el valor lleva coma, punto y coma o dos puntos tiene que ir entre comillas
 dobles, así que siempre lo ponemos entre comillas. Dentro no puede haber comillas ni saltos de línea:
 las comillas se quitan, y los saltos y los demás caracteres de control se cambian por un espacio */
-const escapeParam = value => `"${ String( value ).replace( /"/g, '' ).replace( /\r?\n/g, ' ' ).replace( CONTROL_CHARACTERS, ' ' ) }"`
+const escapeParam = value => `"${ String( value ).replace( /"/g, '' ).replace( /\r?\n/g, ' ' ).replace( ALL_CONTROL_CHARACTERS, ' ' ) }"`
 
 /* Monta el texto del .ics.
 - uid: identificador único del evento. Si se repite, el calendario lo trata como el mismo evento.
 - title, location: textos que se muestran, van escapados.
 - date 'AAAA-MM-DD', time 'HH:MM', durationMinutes: cuándo empieza y cuánto dura.
-- timeZone: zona horaria de la fecha y la hora, por ejemplo 'Europe/Madrid'.
+- timeZone: zona horaria de la fecha y la hora. Tiene que estar en TIME_ZONES (por ahora solo 'Europe/Madrid'):
+  si no, lanza un error, porque el archivo saldría sin la definición de su zona.
 - now: el momento en que se genera el archivo; por defecto, ahora mismo.
 - sequence (opcional): número de versión del evento; por defecto 0, el evento recién creado.
 - method (opcional): 'REQUEST' (por defecto) para añadir o actualizar el evento, o 'CANCEL' para quitarlo.
 - organizer, attendee: quién organiza (el mesón) y quién asiste (el cliente), como { name, email }.
 Devuelve el texto del archivo */
 const buildCalendarEvent = ({ uid, title, date, time, durationMinutes, timeZone, location, now = new Date(), sequence = 0, method = 'REQUEST', organizer, attendee }) => {
-    const startMinutes = minutesFromTime( time )
+    const timeZoneLines = TIME_ZONES[ timeZone ]
+    if ( !timeZoneLines ) throw new Error( `Zona horaria sin definir en la invitación: ${ timeZone }` )
+
+    const startMinutes = toMinutes( time )
     const isCancel = method === 'CANCEL'
 
     const lines = [
@@ -81,6 +109,8 @@ const buildCalendarEvent = ({ uid, title, date, time, durationMinutes, timeZone,
         añade al calendario y, si ya la tenía, la actualiza. CANCEL es una anulación: quita el evento.
         Con PUBLISH el evento se copia una vez y ya no se puede actualizar ni quitar desde otro correo */
         `METHOD:${ isCancel ? 'CANCEL' : 'REQUEST' }`,
+        /* La zona horaria que usan DTSTART y DTEND, definida antes del evento */
+        ...timeZoneLines,
         /* El evento en sí */
         'BEGIN:VEVENT',
         `UID:${ uid }`,

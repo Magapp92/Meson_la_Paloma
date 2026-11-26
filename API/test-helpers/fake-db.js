@@ -21,9 +21,12 @@ const store = {
     tables: []
 }
 
-/* Ganchos de un solo uso para simular otra petición que escribe "a la vez" */
+/* Ganchos de un solo uso para simular otra petición que escribe "a la vez".
+beforeUpdate se ejecuta en findOneAndUpdate justo antes de buscar el documento: sirve para simular
+un cambio que llega entre la lectura del controller y su escritura */
 const hooks = {
     afterCreate: null,
+    beforeUpdate: null,
     afterUpdate: null
 }
 
@@ -49,7 +52,8 @@ const sameValue = ( a, b ) => {
     return String( a ) === String( b ) && typeof a === typeof b
 }
 
-/* ¿Cumple el documento el filtro? Admite igualdad, $ne y $lte, que son los que usan los controllers */
+/* ¿Cumple el documento el filtro? Admite igualdad, $ne y $gte, que son los que usan los controllers,
+y $lte, que ya no usa ninguno pero se deja por si vuelve a hacer falta */
 const matches = ( doc, filter = {} ) => Object.entries( filter ).every( ([ key, condition ]) => {
     const value = doc[ key ]
 
@@ -57,6 +61,7 @@ const matches = ( doc, filter = {} ) => Object.entries( filter ).every( ([ key, 
         return Object.entries( condition ).every( ([ operator, operand ]) => {
             if ( operator === '$ne' ) return !sameValue( value, operand )
             if ( operator === '$lte' ) return value <= operand
+            if ( operator === '$gte' ) return value >= operand
             throw new Error( `Operador no soportado por la base falsa: ${ operator }` )
         })
     }
@@ -111,6 +116,12 @@ const Reservation = {
 
     /* Solo cambios simples ({ campo: valor }), que es lo que mandan los controllers. Actualiza updatedAt */
     findOneAndUpdate: ( filter, update, options = {} ) => query( async () => {
+        if ( hooks.beforeUpdate ) {
+            const hook = hooks.beforeUpdate
+            hooks.beforeUpdate = null
+            await hook()
+        }
+
         const doc = store.reservations.find( item => matches( item, filter ) )
         if ( !doc ) return null
 
@@ -183,6 +194,7 @@ const resetDb = () => {
     store.reservations = []
     store.tables = TABLES.map( table => ({ _id: newId(), ...table, active: true }) )
     hooks.afterCreate = null
+    hooks.beforeUpdate = null
     hooks.afterUpdate = null
 }
 

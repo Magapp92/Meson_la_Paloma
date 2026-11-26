@@ -109,3 +109,54 @@ test( 'quita los caracteres de control de los textos', () => {
     assert.ok( ics.includes( 'SUMMARY:Reserva METHOD:CANCEL \r\n' ) )
     assert.ok( !ics.replace( /\r\n/g, '' ).includes( '\r' ) )
 })
+
+/* El formato exige definir cada TZID que se usa: el .ics lleva el bloque VTIMEZONE de Madrid, antes del evento */
+test( 'lleva la definición de la zona horaria de Madrid antes del evento', () => {
+    const ics = buildCalendarEvent( EVENT )
+    const timeZoneBlock = [
+        'BEGIN:VTIMEZONE',
+        'TZID:Europe/Madrid',
+        'BEGIN:DAYLIGHT',
+        'TZOFFSETFROM:+0100',
+        'TZOFFSETTO:+0200',
+        'TZNAME:CEST',
+        'DTSTART:19700329T020000',
+        'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+        'END:DAYLIGHT',
+        'BEGIN:STANDARD',
+        'TZOFFSETFROM:+0200',
+        'TZOFFSETTO:+0100',
+        'TZNAME:CET',
+        'DTSTART:19701025T030000',
+        'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+        'END:STANDARD',
+        'END:VTIMEZONE'
+    ].join( '\r\n' )
+
+    assert.ok( ics.includes( `\r\n${ timeZoneBlock }\r\n` ) )
+    assert.ok( ics.indexOf( 'END:VTIMEZONE' ) < ics.indexOf( 'BEGIN:VEVENT' ) )
+})
+
+/* Los días del cambio de hora de 2027 (domingo 28 de marzo y domingo 31 de octubre): la hora de la reserva
+se escribe tal cual, en hora de Madrid, sin sumarle ni restarle la hora del cambio */
+test( 'en los días del cambio de hora mantiene la hora de Madrid', () => {
+    const spring = buildCalendarEvent({ ...EVENT, date: '2027-03-28', time: '14:00' })
+    const autumn = buildCalendarEvent({ ...EVENT, date: '2027-10-31', time: '14:00' })
+
+    assert.ok( spring.includes( 'DTSTART;TZID=Europe/Madrid:20270328T140000\r\n' ) )
+    assert.ok( spring.includes( 'DTEND;TZID=Europe/Madrid:20270328T153000\r\n' ) )
+    assert.ok( autumn.includes( 'DTSTART;TZID=Europe/Madrid:20271031T140000\r\n' ) )
+    assert.ok( autumn.includes( 'DTEND;TZID=Europe/Madrid:20271031T153000\r\n' ) )
+})
+
+test( 'con una zona horaria sin definir lanza un error', () => {
+    assert.throws( () => buildCalendarEvent({ ...EVENT, timeZone: 'America/Lima' }), /Zona horaria sin definir/ )
+})
+
+/* Los saltos de línea de Unicode y los caracteres que cambian la dirección del texto también pasan a ser espacios */
+test( 'quita los saltos de línea de Unicode y los de dirección del texto', () => {
+    const ics = buildCalendarEvent({ ...EVENT, title: 'Reserva\u2028A\u0085B\u202EC', attendee: { name: 'Ana\u2029\u2066Pérez', email: 'ana@ejemplo.es' } })
+
+    assert.ok( ics.includes( 'SUMMARY:Reserva A B C\r\n' ) )
+    assert.ok( ics.includes( 'ATTENDEE;CN="Ana  Pérez";' ) )
+})

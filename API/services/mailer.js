@@ -59,7 +59,7 @@ const sendEmail = async ({ to, subject, html, text, attachments }) => {
     return body
 }
 
-/* Exportamos el envío para los controllers */
+/* Exportamos el envío para services/notifications.js, que manda los correos de las reservas */
 module.exports = {
     sendEmail
 }

@@ -2,7 +2,8 @@
 /* Controlador de las reservas */
 const crypto = require( 'node:crypto' )
 const { Table, Reservation } = require( '../models' )
-const { getAvailableTimes, pickTable, overlaps } = require( '../services/availability' )
+const { getAvailableTimes, pickTable, overlaps, toMinutes } = require( '../services/availability' )
+const { BOOKING_RULES } = require( '../services/booking-rules' )
 const { getMadridNow } = require( '../services/madrid-time' )
 const { sendEmailSafely } = require( '../services/notifications' )
 const { TOKEN_PATTERN, validateBooking, validateReservationForm, validateDaysAhead } = require( '../services/reservation-validation' )
@@ -11,6 +12,10 @@ const { fail } = require( './http' )
 
 const NOT_FOUND_MESSAGE = 'No encontramos ninguna reserva con este enlace'
 const NOT_FREE_MESSAGE = 'Esa hora ya no está libre. Elige otra, por favor'
+const TOO_LATE_TO_CHANGE_MESSAGE = `Faltan menos de ${ BOOKING_RULES.minNoticeMinutes / 60 } horas para tu reserva: para cambiarla, llámanos`
+
+/* Ventana para tratar una reserva igual como repetida (doble clic o reintento del navegador): 10 minutos */
+const DUPLICATE_WINDOW_MS = 10 * 60 * 1000
 
 /* La reserva de un código, o null si no hay ninguna. Un código mal formado o que no existe se tratan igual
 (los dos acaban en el mismo 404), pero con uno mal formado ni consultamos la base de datos */
@@ -51,6 +56,34 @@ const hasClash = async reservation => {
     return others.some( other => overlaps( other.time, reservation.time ) )
 }
 
+/* Envía un correo de la reserva y, si falla, apunta la fecha del fallo en emailFailedAt:
+así el mesón puede ver a quién no le ha llegado el correo y avisarle por teléfono.
+A la consola solo va el _id, la fecha y la hora, nunca los datos personales.
+Si tampoco se puede guardar el fallo, se queda en la consola: la reserva ya está hecha y la respuesta no cambia */
+const sendReservationEmail = async ( reservation, buildMessage, label ) => {
+    const { _id, date, time } = reservation
+    const sent = await sendEmailSafely( buildMessage, label, { _id, date, time } )
+    if ( sent ) return
+
+    try {
+        await Reservation.updateOne({ _id }, { emailFailedAt: new Date() })
+    } catch ( error ) {
+        console.error( `No se ha podido apuntar el fallo del correo (reserva ${ _id }):`, error.message )
+    }
+}
+
+/* Respuesta de "reserva confirmada": solo los datos básicos. No devolvemos el código secreto: solo llega por correo.
+Si lo devolviéramos, quien reserve con el correo de otra persona podría modificar la reserva en bucle y llenarle el buzón de correos */
+const respondCreated = ( res, reservation ) => res.status( 201 ).json({
+    message: 'Reserva confirmada',
+    data: {
+        date: reservation.date,
+        time: reservation.time,
+        partySize: reservation.partySize,
+        name: reservation.name
+    }
+})
+
 /* POST /api/reservations
 Crea una reserva con los datos del formulario. La mesa, el estado y el código secreto los pone la API */
 const postReservation = async ( req, res, next ) => {
@@ -67,6 +100,19 @@ const postReservation = async ( req, res, next ) => {
         const now = getMadridNow()
         const daysAheadError = validateDaysAhead( date, now )
         if ( daysAheadError ) return fail( res, 400, daysAheadError )
+
+        /* ¿Es una reserva repetida? Mientras se espera el correo de confirmación, el cliente puede pulsar otra vez
+        o el navegador reintentar la petición. Si ya hay una reserva confirmada con el mismo correo, día y hora
+        creada hace menos de 10 minutos, no creamos otra: respondemos con la que hay, sin volver a mandar el correo.
+        Va antes de mirar las horas libres porque la propia reserva repetida ocupa la mesa y saldría como no libre */
+        const duplicate = await Reservation.findOne({
+            email: email.trim().toLowerCase(),
+            date,
+            time,
+            status: 'confirmed',
+            createdAt: { $gte: new Date( Date.now() - DUPLICATE_WINDOW_MS ) }
+        }).lean()
+        if ( duplicate ) return respondCreated( res, duplicate )
 
         const [ tables, reservations ] = await getDayBookings( date )
 
@@ -95,19 +141,9 @@ const postReservation = async ( req, res, next ) => {
         }
 
         /* Correo de confirmación con el enlace a "Mi reserva" */
-        await sendEmailSafely( () => buildReservationEmail( reservation ), 'confirmación' )
+        await sendReservationEmail( reservation, () => buildReservationEmail( reservation ), 'confirmación' )
 
-        /* No devolvemos el código secreto: solo llega por correo. Si lo devolviéramos, quien reserve
-        con el correo de otra persona podría modificar la reserva en bucle y llenarle el buzón de correos */
-        res.status( 201 ).json({
-            message: 'Reserva confirmada',
-            data: {
-                date: reservation.date,
-                time: reservation.time,
-                partySize: reservation.partySize,
-                name: reservation.name
-            }
-        })
+        respondCreated( res, reservation )
     } catch ( error ) {
         next( error )
     }
@@ -185,7 +221,7 @@ const cancelReservation = async ( req, res, next ) => {
         if ( !cancelled ) return respondAlreadyCancelled( res, { ...reservation, status: 'cancelled' }, now )
 
         /* Si el correo falla, la reserva ya está cancelada y se mantiene */
-        await sendEmailSafely( () => buildCancellationMessage( cancelled ), 'cancelación' )
+        await sendReservationEmail( cancelled, () => buildCancellationMessage( cancelled ), 'cancelación' )
 
         res.status( 200 ).json({
             message: 'Reserva cancelada',
@@ -238,6 +274,13 @@ const updateReservation = async ( req, res, next ) => {
             })
         }
 
+        /* Dentro de las 2 horas (minNoticeMinutes) antes de la reserva ya no se cambia por la web: que llamen.
+        Miramos la hora que tiene la reserva ahora, no la nueva. Que no ha empezado ya lo hemos comprobado arriba.
+        Va antes de calcular las horas libres para dar este mensaje claro y no el de "esa hora ya no está libre" */
+        if ( reservation.date === now.date && toMinutes( reservation.time ) - toMinutes( now.time ) < BOOKING_RULES.minNoticeMinutes ) {
+            return fail( res, 409, TOO_LATE_TO_CHANGE_MESSAGE )
+        }
+
         /* Las mesas y las reservas del NUEVO día sin contar esta: su mesa actual tiene que poder volver a elegirse
         (por ejemplo, al pasar de 4 a 5 personas a la misma hora) */
         const [ tables, reservations ] = await getDayBookings( date, reservation._id )
@@ -261,8 +304,10 @@ const updateReservation = async ( req, res, next ) => {
         /* Si a la vez otra persona reserva o modifica hacia la misma mesa, las dos pueden pasar la comprobación de arriba.
         Después de guardar volvemos a mirar: si choca con otra, devolvemos la reserva a como estaba y avisamos */
         if ( await hasClash( updated ) ) {
-            await Reservation.updateOne(
-                { _id: reservation._id },
+            /* Solo deshacemos si la reserva sigue confirmada y con el día y la hora que acabamos de guardar:
+            si entre medias se ha cancelado o se ha vuelto a cambiar, ese cambio es más nuevo que el nuestro y no lo pisamos */
+            const undone = await Reservation.updateOne(
+                { _id: reservation._id, status: 'confirmed', date: updated.date, time: updated.time },
                 {
                     date: reservation.date,
                     time: reservation.time,
@@ -271,12 +316,20 @@ const updateReservation = async ( req, res, next ) => {
                     reminderSent: reservation.reminderSent
                 }
             )
+
+            /* Mientras tanto otra reserva ha podido ocupar el hueco antiguo: entonces la reserva no tiene un sitio
+            seguro ni en la hora nueva ni en la antigua. No la movemos a ciegas: lo apuntamos en la consola
+            (solo _id, día y hora, sin datos personales) para que el mesón lo revise, y el cliente recibe el mismo 409 */
+            if ( undone.matchedCount > 0 && await hasClash( reservation ) ) {
+                console.error( `Reserva ${ reservation._id } devuelta a ${ reservation.date } ${ reservation.time } con la mesa ocupada por otra: revisarla a mano` )
+            }
+
             return fail( res, 409, NOT_FREE_MESSAGE )
         }
 
         /* Correo de "Reserva modificada" con el evento de calendario actualizado (mismo UID, sequence mayor).
         Si el correo falla, el cambio ya está guardado y se mantiene */
-        await sendEmailSafely( () => buildReservationEmail( updated, { isUpdate: true, sequence: getSequence( updated ) } ), 'reserva modificada' )
+        await sendReservationEmail( updated, () => buildReservationEmail( updated, { isUpdate: true, sequence: getSequence( updated ) } ), 'reserva modificada' )
 
         res.status( 200 ).json({
             message: 'Reserva modificada',
@@ -287,11 +340,10 @@ const updateReservation = async ( req, res, next ) => {
     }
 }
 
-/* Exportamos los controllers para el router, y TOKEN_PATTERN para los tests */
+/* Exportamos los controllers para el router */
 module.exports = {
     postReservation,
     getReservation,
     cancelReservation,
-    updateReservation,
-    TOKEN_PATTERN
+    updateReservation
 }

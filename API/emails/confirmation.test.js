@@ -3,7 +3,8 @@
 Usan una reserva inventada: sábado 28 de noviembre de 2026 a las 21:00, para 4 personas */
 const { test } = require( 'node:test' )
 const assert = require( 'node:assert/strict' )
-const { buildConfirmationEmail, formatLongDate } = require( './confirmation' )
+const { buildConfirmationEmail } = require( './confirmation' )
+const { formatLongDate } = require( './format' )
 
 const RESERVATION = {
     name: 'Ana',

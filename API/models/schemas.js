@@ -59,6 +59,7 @@ date va como texto AAAA-MM-DD y time como HH:MM, en hora de Madrid: así una res
 es siempre del día 5, esté donde esté el servidor.
 table es el número de la mesa asignada. token es el código secreto del enlace para modificar o cancelar.
 Los maxlength repiten los máximos de la validación (FIELD_LIMITS): por si algún día se guarda una reserva sin pasar por ella.
+emailFailedAt (opcional) es cuándo falló el último correo de la reserva: así el mesón puede ver a quién no le ha llegado y avisarle.
 timestamps añade createdAt y updatedAt solos */
 const reservationSchema = new mongoose.Schema(
     {
@@ -73,7 +74,8 @@ const reservationSchema = new mongoose.Schema(
         table: { type: mongoose.Schema.Types.Number, required: true },
         status: { type: mongoose.Schema.Types.String, enum: [ 'confirmed', 'cancelled' ], default: 'confirmed' },
         token: { type: mongoose.Schema.Types.String, required: true, unique: true },
-        reminderSent: { type: mongoose.Schema.Types.Boolean, default: false }
+        reminderSent: { type: mongoose.Schema.Types.Boolean, default: false },
+        emailFailedAt: { type: mongoose.Schema.Types.Date }
     },
     {
         collection: 'reservations',
