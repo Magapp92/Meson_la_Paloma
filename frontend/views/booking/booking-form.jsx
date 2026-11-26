@@ -18,8 +18,9 @@ const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Datos' ])
 /* Al modificar una reserva los datos de contacto ya están: el último paso es revisar el cambio */
 const EDIT_STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Revisar' ])
 
-/* El mensaje de la API cuando la hora se ha ocupado (409). Al modificar, un 409 también puede ser
-que la reserva esté cancelada o ya haya empezado: solo con este mensaje se vuelve a elegir hora */
+/* El mensaje de la API cuando la hora se ha ocupado (409). Otros 409 no son de la hora (al crear, que ya
+tienes el máximo de reservas activas; al modificar, que está cancelada o ya ha empezado): solo con este
+mensaje se vuelve a elegir hora; los demás se muestran encima del botón */
 const TIME_TAKEN_MESSAGE = 'Esa hora ya no está libre. Elige otra, por favor'
 
 /* Las horas se reparten en comidas y cenas para leerlas mejor: las de antes de las 17:00 son comidas.
@@ -48,8 +49,9 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
     const [ date, setDate ] = useState( initial?.date ?? null )
     const [ time, setTime ] = useState( initial?.time ?? null )
 
-    /* Los datos de contacto, en un solo objeto: cada campo cambia su propiedad */
-    const [ contact, setContact ] = useState({ name: '', phone: '', email: '', notes: '' })
+    /* Los datos de contacto, en un solo objeto: cada campo cambia su propiedad.
+    website es el campo trampa para robots (ver el paso 4): una persona lo deja siempre vacío */
+    const [ contact, setContact ] = useState({ name: '', phone: '', email: '', notes: '', website: '' })
     const [ isPrivacyAccepted, setIsPrivacyAccepted ] = useState( false )
 
     /* El envío: si se está enviando, el error de la API (400), el aviso si la hora se ha ocupado (409)
@@ -173,7 +175,7 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                 setReservation( data )
             }
         } catch ( error ) {
-            if ( error.status === 409 && ( !isEditing || error.message === TIME_TAKEN_MESSAGE ) ) {
+            if ( error.status === 409 && error.message === TIME_TAKEN_MESSAGE ) {
                 setNotice( error.message )
                 setTime( null )
                 reload()
@@ -333,6 +335,17 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                             <span className="ContactFields-label">Notas <span className="ContactFields-optional">(opcional)</span></span>
                             <textarea className="ContactFields-input ContactFields-input--notes" name="notes" value={contact.notes} onChange={changeContact} maxLength={500} rows={3} placeholder="Una trona, una alergia, una celebración…" />
                         </label>
+                        {/* Campo trampa para robots: está en la página pero nadie lo ve. Fuera de la vista (CSS),
+                        oculto al lector de pantalla (aria-hidden), sin paso con el tabulador (tabIndex -1) y sin que
+                        el navegador lo rellene solo (autoComplete off). Una persona lo deja vacío; un robot que rellena
+                        todos los campos lo escribe, y la API descarta esa reserva sin decírselo.
+                        No usamos display: none porque muchos robots se saltan los campos ocultos así */}
+                        <div className="ContactFields-trap" aria-hidden="true">
+                            <label>
+                                Web
+                                <input type="text" name="website" value={contact.website} onChange={changeContact} tabIndex={-1} autoComplete="off" />
+                            </label>
+                        </div>
                         {/* La casilla de privacidad es obligatoria. El enlace se abre en otra pestaña para no perder lo escrito */}
                         <label className="ContactFields-consent ContactFields-field--full">
                             <input className="ContactFields-checkbox" type="checkbox" checked={isPrivacyAccepted} onChange={ event => setIsPrivacyAccepted( event.target.checked ) } required />

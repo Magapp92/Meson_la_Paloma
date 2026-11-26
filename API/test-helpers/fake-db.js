@@ -10,6 +10,8 @@ con node --test, así que el cambio no afecta a los demás tests */
 const path = require( 'node:path' )
 const Module = require( 'node:module' )
 const { TABLES } = require( '../data/tables' )
+/* El cálculo del borrado no lee el reloj: el módulo falso de madrid-time lleva el de verdad */
+const { getStartOfNextDayInMadrid } = require( '../services/madrid-time' )
 
 /* "Ahora" fijo en Madrid: miércoles 25 de noviembre de 2026 a las 10:00, como en availability.test.js */
 const NOW = Object.freeze({ date: '2026-11-25', time: '10:00' })
@@ -237,7 +239,7 @@ const setCachedModule = ( relativePath, exports ) => {
 const install = () => {
     setCachedModule( 'models/index.js', { Table, Reservation, MenuCategory: {} } )
     setCachedModule( 'services/mailer.js', { sendEmail } )
-    setCachedModule( 'services/madrid-time.js', { getMadridNow } )
+    setCachedModule( 'services/madrid-time.js', { getMadridNow, getStartOfNextDayInMadrid } )
     resetDb()
     resetMailer()
 }

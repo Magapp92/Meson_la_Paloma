@@ -63,8 +63,8 @@ const occupyTables = ( time, tables = [ 7, 8, 9 ], date = '2026-12-01' ) => {
     }))
 }
 
-/* La reserva que acaba de guardar postReservation. La respuesta ya no trae el código secreto,
-así que la buscamos en la base falsa: es la única con el nombre del formulario (las demás se llaman 'Otra') */
+/* La reserva que acaba de guardar postReservation. La respuesta no trae el código secreto: solo llega por correo.
+Así que la buscamos en la base falsa: es la única con el nombre del formulario (las demás se llaman 'Otra') */
 const createdReservation = () => fake.getReservationByToken( fake.store.reservations.find( item => item.name === 'Lucía Pérez' ).token )
 
 /* Valor de una línea del .ics adjunto: ( ics, 'METHOD' ) → 'REQUEST' */
@@ -334,6 +334,124 @@ describe( 'POST /api/reservations (postReservation)', () => {
         assert.equal( fake.store.reservations.length, 3 )
         assert.equal( createdReservation().table, 1 )
         assert.equal( fake.mailer.calls.length, 1 )
+    })
+
+    /* Number( [ 4 ] ) da 4: las personas llegan a la validación sin convertir, y una lista no vale */
+    test( 'responde 400 con las personas en una lista', async () => {
+        const { res } = await fake.callHandler( postReservation, { body: validBody({ partySize: [ 4 ] }) } )
+
+        assert.equal( res.statusCode, 400 )
+        assert.deepEqual( res.body, { message: 'Se reserva para 2 a 6 personas. Para grupos más grandes, llámanos', data: null } )
+        assert.equal( fake.store.reservations.length, 0 )
+    })
+
+    /* La reserva se borra sola al empezar en Madrid el día siguiente: el 1 de diciembre (invierno), a las 23:00 universales del día 1 */
+    test( 'guarda expiresAt al empezar el día siguiente en Madrid', async () => {
+        await fake.callHandler( postReservation, { body: validBody() } )
+
+        assert.equal( createdReservation().expiresAt.toISOString(), '2026-12-01T23:00:00.000Z' )
+    })
+
+    /* Campo trampa relleno: un robot. Responde 201 con la respuesta de siempre, pero no guarda ni manda correo */
+    test( 'con el campo trampa relleno responde 201 sin guardar ni mandar correo', async t => {
+        const consoleWarn = t.mock.method( console, 'warn', () => {} )
+        const { res, error } = await fake.callHandler( postReservation, { body: validBody({ website: 'https://spam.ejemplo' }) } )
+
+        assert.equal( error, null )
+        assert.equal( res.statusCode, 201 )
+        assert.deepEqual( res.body, {
+            message: 'Reserva confirmada',
+            data: { date: '2026-12-01', time: '21:00', partySize: 4, name: 'Lucía Pérez' }
+        })
+        assert.equal( fake.store.reservations.length, 0 )
+        assert.equal( fake.mailer.calls.length, 0 )
+        assert.equal( consoleWarn.mock.callCount(), 1 )
+        const logged = consoleWarn.mock.calls[ 0 ].arguments.join( ' ' )
+        for ( const personal of [ 'Lucía', 'lucia@ejemplo.es', '600 123 456' ] ) assert.ok( !logged.includes( personal ) )
+    })
+
+    /* Campo trampa vacío o sin mandar: una persona. La reserva se hace y el campo no se guarda */
+    test( 'con el campo trampa vacío o ausente la reserva se hace normal', async () => {
+        for ( const body of [ validBody({ website: '' }), validBody() ] ) {
+            fake.resetDb()
+            const { res } = await fake.callHandler( postReservation, { body } )
+
+            assert.equal( res.statusCode, 201 )
+            assert.equal( fake.store.reservations.length, 1 )
+            assert.equal( 'website' in createdReservation(), false )
+        }
+        assert.equal( fake.mailer.calls.length, 2 )
+    })
+
+    describe( 'tope de reservas activas por contacto', () => {
+
+        const TOO_MANY = 'Ya tienes 2 reservas activas. Para hacer otra, llámanos'
+
+        /* Una reserva confirmada y futura del mismo contacto, en otra mesa y otro día para que no ocupe la hora pedida */
+        const previous = ( overrides = {} ) => fake.insertReservation({
+            date: '2026-12-02', time: '13:00', partySize: 2, name: 'Lucía Pérez',
+            phone: '600123456', email: 'lucia@ejemplo.es', table: 10, token: `${ fake.store.reservations.length }`.repeat( 32 ),
+            ...overrides
+        })
+
+        test( 'con 1 reserva activa todavía puede hacer otra', async () => {
+            previous()
+            const { res } = await fake.callHandler( postReservation, { body: validBody() } )
+
+            assert.equal( res.statusCode, 201 )
+            assert.equal( fake.store.reservations.length, 2 )
+        })
+
+        test( 'la tercera con el mismo correo responde 409', async () => {
+            previous({ phone: '611111111' })
+            previous({ phone: '622222222', date: '2026-12-03' })
+            const { res } = await fake.callHandler( postReservation, { body: validBody({ email: ' LUCIA@ejemplo.es' }) } )
+
+            assert.equal( res.statusCode, 409 )
+            assert.deepEqual( res.body, { message: TOO_MANY, data: null } )
+            assert.equal( fake.store.reservations.length, 2 )
+            assert.equal( fake.mailer.calls.length, 0 )
+        })
+
+        /* El mismo teléfono escrito de otra forma (espacios, guiones, +34) cuenta como el mismo */
+        test( 'la tercera con el mismo teléfono escrito distinto responde 409', async () => {
+            for ( const phone of [ '600 000 000', '+34600000000', '600-000-000' ] ) {
+                fake.resetDb()
+                previous({ email: 'una@ejemplo.es', phone: '600000000' })
+                previous({ email: 'otra@ejemplo.es', phone: '+34 600 00 00 00', date: '2026-12-03' })
+
+                const { res } = await fake.callHandler( postReservation, { body: validBody({ phone }) } )
+
+                assert.equal( res.statusCode, 409, `${ phone } debería contar como el mismo teléfono` )
+                assert.deepEqual( res.body, { message: TOO_MANY, data: null } )
+            }
+            assert.equal( fake.mailer.calls.length, 0 )
+        })
+
+        /* Solo cuentan las confirmadas y futuras: ni las canceladas, ni las de días pasados, ni las de hoy que ya han empezado
+        (el "ahora" fijo es hoy a las 10:00) */
+        test( 'las canceladas y las pasadas no cuentan', async () => {
+            previous({ status: 'cancelled' })
+            previous({ status: 'cancelled', date: '2026-12-03' })
+            previous({ date: '2026-11-20' })
+            previous({ date: '2026-11-25', time: '09:00' })
+            previous()
+
+            const { res } = await fake.callHandler( postReservation, { body: validBody() } )
+
+            assert.equal( res.statusCode, 201 )
+        })
+
+        /* Un reintento de la segunda (en menos de 10 minutos) no cuenta como tercera: responde con la que hay */
+        test( 'un reintento de la segunda no cuenta como tercera', async () => {
+            previous()
+            await fake.callHandler( postReservation, { body: validBody() } )
+            const { res } = await fake.callHandler( postReservation, { body: validBody() } )
+
+            assert.equal( res.statusCode, 201 )
+            assert.equal( fake.store.reservations.length, 2 )
+            assert.equal( fake.mailer.calls.length, 1 )
+        })
     })
 })
 
@@ -698,6 +816,50 @@ describe( 'PATCH /api/reservations/:token (updateReservation)', () => {
         const saved = fake.getReservationByToken( TOKEN_A )
         assert.equal( saved.time, '21:00' )
         assert.ok( saved.emailFailedAt instanceof Date )
+    })
+
+    /* Number( [ 4 ] ) da 4: las personas llegan a la validación sin convertir, y una lista no vale */
+    test( 'responde 400 con las personas en una lista', async () => {
+        storedReservation()
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-01', time: '21:00', partySize: [ 4 ] }
+        })
+
+        assert.equal( res.statusCode, 400 )
+        assert.deepEqual( res.body, { message: 'Se reserva para 2 a 6 personas. Para grupos más grandes, llámanos', data: null } )
+        assert.equal( fake.getReservationByToken( TOKEN_A ).time, '13:00' )
+    })
+
+    /* Al cambiar de día se recalcula cuándo se borra: el 2 de diciembre, a las 23:00 universales del día 2 */
+    test( 'al modificar recalcula expiresAt con el nuevo día', async () => {
+        storedReservation({ expiresAt: new Date( '2026-12-01T23:00:00.000Z' ) })
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-02', time: '20:00', partySize: 2 }
+        })
+
+        assert.equal( res.statusCode, 200 )
+        assert.equal( fake.getReservationByToken( TOKEN_A ).expiresAt.toISOString(), '2026-12-02T23:00:00.000Z' )
+    })
+
+    /* Si el cambio choca y se deshace, expiresAt vuelve a ser el del día de antes */
+    test( 'al deshacer un cambio expiresAt vuelve al del día de antes', async () => {
+        storedReservation({ expiresAt: new Date( '2026-12-01T23:00:00.000Z' ) })
+        fake.hooks.afterUpdate = updated => {
+            fake.insertReservation({
+                date: updated.date, time: updated.time, partySize: 2, name: 'Otra', phone: '600000000',
+                email: 'otra@ejemplo.es', table: updated.table, token: TOKEN_B
+            })
+        }
+
+        const { res } = await fake.callHandler( updateReservation, {
+            params: { token: TOKEN_A },
+            body: { date: '2026-12-02', time: '20:00', partySize: 2 }
+        })
+
+        assert.equal( res.statusCode, 409 )
+        assert.equal( fake.getReservationByToken( TOKEN_A ).expiresAt.toISOString(), '2026-12-01T23:00:00.000Z' )
     })
 })
 

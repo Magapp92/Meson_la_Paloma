@@ -38,7 +38,12 @@ const FIELD_LIMITS = Object.freeze({
     notes: 500
 })
 
+/* Cuántas reservas futuras puede tener a la vez un mismo contacto (mismo correo o mismo teléfono).
+Para hacer más, tiene que llamar: así nadie llena el comedor con reservas falsas desde la web */
+const MAX_ACTIVE_PER_CONTACT = 2
+
 module.exports = {
     BOOKING_RULES,
-    FIELD_LIMITS
+    FIELD_LIMITS,
+    MAX_ACTIVE_PER_CONTACT
 }

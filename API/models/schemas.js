@@ -60,6 +60,8 @@ es siempre del día 5, esté donde esté el servidor.
 table es el número de la mesa asignada. token es el código secreto del enlace para modificar o cancelar.
 Los maxlength repiten los máximos de la validación (FIELD_LIMITS): por si algún día se guarda una reserva sin pasar por ella.
 emailFailedAt (opcional) es cuándo falló el último correo de la reserva: así el mesón puede ver a quién no le ha llegado y avisarle.
+expiresAt es cuándo se borra la reserva: al empezar en Madrid el día siguiente a date (services/madrid-time.js).
+Lo pone la API al crear y lo recalcula al modificar; al cancelar no cambia, así que las canceladas se borran igual.
 timestamps añade createdAt y updatedAt solos */
 const reservationSchema = new mongoose.Schema(
     {
@@ -75,7 +77,8 @@ const reservationSchema = new mongoose.Schema(
         status: { type: mongoose.Schema.Types.String, enum: [ 'confirmed', 'cancelled' ], default: 'confirmed' },
         token: { type: mongoose.Schema.Types.String, required: true, unique: true },
         reminderSent: { type: mongoose.Schema.Types.Boolean, default: false },
-        emailFailedAt: { type: mongoose.Schema.Types.Date }
+        emailFailedAt: { type: mongoose.Schema.Types.Date },
+        expiresAt: { type: mongoose.Schema.Types.Date, required: true }
     },
     {
         collection: 'reservations',
@@ -86,6 +89,11 @@ const reservationSchema = new mongoose.Schema(
 
 /* Índice para buscar rápido las reservas de un día (lo que más se consulta al calcular los huecos) */
 reservationSchema.index({ date: 1, status: 1 })
+
+/* Índice TTL: borra cada reserva cuando llega su expiresAt (expireAfterSeconds 0: justo en ese momento, sin esperar más).
+MongoDB revisa los TTL cada unos 60 segundos y borra los documentos vencidos él solo, sin tareas programadas nuestras.
+El recordatorio no se ve afectado: se envía antes de la reserva, y la reserva no se borra hasta que acaba su día */
+reservationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
 
 module.exports = {
     menuCategorySchema,

@@ -3,8 +3,8 @@
 const crypto = require( 'node:crypto' )
 const { Table, Reservation } = require( '../models' )
 const { getAvailableTimes, pickTable, overlaps, toMinutes } = require( '../services/availability' )
-const { BOOKING_RULES } = require( '../services/booking-rules' )
-const { getMadridNow } = require( '../services/madrid-time' )
+const { BOOKING_RULES, MAX_ACTIVE_PER_CONTACT } = require( '../services/booking-rules' )
+const { getMadridNow, getStartOfNextDayInMadrid } = require( '../services/madrid-time' )
 const { sendEmailSafely } = require( '../services/notifications' )
 const { TOKEN_PATTERN, validateBooking, validateReservationForm, validateDaysAhead } = require( '../services/reservation-validation' )
 const { getSequence, buildReservationEmail, buildCancellationMessage } = require( '../emails/reservation-emails' )
@@ -13,9 +13,34 @@ const { fail } = require( './http' )
 const NOT_FOUND_MESSAGE = 'No encontramos ninguna reserva con este enlace'
 const NOT_FREE_MESSAGE = 'Esa hora ya no está libre. Elige otra, por favor'
 const TOO_LATE_TO_CHANGE_MESSAGE = `Faltan menos de ${ BOOKING_RULES.minNoticeMinutes / 60 } horas para tu reserva: para cambiarla, llámanos`
+const TOO_MANY_ACTIVE_MESSAGE = `Ya tienes ${ MAX_ACTIVE_PER_CONTACT } reservas activas. Para hacer otra, llámanos`
 
 /* Ventana para tratar una reserva igual como repetida (doble clic o reintento del navegador): 10 minutos */
 const DUPLICATE_WINDOW_MS = 10 * 60 * 1000
+
+/* El teléfono solo con sus cifras, para reconocer el mismo número aunque se escriba distinto:
+'600 000 000', '600-000-000' y '+34600000000' son el mismo. Quitamos todo lo que no es cifra y, si delante
+de los 9 números queda el prefijo de España (34 o 0034), también: un número español tiene 9 cifras */
+const toPhoneDigits = phone => phone.replace( /\D/g, '' ).replace( /^(?:00)?34(?=\d{9}$)/, '' )
+
+/* ¿Cuántas reservas confirmadas y futuras tiene ya este contacto, con el mismo correo O el mismo teléfono?
+Pedimos a la base las confirmadas de hoy en adelante (en hora de Madrid) y comparamos aquí, en memoria:
+el teléfono hay que normalizarlo (toPhoneDigits) y a esta escala son pocas reservas, así que no hace falta
+guardar el teléfono normalizado aparte. Las de hoy que ya han empezado no cuentan (isPastReservation) */
+const countActiveReservations = async ( email, phone, now ) => {
+    const normalizedEmail = email.trim().toLowerCase()
+    const phoneDigits = toPhoneDigits( phone )
+
+    const upcoming = await Reservation.find(
+        { status: 'confirmed', date: { $gte: now.date } },
+        { date: 1, time: 1, email: 1, phone: 1 }
+    ).lean()
+
+    return upcoming.filter( reservation =>
+        !isPastReservation( reservation, now ) &&
+        ( reservation.email === normalizedEmail || toPhoneDigits( reservation.phone ) === phoneDigits )
+    ).length
+}
 
 /* La reserva de un código, o null si no hay ninguna. Un código mal formado o que no existe se tratan igual
 (los dos acaban en el mismo 404), pero con uno mal formado ni consultamos la base de datos */
@@ -91,15 +116,26 @@ const postReservation = async ( req, res, next ) => {
         /* Si la petición llega sin cuerpo JSON, Express 5 deja req.body en undefined: con {} llega a la validación y responde 400 */
         const body = req.body ?? {}
         /* Solo cogemos los campos permitidos: si alguien manda status, table o token, se ignoran */
-        const { date, time, name, phone, email, notes } = body
-        const partySize = Number( body.partySize )
+        const { date, time, name, phone, email, notes, website } = body
 
-        const error = validateReservationForm({ date, time, partySize, name, phone, email, notes })
+        /* La validación recibe partySize tal como llega, sin convertir: así una lista ([ 4 ]) se rechaza.
+        Una vez validado, para el resto lo usamos como número */
+        const error = validateReservationForm({ date, time, partySize: body.partySize, name, phone, email, notes })
         if ( error ) return fail( res, 400, error )
+        const partySize = Number( body.partySize )
 
         const now = getMadridNow()
         const daysAheadError = validateDaysAhead( date, now )
         if ( daysAheadError ) return fail( res, 400, daysAheadError )
+
+        /* Campo trampa (website): el formulario lo tiene oculto, así que una persona lo deja vacío y un robot que
+        rellena todos los campos lo escribe. Si llega con texto, respondemos 201 como si la reserva se hubiera hecho,
+        para que el robot no sepa que lo hemos detectado, pero no guardamos nada ni mandamos correo.
+        A la consola solo va el aviso, sin datos personales. El campo nunca se guarda */
+        if ( typeof website === 'string' && website.trim() ) {
+            console.warn( 'Reserva descartada: el campo trampa llegó relleno' )
+            return respondCreated( res, { date, time, partySize, name: name.trim() } )
+        }
 
         /* ¿Es una reserva repetida? Mientras se espera el correo de confirmación, el cliente puede pulsar otra vez
         o el navegador reintentar la petición. Si ya hay una reserva confirmada con el mismo correo, día y hora
@@ -113,6 +149,12 @@ const postReservation = async ( req, res, next ) => {
             createdAt: { $gte: new Date( Date.now() - DUPLICATE_WINDOW_MS ) }
         }).lean()
         if ( duplicate ) return respondCreated( res, duplicate )
+
+        /* Tope de reservas futuras por contacto. Va después de la de repetidas, para que un reintento
+        no cuente como una reserva más, y antes de mirar las horas libres */
+        if ( await countActiveReservations( email, phone, now ) >= MAX_ACTIVE_PER_CONTACT ) {
+            return fail( res, 409, TOO_MANY_ACTIVE_MESSAGE )
+        }
 
         const [ tables, reservations ] = await getDayBookings( date )
 
@@ -129,7 +171,9 @@ const postReservation = async ( req, res, next ) => {
         const reservation = await Reservation.create({
             date, time, partySize, name, phone, email, notes,
             table: table.number,
-            token
+            token,
+            /* Se borra sola al empezar el día siguiente (índice TTL de models/schemas.js) */
+            expiresAt: getStartOfNextDayInMadrid( date )
         })
 
         /* Si dos personas reservan la misma mesa a la vez, las dos pueden pasar la comprobación de arriba.
@@ -241,12 +285,13 @@ const updateReservation = async ( req, res, next ) => {
         const body = req.body ?? {}
         /* Solo cogemos los campos permitidos: si alguien manda status, table o token, se ignoran */
         const { date, time } = body
-        const partySize = Number( body.partySize )
 
         /* Primero los datos, con los mismos mensajes que al crear, y después el código:
-        con datos mal responde 400 aunque el código no exista */
-        const error = validateBooking({ date, time, partySize })
+        con datos mal responde 400 aunque el código no exista.
+        partySize llega a la validación sin convertir (una lista no vale); después lo usamos como número */
+        const error = validateBooking({ date, time, partySize: body.partySize })
         if ( error ) return fail( res, 400, error )
+        const partySize = Number( body.partySize )
 
         const now = getMadridNow()
         const daysAheadError = validateDaysAhead( date, now )
@@ -292,10 +337,11 @@ const updateReservation = async ( req, res, next ) => {
 
         /* Guardamos el cambio. Filtramos también por status: 'confirmed' para no pisar una cancelación
         que haya llegado entre la lectura y esta escritura.
-        reminderSent vuelve a false: el recordatorio se enviará otra vez, para la nueva fecha */
+        reminderSent vuelve a false: el recordatorio se enviará otra vez, para la nueva fecha.
+        expiresAt se recalcula con el nuevo día: la reserva se borra al empezar el día siguiente */
         const updated = await Reservation.findOneAndUpdate(
             { _id: reservation._id, status: 'confirmed' },
-            { date, time, partySize, table: table.number, reminderSent: false },
+            { date, time, partySize, table: table.number, reminderSent: false, expiresAt: getStartOfNextDayInMadrid( date ) },
             { returnDocument: 'after' }
         ).lean()
 
@@ -313,7 +359,8 @@ const updateReservation = async ( req, res, next ) => {
                     time: reservation.time,
                     partySize: reservation.partySize,
                     table: reservation.table,
-                    reminderSent: reservation.reminderSent
+                    reminderSent: reservation.reminderSent,
+                    expiresAt: getStartOfNextDayInMadrid( reservation.date )
                 }
             )
 
