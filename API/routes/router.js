@@ -1,9 +1,9 @@
 
 /* Router con todos los endpoints de la API. Cuelgan de /api (lo pone index.js) */
 const express = require( 'express' )
-const { getMenu } = require( './controllers/menu' )
-const { getAvailability, getDays } = require( './controllers/availability' )
-const { postReservation, getReservation, cancelReservation, updateReservation } = require( './controllers/reservations' )
+const { getMenu } = require( '../controllers/menu' )
+const { getAvailability, getDays } = require( '../controllers/availability' )
+const { postReservation, getReservation, cancelReservation, updateReservation } = require( '../controllers/reservations' )
 
 const router = express.Router()
 

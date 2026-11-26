@@ -4,7 +4,7 @@ Este archivo NO acaba en .test.js a propósito: node --test solo ejecuta como te
 *.test.js, y este es solo una ayuda que cargan los tests.
 
 Cómo se usa: llamar a install() ANTES de cargar el controller. install() mete en require.cache
-los módulos falsos con la ruta de los de verdad (models.js, mailer.js y madrid-time.js), y require
+los módulos falsos con la ruta de los de verdad (models/index.js, services/mailer.js y services/madrid-time.js), y require
 los devuelve a ellos en vez de leer los archivos. Cada archivo de test va en su propio proceso
 con node --test, así que el cambio no afecta a los demás tests */
 const path = require( 'node:path' )
@@ -223,9 +223,9 @@ const setCachedModule = ( relativePath, exports ) => {
 }
 
 const install = () => {
-    setCachedModule( 'models.js', { Table, Reservation, MenuCategory: {} } )
-    setCachedModule( 'mailer.js', { sendEmail } )
-    setCachedModule( 'madrid-time.js', { getMadridNow } )
+    setCachedModule( 'models/index.js', { Table, Reservation, MenuCategory: {} } )
+    setCachedModule( 'services/mailer.js', { sendEmail } )
+    setCachedModule( 'services/madrid-time.js', { getMadridNow } )
     resetDb()
     resetMailer()
 }

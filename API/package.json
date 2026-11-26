@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "nodemon index",
     "start": "node index",
-    "seed": "node seed",
+    "seed": "node data/seed.js",
     "test": "node --test"
   },
   "dependencies": {

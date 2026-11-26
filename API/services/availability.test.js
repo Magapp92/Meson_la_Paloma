@@ -5,7 +5,7 @@ miércoles 25 de noviembre de 2026 a las 10:00. El 29 es domingo, el 30 lunes y 
 const { test } = require( 'node:test' )
 const assert = require( 'node:assert/strict' )
 const { toMinutes, toTime, parseDate, getDaySlots, pickTable, getAvailableTimes, getOpenDays } = require( './availability' )
-const { TABLES } = require( './data/tables' )
+const { TABLES } = require( '../data/tables' )
 
 const NOW = { date: '2026-11-25', time: '10:00' }
 

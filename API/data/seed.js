@@ -3,10 +3,10 @@
 Vacía cada colección y la vuelve a llenar con los archivos de data/.
 Se lanza a mano con npm run seed cada vez que cambia la carta o el aforo. No toca las reservas */
 const mongoose = require( 'mongoose' )
-const { connect } = require( './db' )
-const { MenuCategory, Table } = require( './models' )
-const { FOOD_MENU } = require( './data/food-menu' )
-const { TABLES } = require( './data/tables' )
+const { connect } = require( '../config/db' )
+const { MenuCategory, Table } = require( '../models' )
+const { FOOD_MENU } = require( './food-menu' )
+const { TABLES } = require( './tables' )
 
 /* La carta: a cada categoría le añadimos su posición (order), empezando por 1 */
 const seedMenu = async () => {

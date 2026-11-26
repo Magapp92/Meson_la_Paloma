@@ -5,9 +5,9 @@ console.log( 'Iniciando la API del Mesón La Paloma' )
 
 const express = require( 'express' )
 const cors = require( 'cors' )
-const { connect } = require( './db' )
-const { router } = require( './router' )
-const { notFound, errorHandler } = require( './middlewares' )
+const { connect } = require( './config/db' )
+const { router } = require( './routes/router' )
+const { notFound, errorHandler } = require( './middlewares/errors' )
 
 /* Leemos las variables del .env: el puerto (la conexión a Mongo la lee db.js) */
 require( 'dotenv' ).config({ quiet: true })

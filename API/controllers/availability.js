@@ -1,9 +1,9 @@
 
 /* Controlador de la disponibilidad: qué horas quedan libres un día para un número de personas */
 const { Table, Reservation } = require( '../models' )
-const { getAvailableTimes, getOpenDays, parseDate } = require( '../availability' )
-const { getMadridNow } = require( '../madrid-time' )
-const { BOOKING_RULES } = require( '../booking-rules' )
+const { getAvailableTimes, getOpenDays, parseDate } = require( '../services/availability' )
+const { getMadridNow } = require( '../services/madrid-time' )
+const { BOOKING_RULES } = require( '../services/booking-rules' )
 const { TOKEN_PATTERN } = require( './reservations' )
 
 /* GET /api/availability?date=AAAA-MM-DD&partySize=4&exclude=CODIGO
