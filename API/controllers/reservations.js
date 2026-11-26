@@ -7,6 +7,7 @@ const { getMadridNow } = require( '../madrid-time' )
 const { BOOKING_RULES } = require( '../booking-rules' )
 const { sendEmail } = require( '../mailer' )
 const { buildConfirmationEmail } = require( '../emails/confirmation' )
+const { buildCalendarEvent } = require( '../emails/calendar-event' )
 
 /* Respuesta de error con el formato de siempre */
 const fail = ( res, status, message ) => res.status( status ).json({ message, data: null })
@@ -110,7 +111,21 @@ const postReservation = async ( req, res, next ) => {
                 notes: reservation.notes,
                 manageUrl
             })
-            await sendEmail({ to: { email: reservation.email, name: reservation.name }, subject, html, text })
+            /* Evento de calendario adjunto (.ics): así el programa de correo ofrece "Añadir al calendario" */
+            const calendarEvent = buildCalendarEvent({
+                uid: `${ reservation.token }@mesonlapaloma.com`,
+                title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
+                date: reservation.date,
+                time: reservation.time,
+                durationMinutes: BOOKING_RULES.durationMinutes,
+                timeZone: 'Europe/Madrid',
+                location: 'C/ Artajona, 9, 28039 Madrid'
+            })
+            await sendEmail({
+                to: { email: reservation.email, name: reservation.name },
+                subject, html, text,
+                attachments: [ { name: 'reserva-meson-la-paloma.ics', content: calendarEvent } ]
+            })
         } catch ( error ) {
             console.error( 'No se ha podido enviar el correo de confirmación:', error.message )
         }

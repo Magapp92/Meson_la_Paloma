@@ -7,9 +7,10 @@ const BREVO_URL = 'https://api.brevo.com/v3/smtp/email'
 /* Envía un correo.
 - to: el destinatario, como { email, name }.
 - subject, html y text: el asunto y el cuerpo en HTML y en texto plano.
+- attachments (opcional): archivos adjuntos, como [ { name, content } ] con content en texto; se mandan en base64, que es lo que pide Brevo.
 Si falta la clave o el remitente no envía nada y devuelve null: así se puede trabajar en local sin clave.
 Si Brevo responde con error, lanza un Error con su mensaje. Si va bien, devuelve la respuesta de Brevo (trae messageId) */
-const sendEmail = async ({ to, subject, html, text }) => {
+const sendEmail = async ({ to, subject, html, text, attachments }) => {
     const apiKey = process.env.BREVO_API_KEY
     const fromEmail = process.env.MAIL_FROM
     const fromName = process.env.MAIL_FROM_NAME || 'Mesón La Paloma'
@@ -31,7 +32,13 @@ const sendEmail = async ({ to, subject, html, text }) => {
             to: [ { email: to.email, name: to.name } ],
             subject,
             htmlContent: html,
-            textContent: text
+            textContent: text,
+            ...( attachments?.length && {
+                attachment: attachments.map( ({ name, content }) => ({
+                    name,
+                    content: Buffer.from( content ).toString( 'base64' )
+                }))
+            })
         })
     })
 

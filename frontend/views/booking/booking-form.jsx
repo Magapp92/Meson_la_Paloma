@@ -8,7 +8,7 @@ import { CONTACT, TIME_ZONE } from '@const/business.js'
 import { ROUTES } from '@const/routes.js'
 import { useRequest } from '@hooks/use-request.js'
 import { request } from '@lib/request.js'
-import { downloadCalendarEvent, getGoogleCalendarUrl } from '@lib/calendar.js'
+import { getGoogleCalendarUrl, getOutlookCalendarUrl } from '@lib/calendar.js'
 
 /* Los pasos del formulario, en orden. El número de cada paso es su posición + 1 */
 const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Datos' ])
@@ -321,11 +321,9 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
         location: `${ CONTACT.street }, ${ CONTACT.city }`
     }
 
-    /* Enlace a Google Calendar con el evento ya rellenado */
+    /* Enlaces a Google Calendar y a Outlook con el evento ya rellenado */
     const googleUrl = getGoogleCalendarUrl( calendarEvent )
-
-    /* Descarga el evento como archivo .ics, para Apple Calendar u Outlook */
-    const downloadEvent = () => downloadCalendarEvent({ ...calendarEvent, fileName: 'reserva-meson-la-paloma.ics' })
+    const outlookUrl = getOutlookCalendarUrl( calendarEvent )
 
     return (
         <section className="BookingConfirmation">
@@ -338,13 +336,15 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
                 Si necesitas cambiar algo,{' '}
                 <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
             </p>
-            {/* Guardar la reserva en el calendario: Google Calendar se abre en otra pestaña; Apple y Outlook, con el archivo .ics */}
+            {/* Guardar la reserva en el calendario: Google Calendar y Outlook se abren en otra pestaña, sin descargar nada.
+            Para Apple, una nota: el evento va en el correo de confirmación */}
             <div className="BookingConfirmation-calendar">
                 <p className="BookingConfirmation-label">Añadir al calendario:</p>
                 <div className="BookingConfirmation-actions">
                     <Button href={googleUrl} target="_blank" rel="noopener" title="Añadir a Google Calendar">Google Calendar</Button>
-                    <Button onClick={downloadEvent} title="Descargar el evento para Apple Calendar u Outlook">Apple / Outlook</Button>
+                    <Button href={outlookUrl} target="_blank" rel="noopener" title="Añadir a Outlook">Outlook</Button>
                 </div>
+                <p className="BookingConfirmation-hint">¿Usas el calendario de Apple? Añádelo desde el correo de confirmación.</p>
             </div>
             {/* El enlace a la carta, debajo */}
             <div className="BookingConfirmation-actions">

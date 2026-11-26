@@ -560,6 +560,15 @@ button.BookingProgress-button:focus-visible{
     margin-top: .6rem;
 }
 
+/* La nota para el calendario de Apple, pequeña y en gris claro, debajo de los botones */
+.BookingConfirmation-hint{
+    margin-top: .75rem;
+
+    font-size: .85rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
 
 /* AVISO */
 
