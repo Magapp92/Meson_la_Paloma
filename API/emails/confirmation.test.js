@@ -51,3 +51,13 @@ test( 'la línea de notas solo sale si hay notas', () => {
     assert.ok( withNotes.html.includes( 'Trona para un bebé' ) )
     assert.ok( withNotes.text.includes( 'Notas: Trona para un bebé' ) )
 })
+
+test( 'con isUpdate, el asunto y el título dicen "Reserva modificada"', () => {
+    const { subject, html, text } = buildConfirmationEmail({ ...RESERVATION, isUpdate: true })
+
+    assert.equal( subject, 'Reserva modificada: sábado 28 de noviembre a las 21:00' )
+    assert.ok( html.includes( 'Reserva modificada' ) )
+    assert.ok( !html.includes( 'Reserva confirmada' ) )
+    assert.ok( text.includes( 'Estos son los datos nuevos de tu reserva:' ) )
+    assert.ok( html.includes( RESERVATION.manageUrl ) )
+})

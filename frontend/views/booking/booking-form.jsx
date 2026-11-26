@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useTransition } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@components/button/button.jsx'
 import { PARTY_SIZES } from '@const/booking.js'
 import { CONTACT, TIME_ZONE } from '@const/business.js'
@@ -9,9 +10,18 @@ import { ROUTES } from '@const/routes.js'
 import { useRequest } from '@hooks/use-request.js'
 import { request } from '@lib/request.js'
 import { getGoogleCalendarUrl, getOutlookCalendarUrl } from '@lib/calendar.js'
+import { toDayLabel } from '@lib/days.js'
+import { BookingReview } from './booking-review.jsx'
 
 /* Los pasos del formulario, en orden. El número de cada paso es su posición + 1 */
 const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Datos' ])
+
+/* Al modificar una reserva los datos de contacto ya están: el último paso es revisar el cambio */
+const EDIT_STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Revisar' ])
+
+/* El mensaje de la API cuando la hora se ha ocupado (409). Al modificar, un 409 también puede ser
+que la reserva esté cancelada o ya haya empezado: solo con este mensaje se vuelve a elegir hora */
+const TIME_TAKEN_MESSAGE = 'Esa hora ya no está libre. Elige otra, por favor'
 
 /* Las horas se reparten en comidas y cenas para leerlas mejor: las de antes de las 17:00 son comidas.
 Las horas 'HH:MM' se pueden comparar como texto: '13:15' < '17:00' */
@@ -22,12 +32,22 @@ const SERVICES = Object.freeze([
 
 /* Formulario de reserva por pasos, como un carrusel: se ve un paso cada vez y, al elegir, se desliza al siguiente.
 Es un componente de cliente porque guarda lo que se va eligiendo (useState).
-days: los días en los que se puede reservar, ya con su etiqueta ({ date, weekday, day, month, long }) */
-export const BookingForm = ({ initialPartySize = null, days }) => {
+days: los días en los que se puede reservar, ya con su etiqueta ({ date, weekday, day, month, long }).
+Modo edición ("Mi reserva"): con editToken se modifica esa reserva en lugar de crear una.
+initial: lo que tiene ahora ({ partySize, date, time }), ya elegido al empezar; onDone: se llama al guardar */
+export const BookingForm = ({ initialPartySize = null, days, editToken, initial, onDone }) => {
 
-    const [ partySize, setPartySize ] = useState( initialPartySize )
-    const [ date, setDate ] = useState( null )
-    const [ time, setTime ] = useState( null )
+    const router = useRouter()
+
+    /* Mientras la página se pide de nuevo tras guardar, el botón sigue en "Guardando…" */
+    const [ isRefreshing, startRefresh ] = useTransition()
+
+    const isEditing = Boolean( editToken )
+    const steps = isEditing ? EDIT_STEPS : STEPS
+
+    const [ partySize, setPartySize ] = useState( initial?.partySize ?? initialPartySize )
+    const [ date, setDate ] = useState( initial?.date ?? null )
+    const [ time, setTime ] = useState( initial?.time ?? null )
 
     /* Los datos de contacto, en un solo objeto: cada campo cambia su propiedad */
     const [ contact, setContact ] = useState({ name: '', phone: '', email: '', notes: '' })
@@ -48,8 +68,10 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
     /* El paso que se ve, para llevarle el foco al cambiar */
     const stepRef = useRef( null )
 
-    /* Las horas libres se piden a la API cuando hay día y personas, y otra vez cada vez que cambia alguno */
-    const availabilityPath = date && partySize ? `/availability?date=${ date }&partySize=${ partySize }` : null
+    /* Las horas libres se piden a la API cuando hay día y personas, y otra vez cada vez que cambia alguno.
+    Al modificar, exclude hace que la propia reserva no cuente como ocupada: su hora actual sale libre */
+    const excludeQuery = isEditing ? `&exclude=${ encodeURIComponent( editToken ) }` : ''
+    const availabilityPath = date && partySize ? `/availability?date=${ date }&partySize=${ partySize }${ excludeQuery }` : null
     const { data: availability, error, isLoading, reload } = useRequest( availabilityPath )
 
     /* Las horas de cada servicio; los servicios sin horas libres no se muestran */
@@ -57,8 +79,9 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
         .map( service => ({ title: service.title, times: availability ? availability.times.filter( service.isInService ) : [] }) )
         .filter( service => service.times.length > 0 )
 
-    /* Lo elegido en cada paso, para el resumen de arriba */
-    const chosenDay = days.find( day => day.date === date )
+    /* Lo elegido en cada paso, para el resumen de arriba.
+    Al modificar, el día de la reserva podría no estar en la lista: entonces su etiqueta se escribe aquí */
+    const chosenDay = days.find( day => day.date === date ) || ( date && toDayLabel( date ) )
     const chosen = [
         partySize && `${ partySize } personas`,
         chosenDay && `${ chosenDay.weekday } ${ chosenDay.day } ${ chosenDay.month }`,
@@ -109,25 +132,42 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
         setContact({ ...contact, [ name ]: value })
     }
 
-    /* Envía la reserva a la API. El navegador ya ha comprobado los campos obligatorios.
-    - Si va bien, se guarda la reserva y se muestra el resumen.
-    - 409: la hora se ha ocupado mientras se rellenaba. Se vuelve al paso 3 con las horas pedidas de nuevo.
+    /* Al modificar, si personas, día y hora son los de antes no hay nada que guardar */
+    const isUnchanged = isEditing && partySize === initial.partySize && date === initial.date && time === initial.time
+
+    /* Envía el formulario a la API. El navegador ya ha comprobado los campos obligatorios.
+    - Al crear, si va bien, se guarda la reserva y se muestra el resumen.
+    - Al modificar, si va bien, router.refresh() pide la página de nuevo al servidor (con los datos nuevos)
+      y onDone() cierra el formulario. Van en una transición para que se cierre cuando ya han llegado.
+    - 409 por hora ocupada: se ha ocupado mientras se elegía. Se vuelve al paso 3 con las horas pedidas de nuevo.
     - Otro error: su mensaje encima del botón */
-    const sendReservation = async event => {
+    const sendForm = async event => {
         event.preventDefault()
 
         setIsSending( true )
         setSendError( '' )
 
         try {
-            const data = await request( '/reservations', {
-                method: 'POST',
-                body: { date, time, partySize, ...contact }
-            })
+            if ( isEditing ) {
+                await request( `/reservations/${ encodeURIComponent( editToken ) }`, {
+                    method: 'PATCH',
+                    body: { date, time, partySize }
+                })
 
-            setReservation( data )
+                startRefresh( () => {
+                    router.refresh()
+                    onDone()
+                })
+            } else {
+                const data = await request( '/reservations', {
+                    method: 'POST',
+                    body: { date, time, partySize, ...contact }
+                })
+
+                setReservation( data )
+            }
         } catch ( error ) {
-            if ( error.status === 409 ) {
+            if ( error.status === 409 && ( !isEditing || error.message === TIME_TAKEN_MESSAGE ) ) {
                 setNotice( error.message )
                 setTime( null )
                 reload()
@@ -146,10 +186,10 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
     }
 
     return (
-        <form className="BookingForm" onSubmit={sendReservation}>
+        <form className="BookingForm" onSubmit={sendForm}>
             {/* En el progreso agrupamos los pasos con lo elegido en cada uno; los ya hechos se pueden pulsar para volver */}
             <ol className="BookingProgress">
-                { STEPS.map( ( name, index ) => {
+                { steps.map( ( name, index ) => {
                     const number = index + 1
                     const isCurrent = number === step
                     const label = chosen[ index ] || name
@@ -178,7 +218,7 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
                     { step === 1 && '¿Cuántos sois?' }
                     { step === 2 && '¿Qué día?' }
                     { step === 3 && '¿A qué hora?' }
-                    { step === 4 && 'Tus datos' }
+                    { step === 4 && ( isEditing ? 'Revisa el cambio' : 'Tus datos' ) }
                 </legend>
                 {/* Paso 1: los círculos para elegir cuántas personas sois */}
                 { step === 1 &&
@@ -253,10 +293,20 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
                         )}
                     </>
                 }
-                {/* Paso 4: los datos de contacto y el botón para confirmar.
+                {/* Paso 4 al modificar: lo de antes y lo nuevo, y el botón para guardar */}
+                { step === 4 && isEditing &&
+                    <BookingReview
+                        before={initial}
+                        after={{ partySize, date, time }}
+                        isUnchanged={isUnchanged}
+                        isSending={isSending || isRefreshing}
+                        sendError={sendError}
+                    />
+                }
+                {/* Paso 4 al reservar: los datos de contacto y el botón para confirmar.
                 Cada campo lleva su label (el lector de pantalla lo lee al entrar) y autoComplete,
                 para que el navegador ofrezca rellenarlo con los datos que ya conoce */}
-                { step === 4 &&
+                { step === 4 && !isEditing &&
                     <div className="ContactFields">
                         <label className="ContactFields-field ContactFields-field--full">
                             <span className="ContactFields-label">Nombre</span>

@@ -49,3 +49,8 @@ test( 'lleva el UID que se pasa', () => {
 
     assert.ok( ics.includes( 'UID:abc123@mesonlapaloma.com\r\n' ) )
 })
+
+test( 'lleva SEQUENCE: 0 por defecto y el número que se pasa', () => {
+    assert.ok( buildCalendarEvent( EVENT ).includes( 'SEQUENCE:0\r\n' ) )
+    assert.ok( buildCalendarEvent({ ...EVENT, sequence: 1795000000 }).includes( 'SEQUENCE:1795000000\r\n' ) )
+})

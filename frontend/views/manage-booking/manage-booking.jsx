@@ -1,7 +1,9 @@
 
 import { CONTACT } from '@const/business.js'
 import { formatLongDate } from '@lib/format-date.js'
+import { getDays, toDayLabel } from '@lib/days.js'
 import { CancelBooking } from './cancel-booking.jsx'
+import { EditBooking } from './edit-booking.jsx'
 import './manage-booking.css'
 
 /* Pide a la API la reserva del código del enlace (GET /api/reservations/:token).
@@ -38,6 +40,14 @@ export const ManageBooking = async ({ searchParams }) => {
 
     /* Sin código no hay nada que pedir: se trata igual que una reserva que no existe */
     const { reservation, notFound, error } = codigo ? await getReservation( codigo ) : { notFound: true }
+
+    /* Si sigue en pie y aún no ha empezado, se puede modificar o cancelar desde aquí */
+    const isChangeable = reservation?.status === 'confirmed' && !reservation.isPast
+
+    /* Para modificarla hacen falta los días, con sus etiquetas ya escritas, como en /reservar.
+    Si no llegan, no se ofrece modificar (sí cancelar) */
+    const days = isChangeable ? await getDays() : null
+    const dayLabels = days ? days.map( toDayLabel ) : null
 
     return (
         <>
@@ -86,9 +96,13 @@ export const ManageBooking = async ({ searchParams }) => {
                                     <li className="ManageBooking-notes">{reservation.notes}</li>
                                 )}
                             </ul>
-                            {/* Si sigue en pie y aún no ha empezado, se puede cancelar desde aquí */}
-                            { reservation.status === 'confirmed' && !reservation.isPast && (
-                                <CancelBooking token={codigo} />
+                            {/* Si se puede cambiar: modificar y cancelar en una fila (cancelar se oculta mientras se modifica).
+                            Sin días, solo cancelar */}
+                            { isChangeable && ( dayLabels
+                                ? <EditBooking token={codigo} reservation={reservation} days={dayLabels}>
+                                    <CancelBooking token={codigo} />
+                                </EditBooking>
+                                : <CancelBooking token={codigo} />
                             )}
                             <p className="ManageBooking-help">
                                 ¿Necesitas algo? Llámanos al{' '}

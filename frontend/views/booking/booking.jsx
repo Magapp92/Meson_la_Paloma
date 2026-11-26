@@ -1,42 +1,9 @@
 
 import { PARTY_SIZES } from '@const/booking.js'
 import { CONTACT } from '@const/business.js'
+import { getDays, toDayLabel } from '@lib/days.js'
 import { BookingForm } from './booking-form.jsx'
 import './booking.css'
-
-/* Pide a la API los días en los que se puede reservar (GET /api/days).
-cache 'no-store': se pide en cada visita, porque la lista cambia con el día y la hora.
-Si la API no responde o contesta con error, devuelve null y la página muestra un aviso */
-const getDays = async () => {
-    try {
-        const res = await fetch( `${ process.env.API_URL }/days`, { cache: 'no-store' })
-
-        if ( !res.ok ) return null
-
-        const { data } = await res.json()
-
-        return data.days
-    } catch {
-        return null
-    }
-}
-
-/* Escribe un día '2026-11-25' por partes para el botón: { weekday: 'mié', day: '25', month: 'nov' },
-y entero para el resumen final: 'miércoles 25 de noviembre'.
-La fecha se lee en UTC, igual que en la API, para que la zona horaria no cambie el día */
-const toDayLabel = date => {
-    const parsed = new Date( `${ date }T00:00:00Z` )
-    const format = options => new Intl.DateTimeFormat( 'es-ES', { timeZone: 'UTC', ...options }).format( parsed ).replace( '.', '' )
-    const day = format({ day: 'numeric' })
-
-    return {
-        date,
-        weekday: format({ weekday: 'short' }),
-        day,
-        month: format({ month: 'short' }),
-        long: `${ format({ weekday: 'long' }) } ${ day } de ${ format({ month: 'long' }) }`
-    }
-}
 
 /* Página para reservar mesa: el título y el formulario.
 Si se llega desde un círculo (/reservar?personas=4), el formulario empieza con ese número elegido */

@@ -3,7 +3,7 @@
 const express = require( 'express' )
 const { getMenu } = require( './controllers/menu' )
 const { getAvailability, getDays } = require( './controllers/availability' )
-const { postReservation, getReservation, cancelReservation } = require( './controllers/reservations' )
+const { postReservation, getReservation, cancelReservation, updateReservation } = require( './controllers/reservations' )
 
 const router = express.Router()
 
@@ -32,9 +32,10 @@ router.route( '/availability' )
 router.route( '/reservations' )
     .post( postReservation )
 
-/* Una reserva, con el código secreto del enlace del correo */
+/* Una reserva, con el código secreto del enlace del correo: leerla y, con PATCH, cambiar el día, la hora y las personas */
 router.route( '/reservations/:token' )
     .get( getReservation )
+    .patch( updateReservation )
 
 /* Cancelar una reserva desde "Mi reserva". Es PATCH porque cambia una parte de la reserva (su estado), no la borra */
 router.route( '/reservations/:token/cancel' )

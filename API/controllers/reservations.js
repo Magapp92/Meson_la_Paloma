@@ -16,8 +16,9 @@ const fail = ( res, status, message ) => res.status( status ).json({ message, da
 /* Los códigos que genera la API tienen 32 caracteres de [A-Za-z0-9_-]: si no tiene esa forma, ni consultamos la base de datos */
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32}$/
 
-/* Comprueba los datos que llegan del formulario. Devuelve el primer error que encuentre, o null si está todo bien */
-const validate = ({ date, time, partySize, name, phone, email, notes }) => {
+/* Comprueba los datos de la mesa: día, hora y personas. Devuelve el primer error que encuentre, o null si está todo bien.
+Va aparte de validate porque al modificar una reserva solo llegan estos tres datos */
+const validateBooking = ({ date, time, partySize }) => {
     if ( !parseDate( date ) ) return 'La fecha no es válida: tiene que ser AAAA-MM-DD'
     if ( typeof time !== 'string' || !/^\d{2}:\d{2}$/.test( time ) ) return 'La hora no es válida: tiene que ser HH:MM'
     /* La hora tiene que ser una de las franjas de ese día: descarta los días cerrados y las horas fuera de servicio o sueltas (21:10) */
@@ -25,6 +26,14 @@ const validate = ({ date, time, partySize, name, phone, email, notes }) => {
     if ( !Number.isInteger( partySize ) || partySize < BOOKING_RULES.minPartySize || partySize > BOOKING_RULES.maxPartySize ) {
         return `Se reserva para ${ BOOKING_RULES.minPartySize } a ${ BOOKING_RULES.maxPartySize } personas. Para grupos más grandes, llámanos`
     }
+
+    return null
+}
+
+/* Comprueba los datos que llegan del formulario. Devuelve el primer error que encuentre, o null si está todo bien */
+const validate = ({ date, time, partySize, name, phone, email, notes }) => {
+    const bookingError = validateBooking({ date, time, partySize })
+    if ( bookingError ) return bookingError
     if ( typeof name !== 'string' || name.trim().length < 2 ) return 'Escribe tu nombre'
     /* Un teléfono con al menos 9 cifras (puede llevar +, espacios o guiones) */
     if ( typeof phone !== 'string' || phone.replace( /\D/g, '' ).length < 9 ) return 'Escribe un teléfono válido'
@@ -32,6 +41,59 @@ const validate = ({ date, time, partySize, name, phone, email, notes }) => {
     if ( notes !== undefined && ( typeof notes !== 'string' || notes.length > 500 ) ) return 'Las notas pueden tener como mucho 500 caracteres'
 
     return null
+}
+
+/* La fecha tiene que estar entre hoy y dentro de maxDaysAhead días (en hora de Madrid). Devuelve el error o null */
+const validateDaysAhead = ( date, now ) => {
+    const daysAhead = daysBetween( now.date, date )
+    if ( daysAhead < 0 || daysAhead > BOOKING_RULES.maxDaysAhead ) {
+        return `Se puede reservar desde hoy hasta dentro de ${ BOOKING_RULES.maxDaysAhead } días`
+    }
+
+    return null
+}
+
+/* Las mesas en uso y las reservas confirmadas de un día.
+excludeId (opcional): una reserva que no se cuenta, la que se está modificando, para que su propia mesa no la bloquee */
+const getDayBookings = ( date, excludeId ) => Promise.all([
+    Table.find({ active: true }).lean(),
+    Reservation.find(
+        { date, status: 'confirmed', ...( excludeId && { _id: { $ne: excludeId } } ) },
+        { table: 1, time: 1, status: 1 }
+    ).lean()
+])
+
+/* Los datos del correo de la reserva (confirmación o modificación), con el evento de calendario adjunto.
+- isUpdate: true en la modificación, cambia el asunto y el título del correo.
+- sequence: versión del evento de calendario; en la creación no se pasa (0) */
+const buildReservationEmail = ( reservation, { isUpdate = false, sequence } = {} ) => {
+    const manageUrl = `${ process.env.SITE_URL }/mi-reserva?codigo=${ reservation.token }`
+    const { subject, html, text } = buildConfirmationEmail({
+        name: reservation.name,
+        date: reservation.date,
+        time: reservation.time,
+        partySize: reservation.partySize,
+        notes: reservation.notes,
+        manageUrl,
+        isUpdate
+    })
+    /* Evento de calendario adjunto (.ics): así el programa de correo ofrece "Añadir al calendario" */
+    const calendarEvent = buildCalendarEvent({
+        uid: `${ reservation.token }@mesonlapaloma.com`,
+        title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
+        date: reservation.date,
+        time: reservation.time,
+        durationMinutes: BOOKING_RULES.durationMinutes,
+        timeZone: 'Europe/Madrid',
+        location: 'C/ Artajona, 9, 28039 Madrid',
+        sequence
+    })
+
+    return {
+        to: { email: reservation.email, name: reservation.name },
+        subject, html, text,
+        attachments: [ { name: 'reserva-meson-la-paloma.ics', content: calendarEvent } ]
+    }
 }
 
 /* ¿Hay otra reserva confirmada, guardada antes que esta, en la misma mesa y a menos de 90 minutos?
@@ -65,18 +127,12 @@ const postReservation = async ( req, res, next ) => {
         const error = validate({ date, time, partySize, name, phone, email, notes })
         if ( error ) return fail( res, 400, error )
 
-        /* La fecha tiene que estar entre hoy y dentro de maxDaysAhead días (en hora de Madrid) */
         const now = getMadridNow()
-        const daysAhead = daysBetween( now.date, date )
-        if ( daysAhead < 0 || daysAhead > BOOKING_RULES.maxDaysAhead ) {
-            return fail( res, 400, `Se puede reservar desde hoy hasta dentro de ${ BOOKING_RULES.maxDaysAhead } días` )
-        }
+        const daysAheadError = validateDaysAhead( date, now )
+        if ( daysAheadError ) return fail( res, 400, daysAheadError )
 
         /* Las mesas en uso y las reservas confirmadas de ese día */
-        const [ tables, reservations ] = await Promise.all([
-            Table.find({ active: true }).lean(),
-            Reservation.find({ date, status: 'confirmed' }, { table: 1, time: 1, status: 1 }).lean()
-        ])
+        const [ tables, reservations ] = await getDayBookings( date )
 
         /* ¿Sigue libre esa hora? Con el mismo cálculo que la disponibilidad: si entre tanto ha pasado
         el margen de 2 horas o se han ocupado las mesas, ya no aparece */
@@ -106,30 +162,7 @@ const postReservation = async ( req, res, next ) => {
         /* Correo de confirmación con el enlace a "Mi reserva". Va en su propio try / catch:
         si el correo falla, la reserva ya está guardada y se mantiene; solo lo apuntamos en la consola */
         try {
-            const manageUrl = `${ process.env.SITE_URL }/mi-reserva?codigo=${ reservation.token }`
-            const { subject, html, text } = buildConfirmationEmail({
-                name: reservation.name,
-                date: reservation.date,
-                time: reservation.time,
-                partySize: reservation.partySize,
-                notes: reservation.notes,
-                manageUrl
-            })
-            /* Evento de calendario adjunto (.ics): así el programa de correo ofrece "Añadir al calendario" */
-            const calendarEvent = buildCalendarEvent({
-                uid: `${ reservation.token }@mesonlapaloma.com`,
-                title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
-                date: reservation.date,
-                time: reservation.time,
-                durationMinutes: BOOKING_RULES.durationMinutes,
-                timeZone: 'Europe/Madrid',
-                location: 'C/ Artajona, 9, 28039 Madrid'
-            })
-            await sendEmail({
-                to: { email: reservation.email, name: reservation.name },
-                subject, html, text,
-                attachments: [ { name: 'reserva-meson-la-paloma.ics', content: calendarEvent } ]
-            })
+            await sendEmail( buildReservationEmail( reservation ) )
         } catch ( error ) {
             console.error( 'No se ha podido enviar el correo de confirmación:', error.message )
         }
@@ -266,9 +299,130 @@ const cancelReservation = async ( req, res, next ) => {
     }
 }
 
-/* Exportamos los controllers para el router */
+/* ¿Hay otra reserva confirmada en la misma mesa, el mismo día y a menos de 90 minutos? La usa la modificación.
+Aquí no miramos quién llegó antes, como en hasEarlierClash: la reserva ya existía y lo que choca es el cambio,
+así que si hay choque con cualquiera, el cambio se deshace */
+const hasClash = async reservation => {
+    const others = await Reservation.find({
+        _id: { $ne: reservation._id },
+        date: reservation.date,
+        table: reservation.table,
+        status: 'confirmed'
+    }).lean()
+
+    return others.some( other =>
+        Math.abs( toMinutes( other.time ) - toMinutes( reservation.time ) ) < BOOKING_RULES.durationMinutes
+    )
+}
+
+/* PATCH /api/reservations/:token
+Modifica el día, la hora y las personas de la reserva del enlace del correo, desde la página "Mi reserva".
+Los demás datos (nombre, teléfono, correo, notas) no se cambian aquí */
+const updateReservation = async ( req, res, next ) => {
+    try {
+        const { token } = req.params
+        /* Solo cogemos los campos permitidos: si alguien manda status, table o token, se ignoran */
+        const { date, time } = req.body
+        const partySize = Number( req.body.partySize )
+
+        /* Primero los datos, con los mismos mensajes que al crear */
+        const error = validateBooking({ date, time, partySize })
+        if ( error ) return fail( res, 400, error )
+
+        const now = getMadridNow()
+        const daysAheadError = validateDaysAhead( date, now )
+        if ( daysAheadError ) return fail( res, 400, daysAheadError )
+
+        /* Mismo 404 que al leer: un código mal formado o que no existe se tratan igual */
+        if ( !TOKEN_PATTERN.test( token ) ) {
+            return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
+        }
+
+        const reservation = await Reservation.findOne({ token }).lean()
+        if ( !reservation ) return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
+
+        if ( reservation.status === 'cancelled' ) {
+            return fail( res, 409, 'Esta reserva está cancelada' )
+        }
+
+        /* Se puede modificar hasta la hora de la reserva, mirando la reserva tal como está (no la nueva hora) */
+        if ( isPastReservation( reservation, now ) ) {
+            return fail( res, 409, 'Esta reserva ya ha empezado. Si necesitas algo, llámanos' )
+        }
+
+        /* Si no cambia nada respondemos 200 con el mismo mensaje, para que la página "Mi reserva" lo trate igual,
+        pero sin guardar ni enviar correo: no hay nada nuevo que contar. Va antes de mirar las horas libres
+        porque su propia hora puede estar ya dentro de las 2 horas de antelación y saldría como no libre */
+        if ( reservation.date === date && reservation.time === time && reservation.partySize === partySize ) {
+            return res.status( 200 ).json({
+                message: 'Reserva modificada',
+                data: toPublicReservation( reservation, now )
+            })
+        }
+
+        /* Las mesas y las reservas del NUEVO día sin contar esta: su mesa actual tiene que poder volver a elegirse
+        (por ejemplo, al pasar de 4 a 5 personas a la misma hora) */
+        const [ tables, reservations ] = await getDayBookings( date, reservation._id )
+
+        const times = getAvailableTimes({ date, partySize, tables, reservations, now })
+        if ( !times.includes( time ) ) {
+            return fail( res, 409, 'Esa hora ya no está libre. Elige otra, por favor' )
+        }
+
+        const table = pickTable({ tables, reservations, time, partySize })
+
+        /* Guardamos el cambio. Filtramos también por status: 'confirmed' para no pisar una cancelación
+        que haya llegado entre la lectura y esta escritura.
+        reminderSent vuelve a false: el recordatorio se enviará otra vez, para la nueva fecha */
+        const updated = await Reservation.findOneAndUpdate(
+            { _id: reservation._id, status: 'confirmed' },
+            { date, time, partySize, table: table.number, reminderSent: false },
+            { returnDocument: 'after' }
+        ).lean()
+
+        if ( !updated ) return fail( res, 409, 'Esta reserva está cancelada' )
+
+        /* Si a la vez otra persona reserva o modifica hacia la misma mesa, las dos pueden pasar la comprobación de arriba.
+        Después de guardar volvemos a mirar: si choca con otra, devolvemos la reserva a como estaba y avisamos */
+        if ( await hasClash( updated ) ) {
+            await Reservation.updateOne(
+                { _id: reservation._id },
+                {
+                    date: reservation.date,
+                    time: reservation.time,
+                    partySize: reservation.partySize,
+                    table: reservation.table,
+                    reminderSent: reservation.reminderSent
+                }
+            )
+            return fail( res, 409, 'Esa hora ya no está libre. Elige otra, por favor' )
+        }
+
+        /* Correo de "Reserva modificada" con el evento de calendario actualizado. Va en su propio try / catch:
+        si el correo falla, el cambio ya está guardado y se mantiene; solo lo apuntamos en la consola.
+        sequence son los segundos de updatedAt, que siempre crecen: con el mismo UID, el calendario
+        actualiza el evento que ya tenía en vez de duplicarlo */
+        try {
+            const sequence = Math.floor( updated.updatedAt.getTime() / 1000 )
+            await sendEmail( buildReservationEmail( updated, { isUpdate: true, sequence } ) )
+        } catch ( error ) {
+            console.error( 'No se ha podido enviar el correo de reserva modificada:', error.message )
+        }
+
+        res.status( 200 ).json({
+            message: 'Reserva modificada',
+            data: toPublicReservation( updated, now )
+        })
+    } catch ( error ) {
+        next( error )
+    }
+}
+
+/* Exportamos los controllers para el router, y TOKEN_PATTERN para el controller de la disponibilidad */
 module.exports = {
     postReservation,
     getReservation,
-    cancelReservation
+    cancelReservation,
+    updateReservation,
+    TOKEN_PATTERN
 }

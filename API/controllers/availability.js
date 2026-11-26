@@ -4,12 +4,16 @@ const { Table, Reservation } = require( '../models' )
 const { getAvailableTimes, getOpenDays, parseDate } = require( '../availability' )
 const { getMadridNow } = require( '../madrid-time' )
 const { BOOKING_RULES } = require( '../booking-rules' )
+const { TOKEN_PATTERN } = require( './reservations' )
 
-/* GET /api/availability?date=AAAA-MM-DD&partySize=4
-Devuelve { date, partySize, times }: times es la lista de horas libres ('13:00', '13:15'…) */
+/* GET /api/availability?date=AAAA-MM-DD&partySize=4&exclude=CODIGO
+Devuelve { date, partySize, times }: times es la lista de horas libres ('13:00', '13:15'…).
+exclude (opcional) es el código de una reserva que se está modificando: esa reserva no cuenta como ocupada.
+Si no, al cambiar de 4 a 5 personas a la misma hora, su propia mesa la bloquearía.
+Si el código no tiene la forma de siempre o no es de ninguna reserva de ese día, se ignora */
 const getAvailability = async ( req, res, next ) => {
     try {
-        const { date } = req.query
+        const { date, exclude } = req.query
         const partySize = Number( req.query.partySize )
 
         /* Comprobamos los parámetros antes de ir a la base de datos: si faltan o están mal, 400 */
@@ -28,11 +32,15 @@ const getAvailability = async ( req, res, next ) => {
         }
 
         /* Pedimos a la vez las mesas en uso y las reservas confirmadas de ese día.
-        lean() devuelve objetos sencillos, más rápidos, porque solo los vamos a leer */
-        const [ tables, reservations ] = await Promise.all([
+        lean() devuelve objetos sencillos, más rápidos, porque solo los vamos a leer.
+        Pedimos también el código para poder quitar la reserva de exclude sin hacer otra consulta */
+        const [ tables, dayReservations ] = await Promise.all([
             Table.find({ active: true }).lean(),
-            Reservation.find({ date, status: 'confirmed' }, { table: 1, time: 1, status: 1 }).lean()
+            Reservation.find({ date, status: 'confirmed' }, { table: 1, time: 1, status: 1, token: 1 }).lean()
         ])
+
+        const excludeToken = typeof exclude === 'string' && TOKEN_PATTERN.test( exclude ) ? exclude : null
+        const reservations = dayReservations.filter( reservation => !excludeToken || reservation.token !== excludeToken )
 
         const times = getAvailableTimes({ date, partySize, tables, reservations, now: getMadridNow() })
 

@@ -1,0 +1,74 @@
+
+/* BOOKING REVIEW */
+
+/* Lo de antes y lo nuevo, uno debajo de otro */
+.BookingReview-list{
+    display: grid;
+    gap: 1rem;
+}
+
+/* Cada reserva: su nombre encima y los datos debajo */
+.BookingReview-item{
+    display: grid;
+    gap: .25rem;
+}
+
+/* "Antes:" y "Ahora:", pequeños, en mayúsculas y en gris claro, como los títulos de comidas y cenas */
+.BookingReview-term{
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+/* Los datos, grandes; los de antes, en gris claro porque dejan de valer */
+.BookingReview-value{
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* Los nuevos, en blanco y con una línea mostaza a la izquierda: es lo que se va a guardar */
+.BookingReview-item--new{
+    padding-left: .9rem;
+    border-left: .2rem solid var(--accent);
+}
+.BookingReview-item--new .BookingReview-value{
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* "No has cambiado nada", en gris claro encima del botón */
+.BookingReview-note{
+    margin-top: 1.25rem;
+
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* Mensaje de la API si no puede guardarlo, en rojo claro con una línea a la izquierda, como los errores de reservar */
+.BookingReview-error{
+    margin-top: 1.25rem;
+    padding: .6rem .9rem;
+    border-left: .2rem solid var(--error);
+
+    color: var(--error);
+    line-height: 1.5;
+}
+
+/* El botón de guardar, separado de lo de encima */
+.BookingReview-actions{
+    margin-top: 1.5rem;
+}
+
+/* Si no hay nada que guardar, el botón apagado y sin reaccionar */
+.BookingReview .Button:disabled{
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* Mientras se guarda, el cursor de espera */
+.BookingReview-actions.isSending .Button:disabled{
+    cursor: wait;
+}

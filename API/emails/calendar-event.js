@@ -50,8 +50,9 @@ const escapeText = value => String( value )
 - date 'AAAA-MM-DD', time 'HH:MM', durationMinutes: cuándo empieza y cuánto dura.
 - timeZone: zona horaria de la fecha y la hora, por ejemplo 'Europe/Madrid'.
 - now: el momento en que se genera el archivo; por defecto, ahora mismo.
+- sequence (opcional): número de versión del evento; por defecto 0, el evento recién creado.
 Devuelve el texto del archivo */
-const buildCalendarEvent = ({ uid, title, date, time, durationMinutes, timeZone, location, now = new Date() }) => {
+const buildCalendarEvent = ({ uid, title, date, time, durationMinutes, timeZone, location, now = new Date(), sequence = 0 }) => {
     const startMinutes = minutesFromTime( time )
 
     const lines = [
@@ -66,6 +67,9 @@ const buildCalendarEvent = ({ uid, title, date, time, durationMinutes, timeZone,
         /* El evento en sí */
         'BEGIN:VEVENT',
         `UID:${ uid }`,
+        /* SEQUENCE: la versión del evento. Si llega otro .ics con el mismo UID y un SEQUENCE mayor,
+        el calendario actualiza el evento que ya tenía en vez de añadir uno duplicado */
+        `SEQUENCE:${ sequence }`,
         /* DTSTAMP: cuándo se generó el evento, siempre en UTC */
         `DTSTAMP:${ formatUtcDateTime( now ) }`,
         /* Inicio y fin en hora local con TZID: así las 21:00 son las 21:00 de Madrid aunque quien

@@ -55,13 +55,17 @@ const detailRow = ( label, value ) => `
 - name, notes: los escribe el cliente, van escapados en el HTML.
 - date 'AAAA-MM-DD', time 'HH:MM', partySize: los datos de la reserva.
 - manageUrl: el enlace para ver, cambiar o cancelar la reserva.
+- isUpdate (opcional): true si el cliente ha modificado la reserva. Cambia el asunto y el título
+a "Reserva modificada" y añade una frase antes de los datos; el resto del correo es el mismo.
 Devuelve { subject, html, text } */
-const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl }) => {
+const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl, isUpdate = false }) => {
     const longDate = formatLongDate( date )
     const people = `${ partySize } ${ partySize === 1 ? 'persona' : 'personas' }`
     const hasNotes = typeof notes === 'string' && notes.trim() !== ''
+    const title = isUpdate ? 'Reserva modificada' : 'Reserva confirmada'
+    const updateIntro = 'Estos son los datos nuevos de tu reserva:'
 
-    const subject = `Reserva confirmada: ${ longDate } a las ${ time }`
+    const subject = `${ title }: ${ longDate } a las ${ time }`
 
     const html = `<!DOCTYPE html>
 <html lang="es">
@@ -82,14 +86,19 @@ const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl 
                     </tr>
                     <tr>
                         <td style="padding: 16px 32px 8px; font-family: ${ TITLE_FONT }; font-size: 32px; line-height: 1.1; text-transform: uppercase; color: ${ COLORS.cream };">
-                            Reserva confirmada
+                            ${ title }
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 8px 32px 16px; font-family: ${ TEXT_FONT }; font-size: 16px; color: ${ COLORS.cream };">
                             Hola, ${ escapeHtml( name ) }:
                         </td>
-                    </tr>
+                    </tr>${ isUpdate ? `
+                    <tr>
+                        <td style="padding: 0 32px 16px; font-family: ${ TEXT_FONT }; font-size: 16px; color: ${ COLORS.cream };">
+                            ${ updateIntro }
+                        </td>
+                    </tr>` : '' }
                     <tr>
                         <td style="padding: 0 32px 24px;">
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${ detailRow( 'Día', escapeHtml( longDate ) ) }${ detailRow( 'Hora', escapeHtml( time ) ) }${ detailRow( 'Personas', escapeHtml( people ) ) }${ hasNotes ? detailRow( 'Notas', escapeHtml( notes ) ) : '' }
@@ -124,10 +133,11 @@ const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl 
     const text = [
         `${ RESTAURANT.name.toUpperCase() }`,
         '',
-        'Reserva confirmada',
+        title,
         '',
         `Hola, ${ name }:`,
         '',
+        ...( isUpdate ? [ updateIntro, '' ] : [] ),
         `Día: ${ longDate }`,
         `Hora: ${ time }`,
         `Personas: ${ people }`,

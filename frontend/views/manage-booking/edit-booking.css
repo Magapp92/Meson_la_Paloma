@@ -1,0 +1,71 @@
+
+/* EDIT BOOKING */
+
+/* Los botones de modificar y cancelar en fila, separados de los datos de la reserva y bajando de línea si no caben */
+.EditBooking-actions{
+    margin-top: 1.75rem;
+
+    display: flex;
+    flex-flow: row wrap;
+    align-items: flex-start;
+    gap: .8rem;
+}
+
+/* Dentro de la fila, cancelar no lleva su separación de arriba: ya la tiene la fila */
+.EditBooking-actions .CancelBooking{
+    margin-top: 0;
+}
+
+/* Al preguntar "¿Seguro que quieres cancelarla?", la pregunta y sus botones ocupan toda la fila, debajo de modificar */
+.EditBooking-actions .CancelBooking:has(.CancelBooking-question){
+    flex-basis: 100%;
+}
+
+/* El formulario abierto, separado de los datos y con "Cerrar sin cambios" debajo.
+   Recibe el foco al abrirse, sin dibujar un contorno */
+.EditBooking{
+    margin-top: 1.75rem;
+
+    display: grid;
+    justify-items: start;
+    gap: 1.25rem;
+}
+.EditBooking:focus{
+    outline: none;
+}
+
+/* El formulario a todo el ancho de la caja */
+.EditBooking .BookingForm{
+    width: 100%;
+}
+
+/* El paso, con el fondo de la página: dentro de la caja de "Mi reserva" se distingue de ella */
+.EditBooking .BookingStep{
+    background-color: var(--bg);
+}
+
+
+/* MÓVIL */
+
+/* En pantallas estrechas el formulario va dentro de la caja y tiene menos sitio que en /reservar:
+   - el paso con menos relleno a los lados;
+   - los círculos de personas un poco más pequeños, para que los cinco quepan en una fila;
+   - los botones de modificar y cancelar, uno debajo de otro y a todo el ancho */
+@media (max-width: 480px){
+    .EditBooking .BookingStep{
+        padding-inline: .75rem;
+    }
+
+    .EditBooking .PartyPicker-circle{
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+
+    .EditBooking-actions > .Button,
+    .EditBooking-actions .CancelBooking{
+        flex: 1 1 100%;
+    }
+    .EditBooking-actions .CancelBooking > .Button{
+        width: 100%;
+    }
+}
