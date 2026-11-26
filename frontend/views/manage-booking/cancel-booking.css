@@ -1,0 +1,52 @@
+
+/* CANCEL BOOKING */
+
+/* Separado de los datos de la reserva */
+.CancelBooking{
+    margin-top: 1.75rem;
+}
+
+/* La pregunta, grande como los datos. Recibe el foco al aparecer, sin dibujar un contorno */
+.CancelBooking-question{
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1.5;
+}
+.CancelBooking-question:focus{
+    outline: none;
+}
+
+/* Los dos botones en fila, bajando de línea si no caben */
+.CancelBooking-actions{
+    margin-top: 1rem;
+
+    display: flex;
+    flex-flow: row wrap;
+    gap: .8rem;
+}
+
+/* Mientras se cancela, los botones apagados y sin reaccionar */
+.CancelBooking .Button:disabled{
+    opacity: .6;
+    cursor: wait;
+}
+
+/* Mensaje de la API si no puede cancelarla, en rojo claro con una línea a la izquierda, como los errores de reservar */
+.CancelBooking-error{
+    margin-top: 1rem;
+    padding: .6rem .9rem;
+    border-left: .2rem solid var(--error);
+
+    color: var(--error);
+    line-height: 1.5;
+}
+
+
+/* MÓVIL */
+
+/* En pantallas estrechas los dos botones, uno debajo de otro y a todo el ancho */
+@media (max-width: 480px){
+    .CancelBooking-actions .Button{
+        flex: 1 1 100%;
+    }
+}

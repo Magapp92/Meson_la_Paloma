@@ -143,8 +143,9 @@ const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl 
     return { subject, html, text }
 }
 
-/* Exportamos el correo para los controllers y formatLongDate para los tests */
+/* Exportamos el correo para los controllers, formatLongDate para los tests y escapeHtml para reutilizarlo en otros correos */
 module.exports = {
     buildConfirmationEmail,
-    formatLongDate
+    formatLongDate,
+    escapeHtml
 }

@@ -8,9 +8,13 @@ const { BOOKING_RULES } = require( '../booking-rules' )
 const { sendEmail } = require( '../mailer' )
 const { buildConfirmationEmail } = require( '../emails/confirmation' )
 const { buildCalendarEvent } = require( '../emails/calendar-event' )
+const { buildCancellationEmail } = require( '../emails/cancellation' )
 
 /* Respuesta de error con el formato de siempre */
 const fail = ( res, status, message ) => res.status( status ).json({ message, data: null })
+
+/* Los códigos que genera la API tienen 32 caracteres de [A-Za-z0-9_-]: si no tiene esa forma, ni consultamos la base de datos */
+const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32}$/
 
 /* Comprueba los datos que llegan del formulario. Devuelve el primer error que encuentre, o null si está todo bien */
 const validate = ({ date, time, partySize, name, phone, email, notes }) => {
@@ -146,37 +150,116 @@ const postReservation = async ( req, res, next ) => {
     }
 }
 
-/* GET /api/reservations/:token
-Devuelve la reserva del enlace del correo, para la página "Mi reserva".
-Solo enviamos lo que hace falta para mostrarla: el enlace se puede reenviar, y quien lo tenga
+/* ¿Ya ha empezado la reserva? Comparamos con la hora de Madrid (now, de getMadridNow): primero el día y,
+si es el mismo, la hora (como texto, AAAA-MM-DD y HH:MM). La usan leer y cancelar, así las dos miran lo mismo */
+const isPastReservation = ( reservation, now ) =>
+    reservation.date < now.date || ( reservation.date === now.date && reservation.time <= now.time )
+
+/* Los datos de la reserva que se pueden enseñar en "Mi reserva".
+Solo lo que hace falta para mostrarla: el enlace se puede reenviar, y quien lo tenga
 no debe ver el teléfono ni el correo. Tampoco la mesa, el código ni los datos internos */
+const toPublicReservation = ( reservation, now ) => ({
+    date: reservation.date,
+    time: reservation.time,
+    partySize: reservation.partySize,
+    name: reservation.name,
+    notes: reservation.notes,
+    status: reservation.status,
+    isPast: isPastReservation( reservation, now )
+})
+
+/* GET /api/reservations/:token
+Devuelve la reserva del enlace del correo, para la página "Mi reserva" */
 const getReservation = async ( req, res, next ) => {
     try {
         const { token } = req.params
 
-        /* Los códigos que genera la API tienen 32 caracteres de [A-Za-z0-9_-]: si no tiene esa forma, ni consultamos la base de datos */
-        if ( !/^[A-Za-z0-9_-]{32}$/.test( token ) ) {
+        if ( !TOKEN_PATTERN.test( token ) ) {
             return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
         }
 
         const reservation = await Reservation.findOne({ token }).lean()
         if ( !reservation ) return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
 
-        /* ¿Ya ha empezado? Comparamos con la hora de Madrid: primero el día y, si es el mismo, la hora (como texto, AAAA-MM-DD y HH:MM) */
-        const now = getMadridNow()
-        const isPast = reservation.date < now.date || ( reservation.date === now.date && reservation.time <= now.time )
-
         res.status( 200 ).json({
             message: 'Tu reserva',
-            data: {
-                date: reservation.date,
-                time: reservation.time,
-                partySize: reservation.partySize,
-                name: reservation.name,
-                notes: reservation.notes,
-                status: reservation.status,
-                isPast
-            }
+            data: toPublicReservation( reservation, getMadridNow() )
+        })
+    } catch ( error ) {
+        next( error )
+    }
+}
+
+/* PATCH /api/reservations/:token/cancel
+Cancela la reserva del enlace del correo, desde la página "Mi reserva".
+Es PATCH y no DELETE porque no borramos la reserva: solo cambiamos su estado a 'cancelled'.
+- La mesa queda libre igual, porque la disponibilidad solo cuenta las reservas confirmadas.
+- Y se conserva el historial: el mesón puede ver qué reservas se cancelaron */
+const cancelReservation = async ( req, res, next ) => {
+    try {
+        const { token } = req.params
+
+        /* Mismo 404 que al leer: un código mal formado o que no existe se tratan igual */
+        if ( !TOKEN_PATTERN.test( token ) ) {
+            return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
+        }
+
+        const reservation = await Reservation.findOne({ token }).lean()
+        if ( !reservation ) return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
+
+        const now = getMadridNow()
+
+        /* Si ya estaba cancelada respondemos 200, no un error: el resultado que se pide (que esté cancelada) ya se cumple.
+        Así, si el cliente pulsa dos veces o repite la petición porque falló la red, no ve un error. Tampoco se reenvía el correo */
+        if ( reservation.status === 'cancelled' ) {
+            return res.status( 200 ).json({
+                message: 'La reserva ya estaba cancelada',
+                data: toPublicReservation( reservation, now )
+            })
+        }
+
+        /* Se puede cancelar hasta la hora de la reserva. Si ya ha empezado, 409: la petición choca con el estado de la reserva */
+        if ( isPastReservation( reservation, now ) ) {
+            return fail( res, 409, 'Esta reserva ya ha empezado. Si necesitas algo, llámanos' )
+        }
+
+        /* findOneAndUpdate cambia el estado y, con returnDocument: 'after', devuelve la reserva ya actualizada en una sola consulta.
+        Filtramos también por status: 'confirmed' para no pisar un cambio que haya llegado entre la lectura y esta escritura */
+        const cancelled = await Reservation.findOneAndUpdate(
+            { _id: reservation._id, status: 'confirmed' },
+            { status: 'cancelled' },
+            { returnDocument: 'after' }
+        ).lean()
+
+        /* Si no ha cambiado nada, otra petición la canceló justo antes: es el mismo caso de "ya estaba cancelada" */
+        if ( !cancelled ) {
+            return res.status( 200 ).json({
+                message: 'La reserva ya estaba cancelada',
+                data: toPublicReservation({ ...reservation, status: 'cancelled' }, now )
+            })
+        }
+
+        /* Correo de cancelación con el enlace para reservar otra vez. Va en su propio try / catch:
+        si el correo falla, la reserva ya está cancelada y se mantiene; solo lo apuntamos en la consola */
+        try {
+            const { subject, html, text } = buildCancellationEmail({
+                name: cancelled.name,
+                date: cancelled.date,
+                time: cancelled.time,
+                partySize: cancelled.partySize,
+                bookingUrl: `${ process.env.SITE_URL }/reservar`
+            })
+            await sendEmail({
+                to: { email: cancelled.email, name: cancelled.name },
+                subject, html, text
+            })
+        } catch ( error ) {
+            console.error( 'No se ha podido enviar el correo de cancelación:', error.message )
+        }
+
+        res.status( 200 ).json({
+            message: 'Reserva cancelada',
+            data: toPublicReservation( cancelled, now )
         })
     } catch ( error ) {
         next( error )
@@ -186,5 +269,6 @@ const getReservation = async ( req, res, next ) => {
 /* Exportamos los controllers para el router */
 module.exports = {
     postReservation,
-    getReservation
+    getReservation,
+    cancelReservation
 }

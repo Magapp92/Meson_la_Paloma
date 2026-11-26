@@ -1,6 +1,7 @@
 
 import { CONTACT } from '@const/business.js'
 import { formatLongDate } from '@lib/format-date.js'
+import { CancelBooking } from './cancel-booking.jsx'
 import './manage-booking.css'
 
 /* Pide a la API la reserva del código del enlace (GET /api/reservations/:token).
@@ -85,6 +86,10 @@ export const ManageBooking = async ({ searchParams }) => {
                                     <li className="ManageBooking-notes">{reservation.notes}</li>
                                 )}
                             </ul>
+                            {/* Si sigue en pie y aún no ha empezado, se puede cancelar desde aquí */}
+                            { reservation.status === 'confirmed' && !reservation.isPast && (
+                                <CancelBooking token={codigo} />
+                            )}
                             <p className="ManageBooking-help">
                                 ¿Necesitas algo? Llámanos al{' '}
                                 <PhoneLink />.
