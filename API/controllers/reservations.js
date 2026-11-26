@@ -5,6 +5,8 @@ const { Table, Reservation } = require( '../models' )
 const { getAvailableTimes, getDaySlots, pickTable, parseDate, daysBetween, toMinutes } = require( '../availability' )
 const { getMadridNow } = require( '../madrid-time' )
 const { BOOKING_RULES } = require( '../booking-rules' )
+const { sendEmail } = require( '../mailer' )
+const { buildConfirmationEmail } = require( '../emails/confirmation' )
 
 /* Respuesta de error con el formato de siempre */
 const fail = ( res, status, message ) => res.status( status ).json({ message, data: null })
@@ -94,6 +96,23 @@ const postReservation = async ( req, res, next ) => {
         if ( await hasEarlierClash( reservation ) ) {
             await Reservation.deleteOne({ _id: reservation._id })
             return fail( res, 409, 'Esa hora ya no está libre. Elige otra, por favor' )
+        }
+
+        /* Correo de confirmación con el enlace a "Mi reserva". Va en su propio try / catch:
+        si el correo falla, la reserva ya está guardada y se mantiene; solo lo apuntamos en la consola */
+        try {
+            const manageUrl = `${ process.env.SITE_URL }/mi-reserva?codigo=${ reservation.token }`
+            const { subject, html, text } = buildConfirmationEmail({
+                name: reservation.name,
+                date: reservation.date,
+                time: reservation.time,
+                partySize: reservation.partySize,
+                notes: reservation.notes,
+                manageUrl
+            })
+            await sendEmail({ to: { email: reservation.email, name: reservation.name }, subject, html, text })
+        } catch ( error ) {
+            console.error( 'No se ha podido enviar el correo de confirmación:', error.message )
         }
 
         res.status( 201 ).json({
