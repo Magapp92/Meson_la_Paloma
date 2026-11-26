@@ -13,14 +13,17 @@ const getSequence = reservation => Math.floor( reservation.updatedAt.getTime() /
 
 /* La invitación de calendario de la reserva, lista para adjuntar al correo. La usan los tres correos:
 confirmar y modificar la añaden o la mueven (REQUEST) y cancelar la quita (CANCEL).
-Siempre con el mismo UID, el código de la reserva, para que el calendario sepa que es el mismo evento.
+Siempre con el mismo UID, el _id de la reserva, para que el calendario sepa que es el mismo evento.
+Usamos el _id y no el código secreto: el UID se queda guardado en el calendario (y en calendarios compartidos
+lo pueden ver otras personas), y con el código cualquiera podría modificar o cancelar la reserva.
+El _id no cambia nunca y no sirve para nada fuera de la base de datos.
 - method: 'REQUEST' o 'CANCEL'.
 - sequence: versión del evento; tiene que ser mayor en cada correo para que el calendario lo tenga en cuenta.
 Se llama invite.ics porque es el nombre que los programas de correo reconocen como invitación */
 const buildInviteAttachment = ( reservation, { method = 'REQUEST', sequence } = {} ) => ({
     name: 'invite.ics',
     content: buildCalendarEvent({
-        uid: `${ reservation.token }@mesonlapaloma.com`,
+        uid: `${ reservation._id }@mesonlapaloma.com`,
         title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
         date: reservation.date,
         time: reservation.time,

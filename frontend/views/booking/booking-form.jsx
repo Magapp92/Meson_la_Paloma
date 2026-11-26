@@ -313,20 +313,21 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                 }
                 {/* Paso 4 al reservar: los datos de contacto y el botón para confirmar.
                 Cada campo lleva su label (el lector de pantalla lo lee al entrar) y autoComplete,
-                para que el navegador ofrezca rellenarlo con los datos que ya conoce */}
+                para que el navegador ofrezca rellenarlo con los datos que ya conoce.
+                maxLength: los mismos máximos que acepta la API (nombre 80, teléfono 30, correo 254) */}
                 { step === 4 && !isEditing &&
                     <div className="ContactFields">
                         <label className="ContactFields-field ContactFields-field--full">
                             <span className="ContactFields-label">Nombre</span>
-                            <input className="ContactFields-input" type="text" name="name" value={contact.name} onChange={changeContact} autoComplete="name" required />
+                            <input className="ContactFields-input" type="text" name="name" value={contact.name} onChange={changeContact} autoComplete="name" maxLength={80} required />
                         </label>
                         <label className="ContactFields-field">
                             <span className="ContactFields-label">Teléfono</span>
-                            <input className="ContactFields-input" type="tel" name="phone" value={contact.phone} onChange={changeContact} autoComplete="tel" required />
+                            <input className="ContactFields-input" type="tel" name="phone" value={contact.phone} onChange={changeContact} autoComplete="tel" maxLength={30} required />
                         </label>
                         <label className="ContactFields-field">
                             <span className="ContactFields-label">Correo</span>
-                            <input className="ContactFields-input" type="email" name="email" value={contact.email} onChange={changeContact} autoComplete="email" required />
+                            <input className="ContactFields-input" type="email" name="email" value={contact.email} onChange={changeContact} autoComplete="email" maxLength={254} required />
                         </label>
                         <label className="ContactFields-field ContactFields-field--full">
                             <span className="ContactFields-label">Notas <span className="ContactFields-optional">(opcional)</span></span>

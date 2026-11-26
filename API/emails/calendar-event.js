@@ -9,6 +9,9 @@ dentro de bloques BEGIN:… / END:… */
 en \n. Algunos calendarios son tolerantes, pero otros rechazan el archivo si no se cumple */
 const LINE_BREAK = '\r\n'
 
+/* Caracteres de control: del 0 al 31 (saltos de línea, retornos de carro, tabuladores…) y el 127 */
+const CONTROL_CHARACTERS = /[\x00-\x1F\x7F]/g
+
 /* Rellena con un cero a la izquierda hasta dos cifras: 5 → '05' */
 const pad = number => String( number ).padStart( 2, '0' )
 
@@ -38,18 +41,21 @@ const formatUtcDateTime = moment =>
 
 /* Escapa un texto para iCalendar. La barra invertida, la coma y el punto y coma tienen significado
 en el formato (separan valores y parámetros), así que llevan una barra delante; los saltos de
-línea se escriben como \n para que el texto siga en una sola línea del archivo */
+línea se escriben como \n para que el texto siga en una sola línea del archivo.
+Cualquier otro carácter de control (un \r suelto, un tabulador…) se cambia por un espacio: así nadie
+puede colar una línea nueva en el .ics con un nombre o una nota preparados */
 const escapeText = value => String( value )
     .replace( /\\/g, '\\\\' )
     .replace( /,/g, '\\,' )
     .replace( /;/g, '\\;' )
     .replace( /\r?\n/g, '\\n' )
+    .replace( CONTROL_CHARACTERS, ' ' )
 
 /* Escapa un nombre para el parámetro CN de ORGANIZER y ATTENDEE. En los parámetros no vale la barra
 invertida de escapeText: si el valor lleva coma, punto y coma o dos puntos tiene que ir entre comillas
 dobles, así que siempre lo ponemos entre comillas. Dentro no puede haber comillas ni saltos de línea:
-las comillas se quitan y los saltos se cambian por un espacio */
-const escapeParam = value => `"${ String( value ).replace( /"/g, '' ).replace( /\r?\n/g, ' ' ) }"`
+las comillas se quitan, y los saltos y los demás caracteres de control se cambian por un espacio */
+const escapeParam = value => `"${ String( value ).replace( /"/g, '' ).replace( /\r?\n/g, ' ' ).replace( CONTROL_CHARACTERS, ' ' ) }"`
 
 /* Monta el texto del .ics.
 - uid: identificador único del evento. Si se repite, el calendario lo trata como el mismo evento.

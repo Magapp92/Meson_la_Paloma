@@ -97,14 +97,15 @@ const postReservation = async ( req, res, next ) => {
         /* Correo de confirmación con el enlace a "Mi reserva" */
         await sendEmailSafely( () => buildReservationEmail( reservation ), 'confirmación' )
 
+        /* No devolvemos el código secreto: solo llega por correo. Si lo devolviéramos, quien reserve
+        con el correo de otra persona podría modificar la reserva en bucle y llenarle el buzón de correos */
         res.status( 201 ).json({
             message: 'Reserva confirmada',
             data: {
                 date: reservation.date,
                 time: reservation.time,
                 partySize: reservation.partySize,
-                name: reservation.name,
-                token: reservation.token
+                name: reservation.name
             }
         })
     } catch ( error ) {

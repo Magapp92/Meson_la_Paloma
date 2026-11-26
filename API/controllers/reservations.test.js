@@ -59,6 +59,10 @@ const occupyTables = ( time, tables = [ 7, 8, 9 ], date = '2026-12-01' ) => {
     }))
 }
 
+/* La reserva que acaba de guardar postReservation. La respuesta ya no trae el código secreto,
+así que la buscamos en la base falsa: es la única con el nombre del formulario (las demás se llaman 'Otra') */
+const createdReservation = () => fake.getReservationByToken( fake.store.reservations.find( item => item.name === 'Lucía Pérez' ).token )
+
 /* Valor de una línea del .ics adjunto: ( ics, 'METHOD' ) → 'REQUEST' */
 const icsValue = ( ics, name ) => ics.split( '\r\n' ).find( line => line.startsWith( `${ name }:` ) )?.slice( name.length + 1 )
 
@@ -69,7 +73,7 @@ beforeEach( () => {
 
 describe( 'POST /api/reservations (postReservation)', () => {
 
-    /* El caso bueno: responde 201 con los datos básicos y el token, guarda la reserva en la mesa más pequeña
+    /* El caso bueno: responde 201 con los datos básicos (sin el código secreto, que solo va por correo), guarda la reserva en la mesa más pequeña
     que vale (para 4 personas, la 1) y manda un correo de confirmación con la invitación de calendario */
     test( 'con datos correctos crea la reserva, elige mesa y manda el correo', async () => {
         const { res, error } = await fake.callHandler( postReservation, { body: validBody() } )
@@ -77,15 +81,16 @@ describe( 'POST /api/reservations (postReservation)', () => {
         assert.equal( error, null )
         assert.equal( res.statusCode, 201 )
         assert.equal( res.body.message, 'Reserva confirmada' )
-        assert.deepEqual( Object.keys( res.body.data ).sort(), [ 'date', 'name', 'partySize', 'time', 'token' ] )
+        assert.deepEqual( Object.keys( res.body.data ).sort(), [ 'date', 'name', 'partySize', 'time' ] )
         assert.equal( res.body.data.date, '2026-12-01' )
         assert.equal( res.body.data.time, '21:00' )
         assert.equal( res.body.data.partySize, 4 )
         assert.equal( res.body.data.name, 'Lucía Pérez' )
-        assert.match( res.body.data.token, TOKEN_PATTERN )
+        assert.equal( 'token' in res.body.data, false )
 
         assert.equal( fake.store.reservations.length, 1 )
-        const saved = fake.getReservationByToken( res.body.data.token )
+        const saved = createdReservation()
+        assert.match( saved.token, TOKEN_PATTERN )
         assert.equal( saved.table, 1 )
         assert.equal( saved.status, 'confirmed' )
         assert.equal( saved.phone, '600 123 456' )
@@ -96,11 +101,22 @@ describe( 'POST /api/reservations (postReservation)', () => {
         const email = fake.mailer.calls[ 0 ]
         assert.deepEqual( email.to, { email: 'lucia@ejemplo.es', name: 'Lucía Pérez' } )
         assert.match( email.subject, /^Reserva confirmada/ )
-        assert.ok( email.html.includes( `http://localhost:3000/mi-reserva?codigo=${ res.body.data.token }` ) )
+        assert.ok( email.html.includes( `http://localhost:3000/mi-reserva?codigo=${ saved.token }` ) )
         assert.equal( email.attachments.length, 1 )
         assert.equal( email.attachments[ 0 ].name, 'invite.ics' )
         assert.equal( icsValue( email.attachments[ 0 ].content, 'METHOD' ), 'REQUEST' )
         assert.equal( icsValue( email.attachments[ 0 ].content, 'SEQUENCE' ), '0' )
+    })
+
+    /* La invitación de calendario usa el _id de la reserva como UID, no el código secreto:
+    el UID se queda guardado en el calendario y no debe servir para modificar ni cancelar */
+    test( 'el UID de la invitación usa el _id y no lleva el código secreto', async () => {
+        await fake.callHandler( postReservation, { body: validBody() } )
+
+        const saved = createdReservation()
+        const ics = fake.mailer.calls[ 0 ].attachments[ 0 ].content
+        assert.equal( icsValue( ics, 'UID' ), `${ saved._id }@mesonlapaloma.com` )
+        assert.ok( !ics.includes( saved.token ) )
     })
 
     /* Para 2 personas la mesa más pequeña que vale es una de 2 (la 10) */
@@ -108,7 +124,7 @@ describe( 'POST /api/reservations (postReservation)', () => {
         const { res } = await fake.callHandler( postReservation, { body: validBody({ partySize: 2 }) } )
 
         assert.equal( res.statusCode, 201 )
-        assert.equal( fake.getReservationByToken( res.body.data.token ).table, 10 )
+        assert.equal( createdReservation().table, 10 )
     })
 
     /* status, table y token los pone la API: si llegan en el cuerpo se ignoran */
@@ -117,8 +133,8 @@ describe( 'POST /api/reservations (postReservation)', () => {
         const { res } = await fake.callHandler( postReservation, { body } )
 
         assert.equal( res.statusCode, 201 )
-        assert.notEqual( res.body.data.token, TOKEN_B )
-        const saved = fake.getReservationByToken( res.body.data.token )
+        const saved = createdReservation()
+        assert.notEqual( saved.token, TOKEN_B )
         assert.equal( saved.status, 'confirmed' )
         assert.equal( saved.table, 1 )
         assert.equal( fake.getReservationByToken( TOKEN_B ), null )
@@ -133,7 +149,18 @@ describe( 'POST /api/reservations (postReservation)', () => {
         [ 'lunes (cerrado)', validBody({ date: '2026-11-30' }), 'Ese día o a esa hora no se puede reservar. Elige una de las horas disponibles' ],
         [ 'hora suelta 21:10', validBody({ time: '21:10' }), 'Ese día o a esa hora no se puede reservar. Elige una de las horas disponibles' ],
         [ 'más allá de 30 días', validBody({ date: '2026-12-26' }), 'Se puede reservar desde hoy hasta dentro de 30 días' ],
-        [ 'en el pasado', validBody({ date: '2026-11-24' }), 'Se puede reservar desde hoy hasta dentro de 30 días' ]
+        [ 'en el pasado', validBody({ date: '2026-11-24' }), 'Se puede reservar desde hoy hasta dentro de 30 días' ],
+        /* La fecha tiene que llegar como texto: una lista con la fecha dentro no vale */
+        [ 'fecha que no es texto', validBody({ date: [ '2026-12-01' ] }), 'La fecha no es válida: tiene que ser AAAA-MM-DD' ],
+        /* Los largos máximos de cada dato (services/booking-rules.js, FIELD_LIMITS) */
+        [ 'nombre de 81 caracteres', validBody({ name: 'a'.repeat( 81 ) }), 'El nombre puede tener como mucho 80 caracteres' ],
+        [ 'teléfono de 31 caracteres', validBody({ phone: '6'.repeat( 31 ) }), 'El teléfono puede tener como mucho 30 caracteres' ],
+        [ 'correo de 255 caracteres', validBody({ email: `${ 'a'.repeat( 244 ) }@ejemplo.es` }), 'El correo puede tener como mucho 254 caracteres' ],
+        [ 'notas de 501 caracteres', validBody({ notes: 'a'.repeat( 501 ) }), 'Las notas pueden tener como mucho 500 caracteres' ],
+        /* Sin caracteres de control: podrían colar líneas nuevas en el correo o en la invitación */
+        [ 'nombre con salto de línea', validBody({ name: 'Lucía\nPérez' }), 'Escribe tu nombre en una sola línea, sin saltos de línea' ],
+        [ 'nombre con retorno de carro', validBody({ name: 'Lucía\rPérez' }), 'Escribe tu nombre en una sola línea, sin saltos de línea' ],
+        [ 'teléfono con tabulador', validBody({ phone: '600\t123 456' }), 'Escribe el teléfono en una sola línea, sin saltos de línea' ]
     ]
 
     badCases.forEach( ([ label, body, message ]) => {
@@ -177,7 +204,7 @@ describe( 'POST /api/reservations (postReservation)', () => {
         assert.equal( error, null )
         assert.equal( res.statusCode, 201 )
         assert.equal( fake.store.reservations.length, 1 )
-        assert.equal( fake.getReservationByToken( res.body.data.token ).status, 'confirmed' )
+        assert.equal( createdReservation().status, 'confirmed' )
         assert.equal( fake.mailer.calls.length, 1 )
         assert.equal( consoleError.mock.callCount(), 1 )
     })
@@ -238,7 +265,7 @@ describe( 'POST /api/reservations (postReservation)', () => {
 
         assert.equal( res.statusCode, 201 )
         assert.equal( fake.store.reservations.length, 3 )
-        assert.equal( fake.getReservationByToken( res.body.data.token ).table, 1 )
+        assert.equal( createdReservation().table, 1 )
         assert.equal( fake.mailer.calls.length, 1 )
     })
 })

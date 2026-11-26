@@ -29,6 +29,16 @@ const BOOKING_RULES = Object.freeze({
     ])
 })
 
+/* Largo máximo de cada dato del formulario, en caracteres. Los usan la validación y el schema de la reserva,
+así el número está en un solo sitio. El correo, 254: el máximo que admite una dirección de correo */
+const FIELD_LIMITS = Object.freeze({
+    name: 80,
+    phone: 30,
+    email: 254,
+    notes: 500
+})
+
 module.exports = {
-    BOOKING_RULES
+    BOOKING_RULES,
+    FIELD_LIMITS
 }

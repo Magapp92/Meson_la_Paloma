@@ -15,9 +15,17 @@ const { PORT = 4000 } = process.env
 
 const app = express()
 
-/* Middlewares para permitir peticiones del frontend y leer el body en JSON */
-app.use( cors() )
-app.use( express.json() )
+/* Quitamos la cabecera X-Powered-By: Express, que Express pone en cada respuesta.
+No aporta nada al cliente y le dice a un atacante qué tecnología usamos */
+app.disable( 'x-powered-by' )
+
+/* CORS: solo la web del mesón (SITE_URL) puede llamar a la API desde el navegador.
+Si SITE_URL no está definida, no abrimos la API a cualquier web: permitimos solo la web en local (localhost:3000) */
+app.use( cors({ origin: process.env.SITE_URL || 'http://localhost:3000' }) )
+
+/* Leemos el body en JSON, con un máximo de 10 kb: una reserva ocupa mucho menos.
+Si llega algo más grande, express.json lo rechaza (413) sin leerlo entero */
+app.use( express.json({ limit: '10kb' }) )
 
 /* Antes de cada petición comprobamos que hay conexión con Mongo; si no, respondemos 503 */
 app.use( async ( req, res, next ) => {

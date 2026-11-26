@@ -1,5 +1,6 @@
 
 const mongoose = require( 'mongoose' )
+const { FIELD_LIMITS } = require( '../services/booking-rules' )
 
 /* Schema de cada plato: nombre, nota opcional y sus precios.
 prices es una lista: un precio o, si la categoría tiene priceLabels, uno por columna (Normal / Montado…).
@@ -57,6 +58,7 @@ const tableSchema = new mongoose.Schema(
 date va como texto AAAA-MM-DD y time como HH:MM, en hora de Madrid: así una reserva del día 5
 es siempre del día 5, esté donde esté el servidor.
 table es el número de la mesa asignada. token es el código secreto del enlace para modificar o cancelar.
+Los maxlength repiten los máximos de la validación (FIELD_LIMITS): por si algún día se guarda una reserva sin pasar por ella.
 timestamps añade createdAt y updatedAt solos */
 const reservationSchema = new mongoose.Schema(
     {
@@ -64,10 +66,10 @@ const reservationSchema = new mongoose.Schema(
         date: { type: mongoose.Schema.Types.String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
         time: { type: mongoose.Schema.Types.String, required: true, match: /^\d{2}:\d{2}$/ },
         partySize: { type: mongoose.Schema.Types.Number, required: true, min: 2, max: 6 },
-        name: { type: mongoose.Schema.Types.String, required: true, trim: true },
-        phone: { type: mongoose.Schema.Types.String, required: true, trim: true },
-        email: { type: mongoose.Schema.Types.String, required: true, trim: true, lowercase: true, match: /^\S+@\S+\.\S+$/ },
-        notes: { type: mongoose.Schema.Types.String, trim: true, default: '' },
+        name: { type: mongoose.Schema.Types.String, required: true, trim: true, maxlength: FIELD_LIMITS.name },
+        phone: { type: mongoose.Schema.Types.String, required: true, trim: true, maxlength: FIELD_LIMITS.phone },
+        email: { type: mongoose.Schema.Types.String, required: true, trim: true, lowercase: true, maxlength: FIELD_LIMITS.email, match: /^\S+@\S+\.\S+$/ },
+        notes: { type: mongoose.Schema.Types.String, trim: true, maxlength: FIELD_LIMITS.notes, default: '' },
         table: { type: mongoose.Schema.Types.Number, required: true },
         status: { type: mongoose.Schema.Types.String, enum: [ 'confirmed', 'cancelled' ], default: 'confirmed' },
         token: { type: mongoose.Schema.Types.String, required: true, unique: true },

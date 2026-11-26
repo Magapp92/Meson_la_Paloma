@@ -90,3 +90,22 @@ test( 'escapa el nombre del asistente: entre comillas, sin comillas ni saltos de
 
     assert.ok( ics.includes( 'ATTENDEE;CN="Ana la de Pérez, Madrid";' ) )
 })
+
+/* Un nombre con un retorno de carro suelto y otro carácter de control (el 0x01) no puede colar una línea
+nueva en el .ics: se cambian por espacios y no queda ningún \r fuera de los finales de línea */
+test( 'quita los caracteres de control del nombre del asistente', () => {
+    const ics = buildCalendarEvent({ ...EVENT, attendee: { name: 'Ana\rSTATUS:CANCELLED\u0001Pérez', email: 'ana@ejemplo.es' } })
+
+    assert.ok( ics.includes( 'ATTENDEE;CN="Ana STATUS:CANCELLED Pérez";' ) )
+    assert.ok( !ics.replace( /\r\n/g, '' ).includes( '\r' ) )
+    assert.ok( !/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/.test( ics ) )
+    assert.ok( !ics.split( '\r\n' ).includes( 'STATUS:CANCELLED' ) )
+})
+
+/* Lo mismo en los textos (SUMMARY, LOCATION): el \r suelto y los demás caracteres de control pasan a ser espacios */
+test( 'quita los caracteres de control de los textos', () => {
+    const ics = buildCalendarEvent({ ...EVENT, title: 'Reserva\rMETHOD:CANCEL\u0007' })
+
+    assert.ok( ics.includes( 'SUMMARY:Reserva METHOD:CANCEL \r\n' ) )
+    assert.ok( !ics.replace( /\r\n/g, '' ).includes( '\r' ) )
+})
