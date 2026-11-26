@@ -30,22 +30,25 @@ const getDayBookings = ( date, excludeId ) => Promise.all([
     ).lean()
 ])
 
-/* ¿Hay otra reserva confirmada, guardada antes que esta, en la misma mesa y a menos de 90 minutos?
-"Antes" es con createdAt menor; si coinciden en el mismo milisegundo, desempata el _id (también va en orden).
-Así, de dos reservas que chocan, siempre se queda la misma y nunca se anulan las dos */
-const hasEarlierClash = async reservation => {
+/* ¿Hay CUALQUIER otra reserva confirmada en la misma mesa, el mismo día y a menos de 90 minutos?
+La usan crear y modificar, siempre DESPUÉS de guardar, para cubrir dos peticiones que llegan a la vez
+y pasan las dos la comprobación de horas libres.
+No miramos quién llegó antes: createdAt y _id los pone Mongoose en nuestro proceso antes de insertar,
+y no tienen por qué seguir el orden en que las reservas llegan de verdad a la base de datos.
+Si solo contáramos las "anteriores" podría pasar esto: B guarda y comprueba (A aún no está, B pasa);
+luego A guarda y comprueba, pero B tiene createdAt posterior y no cuenta (A también pasa): dos en la misma mesa.
+Mirando a todas, como cada petición escribe antes de leer, la que comprueba la última siempre ve a la otra:
+nunca se quedan dos reservas en conflicto. El precio: si comprueban las dos a la vez, pueden anularse las dos
+y las dos reciben 409. Es rarísimo, y el cliente solo tiene que elegir otra hora */
+const hasClash = async reservation => {
     const others = await Reservation.find({
         _id: { $ne: reservation._id },
         date: reservation.date,
         table: reservation.table,
-        status: 'confirmed',
-        createdAt: { $lte: reservation.createdAt }
+        status: 'confirmed'
     }).lean()
 
-    const isEarlier = other =>
-        other.createdAt < reservation.createdAt || String( other._id ) < String( reservation._id )
-
-    return others.some( other => isEarlier( other ) && overlaps( other.time, reservation.time ) )
+    return others.some( other => overlaps( other.time, reservation.time ) )
 }
 
 /* POST /api/reservations
@@ -84,8 +87,9 @@ const postReservation = async ( req, res, next ) => {
         })
 
         /* Si dos personas reservan la misma mesa a la vez, las dos pueden pasar la comprobación de arriba.
-        Después de guardar volvemos a mirar: si otra llegó antes, anulamos esta y avisamos */
-        if ( await hasEarlierClash( reservation ) ) {
+        Después de guardar volvemos a mirar: si choca con cualquier otra (llegara antes o después), anulamos esta y avisamos.
+        No basta con mirar las que llegaron antes: la explicación está encima de hasClash */
+        if ( await hasClash( reservation ) ) {
             await Reservation.deleteOne({ _id: reservation._id })
             return fail( res, 409, NOT_FREE_MESSAGE )
         }
@@ -189,20 +193,6 @@ const cancelReservation = async ( req, res, next ) => {
     } catch ( error ) {
         next( error )
     }
-}
-
-/* ¿Hay otra reserva confirmada en la misma mesa, el mismo día y a menos de 90 minutos? La usa la modificación.
-Aquí no miramos quién llegó antes, como en hasEarlierClash: la reserva ya existía y lo que choca es el cambio,
-así que si hay choque con cualquiera, el cambio se deshace */
-const hasClash = async reservation => {
-    const others = await Reservation.find({
-        _id: { $ne: reservation._id },
-        date: reservation.date,
-        table: reservation.table,
-        status: 'confirmed'
-    }).lean()
-
-    return others.some( other => overlaps( other.time, reservation.time ) )
 }
 
 /* PATCH /api/reservations/:token

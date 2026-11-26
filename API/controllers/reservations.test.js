@@ -202,6 +202,45 @@ describe( 'POST /api/reservations (postReservation)', () => {
         assert.equal( fake.store.reservations[ 0 ].token, TOKEN_B )
         assert.equal( fake.mailer.calls.length, 0 )
     })
+
+    /* El hueco de mirar solo las "anteriores": la otra reserva llega a la base a la vez, pero con createdAt
+    POSTERIOR y _id mayor que la nueva (Mongoose los pone antes de insertar y no siguen el orden real).
+    Con la comprobación simétrica también se detecta: la nueva se borra y responde 409. La otra se queda */
+    test( 'si otra reserva posterior choca en la misma mesa, borra la nueva y responde 409', async () => {
+        fake.hooks.afterCreate = created => {
+            const other = fake.insertReservation({
+                date: created.date, time: created.time, partySize: 4, name: 'Otra', phone: '600000000',
+                email: 'otra@ejemplo.es', table: created.table, token: TOKEN_B,
+                createdAt: new Date( created.createdAt.getTime() + 1 )
+            })
+            assert.ok( other._id > created._id )
+        }
+
+        const { res } = await fake.callHandler( postReservation, { body: validBody() } )
+
+        assert.equal( res.statusCode, 409 )
+        assert.deepEqual( res.body, { message: NOT_FREE, data: null } )
+        assert.equal( fake.store.reservations.length, 1 )
+        assert.equal( fake.store.reservations[ 0 ].token, TOKEN_B )
+        assert.equal( fake.mailer.calls.length, 0 )
+    })
+
+    /* Lo que no es choque no afecta: a la vez se guardan otra reserva a la misma hora en OTRA mesa
+    y otra en la MISMA mesa justo 90 minutos después (21:00 → 22:30, ya no se pisan). La nueva se queda: 201 */
+    test( 'una reserva en otra mesa o a 90 minutos o más no cuenta como choque', async () => {
+        fake.hooks.afterCreate = created => {
+            const other = { partySize: 4, name: 'Otra', phone: '600000000', email: 'otra@ejemplo.es', date: created.date }
+            fake.insertReservation({ ...other, time: created.time, table: 2, token: TOKEN_B })
+            fake.insertReservation({ ...other, time: '22:30', table: created.table, token: TOKEN_MISSING })
+        }
+
+        const { res } = await fake.callHandler( postReservation, { body: validBody() } )
+
+        assert.equal( res.statusCode, 201 )
+        assert.equal( fake.store.reservations.length, 3 )
+        assert.equal( fake.getReservationByToken( res.body.data.token ).table, 1 )
+        assert.equal( fake.mailer.calls.length, 1 )
+    })
 })
 
 describe( 'GET /api/reservations/:token (getReservation)', () => {

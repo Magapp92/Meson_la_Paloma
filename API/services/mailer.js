@@ -4,6 +4,10 @@ Usa el fetch que trae Node, así no hace falta instalar ningún paquete.
 La clave y el remitente salen de las variables de entorno: BREVO_API_KEY, MAIL_FROM y MAIL_FROM_NAME */
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email'
 
+/* Tiempo máximo que esperamos a Brevo: 10 segundos. Sin límite, si Brevo se queda colgado,
+la petición del cliente (crear, modificar o cancelar) esperaría sin fin aunque la reserva ya esté guardada */
+const SEND_TIMEOUT_MS = 10000
+
 /* Envía un correo.
 - to: el destinatario, como { email, name }.
 - subject, html y text: el asunto y el cuerpo en HTML y en texto plano.
@@ -22,6 +26,9 @@ const sendEmail = async ({ to, subject, html, text, attachments }) => {
 
     const res = await fetch( BREVO_URL, {
         method: 'POST',
+        /* AbortSignal.timeout corta la petición si pasan SEND_TIMEOUT_MS sin respuesta: fetch lanza un error
+        (de nombre TimeoutError) y sendEmailSafely, en services/notifications.js, lo recoge y lo apunta en la consola */
+        signal: AbortSignal.timeout( SEND_TIMEOUT_MS ),
         headers: {
             'api-key': apiKey,
             'content-type': 'application/json',
