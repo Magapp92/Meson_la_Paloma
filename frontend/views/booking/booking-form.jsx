@@ -1,10 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { Button } from '@components/button/button.jsx'
 import { PARTY_SIZES } from '@const/booking.js'
-import { CONTACT } from '@const/business.js'
+import { CONTACT, TIME_ZONE } from '@const/business.js'
+import { ROUTES } from '@const/routes.js'
 import { useRequest } from '@hooks/use-request.js'
+import { request } from '@lib/request.js'
+import { downloadCalendarEvent } from '@lib/calendar.js'
 
 /* Los pasos del formulario, en orden. El número de cada paso es su posición + 1 */
 const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Datos' ])
@@ -18,7 +22,7 @@ const SERVICES = Object.freeze([
 
 /* Formulario de reserva por pasos, como un carrusel: se ve un paso cada vez y, al elegir, se desliza al siguiente.
 Es un componente de cliente porque guarda lo que se va eligiendo (useState).
-days: los días en los que se puede reservar, ya con su etiqueta ({ date, weekday, day, month }) */
+days: los días en los que se puede reservar, ya con su etiqueta ({ date, weekday, day, month, long }) */
 export const BookingForm = ({ initialPartySize = null, days }) => {
 
     const [ partySize, setPartySize ] = useState( initialPartySize )
@@ -27,6 +31,14 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
 
     /* Los datos de contacto, en un solo objeto: cada campo cambia su propiedad */
     const [ contact, setContact ] = useState({ name: '', phone: '', email: '', notes: '' })
+    const [ isPrivacyAccepted, setIsPrivacyAccepted ] = useState( false )
+
+    /* El envío: si se está enviando, el error de la API (400), el aviso si la hora se ha ocupado (409)
+    y la reserva confirmada que devuelve la API */
+    const [ isSending, setIsSending ] = useState( false )
+    const [ sendError, setSendError ] = useState( '' )
+    const [ notice, setNotice ] = useState( '' )
+    const [ reservation, setReservation ] = useState( null )
 
     /* Paso actual (1, 2, 3…) y hacia dónde se ha movido, para deslizar desde la derecha o desde la izquierda.
     Si se llega con las personas elegidas (/reservar?personas=4), se empieza en el paso 2 */
@@ -38,7 +50,7 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
 
     /* Las horas libres se piden a la API cuando hay día y personas, y otra vez cada vez que cambia alguno */
     const availabilityPath = date && partySize ? `/availability?date=${ date }&partySize=${ partySize }` : null
-    const { data: availability, error, isLoading } = useRequest( availabilityPath )
+    const { data: availability, error, isLoading, reload } = useRequest( availabilityPath )
 
     /* Las horas de cada servicio; los servicios sin horas libres no se muestran */
     const services = SERVICES
@@ -74,15 +86,18 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
     const choosePartySize = size => {
         setPartySize( size )
         setTime( null )
+        setNotice( '' )
         goTo( 2 )
     }
     const chooseDate = day => {
         setDate( day )
         setTime( null )
+        setNotice( '' )
         goTo( 3 )
     }
     const chooseTime = serviceTime => {
         setTime( serviceTime )
+        setNotice( '' )
         goTo( 4 )
     }
 
@@ -94,8 +109,44 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
         setContact({ ...contact, [ name ]: value })
     }
 
+    /* Envía la reserva a la API. El navegador ya ha comprobado los campos obligatorios.
+    - Si va bien, se guarda la reserva y se muestra el resumen.
+    - 409: la hora se ha ocupado mientras se rellenaba. Se vuelve al paso 3 con las horas pedidas de nuevo.
+    - Otro error: su mensaje encima del botón */
+    const sendReservation = async event => {
+        event.preventDefault()
+
+        setIsSending( true )
+        setSendError( '' )
+
+        try {
+            const data = await request( '/reservations', {
+                method: 'POST',
+                body: { date, time, partySize, ...contact }
+            })
+
+            setReservation( data )
+        } catch ( error ) {
+            if ( error.status === 409 ) {
+                setNotice( error.message )
+                setTime( null )
+                reload()
+                goTo( 3 )
+            } else {
+                setSendError( error.message )
+            }
+        } finally {
+            setIsSending( false )
+        }
+    }
+
+    /* Con la reserva hecha, en lugar del formulario se ve el resumen */
+    if ( reservation ) {
+        return <BookingConfirmation reservation={reservation} dayLabel={chosenDay.long} />
+    }
+
     return (
-        <form className="BookingForm" onSubmit={ event => event.preventDefault() }>
+        <form className="BookingForm" onSubmit={sendReservation}>
             {/* En el progreso agrupamos los pasos con lo elegido en cada uno; los ya hechos se pueden pulsar para volver */}
             <ol className="BookingProgress">
                 { STEPS.map( ( name, index ) => {
@@ -174,6 +225,7 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
                         {/* Mientras llegan las horas, si hay un error o si no queda ninguna, un mensaje.
                         role="status" hace que el lector de pantalla lo lea en voz alta cuando cambia */}
                         <p className="BookingStep-status" role="status">
+                            { notice && <strong className="BookingStep-notice">{notice}. </strong> }
                             { isLoading && 'Buscando horas libres…' }
                             { error && `${ error }.` }
                             { availability && services.length === 0 &&
@@ -222,8 +274,20 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
                             <span className="ContactFields-label">Notas <span className="ContactFields-optional">(opcional)</span></span>
                             <textarea className="ContactFields-input ContactFields-input--notes" name="notes" value={contact.notes} onChange={changeContact} maxLength={500} rows={3} placeholder="Una trona, una alergia, una celebración…" />
                         </label>
+                        {/* La casilla de privacidad es obligatoria. El enlace se abre en otra pestaña para no perder lo escrito */}
+                        <label className="ContactFields-consent ContactFields-field--full">
+                            <input className="ContactFields-checkbox" type="checkbox" checked={isPrivacyAccepted} onChange={ event => setIsPrivacyAccepted( event.target.checked ) } required />
+                            <span className="ContactFields-consentText">
+                                He leído y acepto la{' '}
+                                <Link href={ROUTES.HOME} target="_blank" rel="noopener" className="BookingStep-link">política de privacidad</Link>.
+                            </span>
+                        </label>
+                        {/* Si la API rechaza algún dato, su mensaje. role="alert" hace que el lector de pantalla lo lea al aparecer */}
+                        { sendError &&
+                            <p className="ContactFields-error ContactFields-field--full" role="alert">{sendError}</p>
+                        }
                         <div className="ContactFields-field--full">
-                            <Button type="submit">Confirmar reserva</Button>
+                            <Button type="submit" disabled={isSending}>{ isSending ? 'Enviando…' : 'Confirmar reserva' }</Button>
                         </div>
                     </div>
                 }
@@ -233,5 +297,46 @@ export const BookingForm = ({ initialPartySize = null, days }) => {
                 }
             </fieldset>
         </form>
+    )
+}
+
+/* Resumen de la reserva confirmada, con los botones para guardarla en el calendario y ver la carta.
+reservation: lo que devuelve la API ({ date, time, partySize, name, durationMinutes }); dayLabel: el día escrito entero */
+const BookingConfirmation = ({ reservation, dayLabel }) => {
+
+    /* Al aparecer, el foco va al título: el lector de pantalla lo lee y la página sube hasta él */
+    const titleRef = useRef( null )
+
+    useEffect( () => {
+        titleRef.current?.focus()
+    }, [] )
+
+    /* Descarga el evento de calendario con los datos de la reserva */
+    const addToCalendar = () => downloadCalendarEvent({
+        title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
+        date: reservation.date,
+        time: reservation.time,
+        durationMinutes: reservation.durationMinutes,
+        timeZone: TIME_ZONE,
+        location: `${ CONTACT.street }, ${ CONTACT.city }`,
+        fileName: 'reserva-meson-la-paloma.ics'
+    })
+
+    return (
+        <section className="BookingConfirmation">
+            <h2 ref={titleRef} tabIndex={-1} className="BookingConfirmation-title">Reserva confirmada</h2>
+            <p className="BookingConfirmation-text">
+                Te esperamos el <strong>{dayLabel}</strong> a las <strong>{reservation.time}</strong>.
+                Mesa para {reservation.partySize} a nombre de {reservation.name}.
+            </p>
+            <p className="BookingConfirmation-note">
+                Si necesitas cambiar algo,{' '}
+                <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
+            </p>
+            <div className="BookingConfirmation-actions">
+                <Button onClick={addToCalendar}>Añadir al calendario</Button>
+                <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta</Button>
+            </div>
+        </section>
     )
 }

@@ -21,17 +21,20 @@ const getDays = async () => {
     }
 }
 
-/* Escribe un día '2026-11-25' por partes para el botón: { weekday: 'mié', day: '25', month: 'nov' }.
+/* Escribe un día '2026-11-25' por partes para el botón: { weekday: 'mié', day: '25', month: 'nov' },
+y entero para el resumen final: 'miércoles 25 de noviembre'.
 La fecha se lee en UTC, igual que en la API, para que la zona horaria no cambie el día */
 const toDayLabel = date => {
     const parsed = new Date( `${ date }T00:00:00Z` )
     const format = options => new Intl.DateTimeFormat( 'es-ES', { timeZone: 'UTC', ...options }).format( parsed ).replace( '.', '' )
+    const day = format({ day: 'numeric' })
 
     return {
         date,
         weekday: format({ weekday: 'short' }),
-        day: format({ day: 'numeric' }),
-        month: format({ month: 'short' })
+        day,
+        month: format({ month: 'short' }),
+        long: `${ format({ weekday: 'long' }) } ${ day } de ${ format({ month: 'long' }) }`
     }
 }
 

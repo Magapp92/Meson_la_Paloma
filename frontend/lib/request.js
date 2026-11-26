@@ -1,6 +1,7 @@
 
 /* Todas las peticiones del navegador a la API pasan por aquí.
-Si la respuesta no es ok, lanzamos el mensaje que manda la API para que la página pueda mostrarlo */
+Si la respuesta no es ok, lanzamos el mensaje que manda la API para que la página pueda mostrarlo,
+con el código de estado (400, 409…) en error.status por si la página tiene que distinguirlos */
 export const request = async ( path, { body, ...options } = {} ) => {
 
     /* Si hay cuerpo, lo mandamos como JSON */
@@ -21,7 +22,10 @@ export const request = async ( path, { body, ...options } = {} ) => {
     const { message, data } = await response.json().catch( () => ({}) )
 
     if ( !response.ok ) {
-        throw new Error( message || 'Algo ha fallado. Inténtalo de nuevo o llámanos' )
+        const error = new Error( message || 'Algo ha fallado. Inténtalo de nuevo o llámanos' )
+        error.status = response.status
+
+        throw error
     }
 
     return data
