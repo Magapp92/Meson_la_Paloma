@@ -1,8 +1,5 @@
 
 import { Anton, Inter_Tight } from 'next/font/google'
-import { Header } from '@components/header/header.jsx'
-import { Footer } from '@components/footer/footer.jsx'
-import { MobileBar } from '@components/mobile-bar/mobile-bar.jsx'
 import './reset.css'
 
 /* Next descarga las fuentes al compilar y las sirve desde nuestra web,
@@ -32,17 +29,15 @@ export const metadata = {
 
 /* Layout raíz: Next lo pide obligatoriamente y envuelve todas las páginas.
 Es el único sitio donde van las etiquetas <html> y <body>.
-El Header y el Footer van aquí para que salgan en todas las páginas, encima y debajo de cada una,
-y la barra del móvil, que se queda fija abajo */
+Solo lleva lo común a toda la web: fuentes, estilos globales y metadata.
+La cabecera, el pie y la barra del móvil van en el layout de (site),
+así las páginas privadas como Mi reserva pueden tener su propia interfaz */
 const RootLayout = ({ children }) => {
 
     return (
         <html lang="es" className={`${ fontTitle.variable } ${ fontText.variable }`}>
             <body>
-                <Header />
                 {children}
-                <Footer />
-                <MobileBar />
             </body>
         </html>
     )

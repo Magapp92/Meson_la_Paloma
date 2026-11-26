@@ -3,7 +3,7 @@
 const express = require( 'express' )
 const { getMenu } = require( './controllers/menu' )
 const { getAvailability, getDays } = require( './controllers/availability' )
-const { postReservation } = require( './controllers/reservations' )
+const { postReservation, getReservation } = require( './controllers/reservations' )
 
 const router = express.Router()
 
@@ -31,6 +31,10 @@ router.route( '/availability' )
 /* Las reservas: crear una nueva */
 router.route( '/reservations' )
     .post( postReservation )
+
+/* Una reserva, con el código secreto del enlace del correo */
+router.route( '/reservations/:token' )
+    .get( getReservation )
 
 module.exports = {
     router

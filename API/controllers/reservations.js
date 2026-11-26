@@ -146,7 +146,45 @@ const postReservation = async ( req, res, next ) => {
     }
 }
 
+/* GET /api/reservations/:token
+Devuelve la reserva del enlace del correo, para la página "Mi reserva".
+Solo enviamos lo que hace falta para mostrarla: el enlace se puede reenviar, y quien lo tenga
+no debe ver el teléfono ni el correo. Tampoco la mesa, el código ni los datos internos */
+const getReservation = async ( req, res, next ) => {
+    try {
+        const { token } = req.params
+
+        /* Los códigos que genera la API tienen 32 caracteres de [A-Za-z0-9_-]: si no tiene esa forma, ni consultamos la base de datos */
+        if ( !/^[A-Za-z0-9_-]{32}$/.test( token ) ) {
+            return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
+        }
+
+        const reservation = await Reservation.findOne({ token }).lean()
+        if ( !reservation ) return fail( res, 404, 'No encontramos ninguna reserva con este enlace' )
+
+        /* ¿Ya ha empezado? Comparamos con la hora de Madrid: primero el día y, si es el mismo, la hora (como texto, AAAA-MM-DD y HH:MM) */
+        const now = getMadridNow()
+        const isPast = reservation.date < now.date || ( reservation.date === now.date && reservation.time <= now.time )
+
+        res.status( 200 ).json({
+            message: 'Tu reserva',
+            data: {
+                date: reservation.date,
+                time: reservation.time,
+                partySize: reservation.partySize,
+                name: reservation.name,
+                notes: reservation.notes,
+                status: reservation.status,
+                isPast
+            }
+        })
+    } catch ( error ) {
+        next( error )
+    }
+}
+
 /* Exportamos los controllers para el router */
 module.exports = {
-    postReservation
+    postReservation,
+    getReservation
 }

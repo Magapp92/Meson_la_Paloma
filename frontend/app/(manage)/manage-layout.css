@@ -1,0 +1,90 @@
+
+/* MANAGE LAYOUT */
+
+/* La página ocupa al menos toda la pantalla: cabecera arriba, contenido en medio y la línea de contacto al fondo */
+.ManageLayout{
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* CABECERA */
+
+/* Cabecera con la línea mostaza que la separa del contenido, como la de la web; el logo en el centro */
+.ManageLayout-header{
+    padding: 1rem;
+    border-bottom: 2px solid var(--accent);
+
+    display: flex;
+    justify-content: center;
+}
+
+/* El logo agrupa la imagen y el nombre en una fila */
+.ManageLayout-logo{
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+}
+
+/* El barril a su tamaño fijo: el reset pone las imágenes a todo el ancho y aquí no lo queremos */
+.ManageLayout-logoImg{
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+/* Nombre del mesón en Anton y en mayúsculas, como en la cabecera de la web */
+.ManageLayout-logoText{
+    font-family: var(--font-title), sans-serif;
+    font-size: 1.4rem;
+    line-height: .95;
+    text-transform: uppercase;
+}
+
+/* Segunda línea del nombre en mostaza: el span pasa a bloque para ocupar su propia línea */
+.ManageLayout-logoTextLine{
+    display: block;
+
+    color: var(--accent);
+    line-height: inherit;
+}
+
+/* Contorno mostaza visible al llegar con el teclado */
+.ManageLayout-logo:focus-visible, .ManageLayout-phone:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* CONTENIDO */
+
+/* El contenido ocupa el hueco libre y empuja la línea de contacto al fondo */
+.ManageLayout-main{
+    flex: 1;
+}
+
+
+/* PIE */
+
+/* Una línea pequeña, centrada y en gris claro con la dirección y el teléfono */
+.ManageLayout-footer{
+    padding: 1.25rem 1rem;
+    border-top: 1px solid var(--border);
+
+    font-size: .9rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+/* El texto con un interlineado cómodo si baja a dos líneas (el reset deja los párrafos a 1) */
+.ManageLayout-contact{
+    line-height: 1.5;
+}
+
+/* El teléfono en mostaza, para que se vea que se puede pulsar */
+.ManageLayout-phone{
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}

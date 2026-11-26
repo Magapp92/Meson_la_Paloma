@@ -1,0 +1,152 @@
+
+/* MANAGE BOOKING */
+
+/* HERO */
+
+/* Cabecera de la página, baja como la de reservar */
+.ManageBooking-hero{
+    padding-block: clamp(1.5rem, 4vw, 2.5rem) 0;
+}
+
+/* Título a dos tonos en una sola línea, contenido como el de reservar */
+.ManageBooking-title{
+    font-size: clamp(2.25rem, 6vw, 4rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Segunda parte del título en mostaza */
+.ManageBooking-titleAccent{
+    color: var(--accent);
+    line-height: inherit;
+}
+
+/* Separación con el hero y con la línea de contacto */
+.ManageBooking-content{
+    padding-block: clamp(1.25rem, 3vw, 2rem) clamp(3rem, 7vw, 6rem);
+}
+
+
+/* CAJA */
+
+/* La caja con el fondo un poco más claro y borde mostaza a la izquierda, como los pasos de reservar */
+.ManageBooking-box{
+    max-width: 48rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-left: .25rem solid var(--accent);
+    border-radius: 1.125rem;
+
+    background-color: var(--surface);
+}
+
+/* Título de la caja grande en mostaza, como el de la reserva confirmada */
+.ManageBooking-boxTitle{
+    font-family: var(--font-title), sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+/* Texto de los casos sin reserva, grande y con un interlineado cómodo */
+.ManageBooking-text{
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    line-height: 1.5;
+}
+
+/* Si va debajo del título, separado de él */
+.ManageBooking-boxTitle + .ManageBooking-text{
+    margin-top: 1rem;
+}
+
+/* Aviso de cancelada o pasada: en rojo claro con una línea a la izquierda, como los errores de reservar.
+   Va el primero de la caja, así que no lleva margen arriba */
+.ManageBooking-notice{
+    padding: .6rem .9rem;
+    border-left: .2rem solid var(--error);
+
+    font-weight: 700;
+    color: var(--error);
+    line-height: 1.5;
+}
+
+/* Si ya ha pasado no es un problema, es un agradecimiento: en mostaza en lugar de rojo */
+.ManageBooking-notice--past{
+    border-color: var(--accent);
+
+    color: var(--accent);
+}
+
+
+/* DATOS */
+
+/* Si hay aviso, los datos van separados de él */
+.ManageBooking-notice + .ManageBooking-details{
+    margin-top: 1.25rem;
+}
+
+/* Los datos uno debajo de otro */
+.ManageBooking-details{
+    display: grid;
+    gap: .4rem;
+}
+
+/* El día, el dato más importante: con la fuente de títulos y la primera letra en mayúscula */
+.ManageBooking-day{
+    font-family: var(--font-title), sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.1;
+}
+.ManageBooking-day::first-letter{
+    text-transform: uppercase;
+}
+
+/* Hora, personas y nombre, grandes */
+.ManageBooking-detail{
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    line-height: 1.5;
+}
+
+/* Las notas, en gris claro y en cursiva, respetando los saltos de línea que escribió el cliente */
+.ManageBooking-notes{
+    margin-top: .4rem;
+
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+/* "¿Necesitas algo?", en gris claro y separado de los datos */
+.ManageBooking-help{
+    margin-top: 1.5rem;
+
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* El teléfono en mostaza y subrayado; no se parte en dos líneas */
+.ManageBooking-link{
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: .2em;
+    white-space: nowrap;
+}
+
+/* Contorno mostaza visible al llegar con el teclado */
+.ManageBooking-link:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* MÓVIL */
+
+/* En pantallas estrechas la caja con menos relleno, como los pasos de reservar */
+@media (max-width: 480px){
+    .ManageBooking-box{
+        padding: 1.25rem 1rem;
+    }
+}
