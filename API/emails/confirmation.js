@@ -64,6 +64,7 @@ const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl,
     const hasNotes = typeof notes === 'string' && notes.trim() !== ''
     const title = isUpdate ? 'Reserva modificada' : 'Reserva confirmada'
     const updateIntro = 'Estos son los datos nuevos de tu reserva:'
+    const calendarNote = 'Este correo incluye la invitación de calendario: añádela y se actualizará sola si cambias o cancelas la reserva.'
 
     const subject = `${ title }: ${ longDate } a las ${ time }`
 
@@ -111,6 +112,11 @@ const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl,
                         </td>
                     </tr>
                     <tr>
+                        <td style="padding: 0 32px 16px; font-family: ${ TEXT_FONT }; font-size: 14px; color: ${ COLORS.grey };">
+                            ${ calendarNote }
+                        </td>
+                    </tr>
+                    <tr>
                         <td style="padding: 0 32px 32px; font-family: ${ TEXT_FONT }; font-size: 14px; color: ${ COLORS.grey };">
                             Si necesitas algo, llámanos al <a href="${ RESTAURANT.phoneHref }" style="color: ${ COLORS.mustard }; text-decoration: none;">${ RESTAURANT.phone }</a>
                         </td>
@@ -144,6 +150,8 @@ const buildConfirmationEmail = ({ name, date, time, partySize, notes, manageUrl,
         ...( hasNotes ? [ `Notas: ${ notes }` ] : [] ),
         '',
         `Ver o cambiar mi reserva: ${ manageUrl }`,
+        '',
+        calendarNote,
         '',
         `Si necesitas algo, llámanos al ${ RESTAURANT.phone }`,
         '',

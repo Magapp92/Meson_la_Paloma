@@ -41,3 +41,11 @@ test( 'el html lleva el título de reserva cancelada', () => {
 
     assert.ok( html.includes( 'Reserva cancelada' ) )
 })
+
+test( 'el html y el texto avisan de que la invitación quita la reserva del calendario', () => {
+    const { html, text } = buildCancellationEmail( RESERVATION )
+    const note = 'Si añadiste la reserva a tu calendario, la invitación de este correo la quita.'
+
+    assert.ok( html.includes( note ) )
+    assert.ok( text.includes( note ) )
+})

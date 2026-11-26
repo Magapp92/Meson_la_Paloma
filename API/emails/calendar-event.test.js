@@ -13,7 +13,9 @@ const EVENT = {
     durationMinutes: 90,
     timeZone: 'Europe/Madrid',
     location: 'C/ Artajona, 9, 28039 Madrid',
-    now: new Date( '2026-11-26T10:15:00Z' )
+    now: new Date( '2026-11-26T10:15:00Z' ),
+    organizer: { name: 'Mesón La Paloma', email: 'meson@ejemplo.es' },
+    attendee: { name: 'Ana', email: 'ana@ejemplo.es' }
 }
 
 test( 'las líneas van separadas por \\r\\n', () => {
@@ -53,4 +55,38 @@ test( 'lleva el UID que se pasa', () => {
 test( 'lleva SEQUENCE: 0 por defecto y el número que se pasa', () => {
     assert.ok( buildCalendarEvent( EVENT ).includes( 'SEQUENCE:0\r\n' ) )
     assert.ok( buildCalendarEvent({ ...EVENT, sequence: 1795000000 }).includes( 'SEQUENCE:1795000000\r\n' ) )
+})
+
+test( 'por defecto es una invitación: METHOD:REQUEST y STATUS:CONFIRMED', () => {
+    const ics = buildCalendarEvent( EVENT )
+
+    assert.ok( ics.includes( 'METHOD:REQUEST\r\n' ) )
+    assert.ok( ics.includes( 'STATUS:CONFIRMED\r\n' ) )
+    assert.ok( !ics.includes( 'METHOD:PUBLISH' ) )
+})
+
+test( 'con method CANCEL lleva METHOD:CANCEL y STATUS:CANCELLED', () => {
+    const ics = buildCalendarEvent({ ...EVENT, method: 'CANCEL' })
+
+    assert.ok( ics.includes( 'METHOD:CANCEL\r\n' ) )
+    assert.ok( ics.includes( 'STATUS:CANCELLED\r\n' ) )
+    assert.ok( !ics.includes( 'METHOD:REQUEST' ) )
+})
+
+test( 'lleva el organizador con su nombre y su correo', () => {
+    const ics = buildCalendarEvent( EVENT )
+
+    assert.ok( ics.includes( 'ORGANIZER;CN="Mesón La Paloma":mailto:meson@ejemplo.es\r\n' ) )
+})
+
+test( 'lleva al cliente como asistente que ya ha aceptado y sin pedir respuesta', () => {
+    const ics = buildCalendarEvent( EVENT )
+
+    assert.ok( ics.includes( 'ATTENDEE;CN="Ana";ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:ana@ejemplo.es\r\n' ) )
+})
+
+test( 'escapa el nombre del asistente: entre comillas, sin comillas ni saltos de línea dentro', () => {
+    const ics = buildCalendarEvent({ ...EVENT, attendee: { name: 'Ana "la de\nPérez", Madrid', email: 'ana@ejemplo.es' } })
+
+    assert.ok( ics.includes( 'ATTENDEE;CN="Ana la de Pérez, Madrid";' ) )
 })

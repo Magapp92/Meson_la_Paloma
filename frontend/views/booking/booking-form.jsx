@@ -5,11 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@components/button/button.jsx'
 import { PARTY_SIZES } from '@const/booking.js'
-import { CONTACT, TIME_ZONE } from '@const/business.js'
+import { CONTACT } from '@const/business.js'
 import { ROUTES } from '@const/routes.js'
 import { useRequest } from '@hooks/use-request.js'
 import { request } from '@lib/request.js'
-import { getGoogleCalendarUrl, getOutlookCalendarUrl } from '@lib/calendar.js'
 import { toDayLabel } from '@lib/days.js'
 import { BookingReview } from './booking-review.jsx'
 
@@ -359,8 +358,8 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
     )
 }
 
-/* Resumen de la reserva confirmada, con los botones para guardarla en el calendario y ver la carta.
-reservation: lo que devuelve la API ({ date, time, partySize, name, durationMinutes }); dayLabel: el día escrito entero */
+/* Resumen de la reserva confirmada, con la nota del correo y el botón para ver la carta.
+reservation: lo que devuelve la API ({ date, time, partySize, name }); dayLabel: el día escrito entero */
 const BookingConfirmation = ({ reservation, dayLabel }) => {
 
     /* Al aparecer, el foco va al título: el lector de pantalla lo lee y la página sube hasta él */
@@ -370,20 +369,6 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
         titleRef.current?.focus()
     }, [] )
 
-    /* El evento de calendario con los datos de la reserva, para los dos botones */
-    const calendarEvent = {
-        title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
-        date: reservation.date,
-        time: reservation.time,
-        durationMinutes: reservation.durationMinutes,
-        timeZone: TIME_ZONE,
-        location: `${ CONTACT.street }, ${ CONTACT.city }`
-    }
-
-    /* Enlaces a Google Calendar y a Outlook con el evento ya rellenado */
-    const googleUrl = getGoogleCalendarUrl( calendarEvent )
-    const outlookUrl = getOutlookCalendarUrl( calendarEvent )
-
     return (
         <section className="BookingConfirmation">
             <h2 ref={titleRef} tabIndex={-1} className="BookingConfirmation-title">Reserva confirmada</h2>
@@ -391,23 +376,19 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
                 Te esperamos el <strong>{dayLabel}</strong> a las <strong>{reservation.time}</strong>.
                 Mesa para {reservation.partySize} a nombre de {reservation.name}.
             </p>
+            {/* El calendario se gestiona con la invitación del correo, no con botones aquí: un evento creado
+            desde la página no se podría actualizar al cambiar o cancelar la reserva y quedaría duplicado */}
+            <p className="BookingConfirmation-note">
+                Te hemos enviado un correo con los datos y la invitación de calendario: añádela desde allí
+                y se actualizará sola si cambias o cancelas la reserva.
+            </p>
             <p className="BookingConfirmation-note">
                 Si necesitas cambiar algo,{' '}
                 <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
             </p>
-            {/* El enlace a la carta, antes del calendario */}
+            {/* El enlace a la carta */}
             <div className="BookingConfirmation-actions">
                 <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta</Button>
-            </div>
-            {/* Guardar la reserva en el calendario: Google Calendar y Outlook se abren en otra pestaña, sin descargar nada.
-            Para Apple, una nota: el evento va en el correo de confirmación */}
-            <div className="BookingConfirmation-calendar">
-                <p className="BookingConfirmation-label">Añadir al calendario:</p>
-                <div className="BookingConfirmation-actions">
-                    <Button href={googleUrl} target="_blank" rel="noopener" title="Añadir a Google Calendar">Google Calendar</Button>
-                    <Button href={outlookUrl} target="_blank" rel="noopener" title="Añadir a Outlook">Outlook</Button>
-                </div>
-                <p className="BookingConfirmation-hint">¿Usas el calendario de Apple? Añádelo desde el correo de confirmación.</p>
             </div>
         </section>
     )

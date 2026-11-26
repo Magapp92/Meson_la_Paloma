@@ -61,3 +61,12 @@ test( 'con isUpdate, el asunto y el título dicen "Reserva modificada"', () => {
     assert.ok( text.includes( 'Estos son los datos nuevos de tu reserva:' ) )
     assert.ok( html.includes( RESERVATION.manageUrl ) )
 })
+
+test( 'el html y el texto avisan de la invitación de calendario, al confirmar y al modificar', () => {
+    const note = 'Este correo incluye la invitación de calendario: añádela y se actualizará sola si cambias o cancelas la reserva.'
+
+    for ( const email of [ buildConfirmationEmail( RESERVATION ), buildConfirmationEmail({ ...RESERVATION, isUpdate: true }) ] ) {
+        assert.ok( email.html.includes( note ) )
+        assert.ok( email.text.includes( note ) )
+    }
+})

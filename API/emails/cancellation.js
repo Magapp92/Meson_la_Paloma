@@ -40,6 +40,8 @@ const buildCancellationEmail = ({ name, date, time, partySize, bookingUrl }) => 
     const longDate = formatLongDate( date )
     const people = `${ partySize } ${ partySize === 1 ? 'persona' : 'personas' }`
 
+    const calendarNote = 'Si añadiste la reserva a tu calendario, la invitación de este correo la quita.'
+
     const subject = `Reserva cancelada: ${ longDate } a las ${ time }`
 
     const html = `<!DOCTYPE html>
@@ -86,6 +88,11 @@ const buildCancellationEmail = ({ name, date, time, partySize, bookingUrl }) => 
                         </td>
                     </tr>
                     <tr>
+                        <td style="padding: 0 32px 16px; font-family: ${ TEXT_FONT }; font-size: 14px; color: ${ COLORS.grey };">
+                            ${ calendarNote }
+                        </td>
+                    </tr>
+                    <tr>
                         <td style="padding: 0 32px 32px; font-family: ${ TEXT_FONT }; font-size: 14px; color: ${ COLORS.grey };">
                             Si necesitas algo, llámanos al <a href="${ RESTAURANT.phoneHref }" style="color: ${ COLORS.mustard }; text-decoration: none;">${ RESTAURANT.phone }</a>
                         </td>
@@ -119,6 +126,8 @@ const buildCancellationEmail = ({ name, date, time, partySize, bookingUrl }) => 
         `Personas: ${ people }`,
         '',
         `Hacer otra reserva: ${ bookingUrl }`,
+        '',
+        calendarNote,
         '',
         `Si necesitas algo, llámanos al ${ RESTAURANT.phone }`,
         '',

@@ -63,7 +63,31 @@ const getDayBookings = ( date, excludeId ) => Promise.all([
     ).lean()
 ])
 
-/* Los datos del correo de la reserva (confirmación o modificación), con el evento de calendario adjunto.
+/* La invitación de calendario de la reserva, lista para adjuntar al correo. La usan los tres correos:
+confirmar y modificar la añaden o la mueven (REQUEST) y cancelar la quita (CANCEL).
+Siempre con el mismo UID, el código de la reserva, para que el calendario sepa que es el mismo evento.
+- method: 'REQUEST' o 'CANCEL'.
+- sequence: versión del evento; tiene que ser mayor en cada correo para que el calendario lo tenga en cuenta.
+Se llama invite.ics porque es el nombre que los programas de correo reconocen como invitación */
+const buildInviteAttachment = ( reservation, { method = 'REQUEST', sequence } = {} ) => ({
+    name: 'invite.ics',
+    content: buildCalendarEvent({
+        uid: `${ reservation.token }@mesonlapaloma.com`,
+        title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
+        date: reservation.date,
+        time: reservation.time,
+        durationMinutes: BOOKING_RULES.durationMinutes,
+        timeZone: 'Europe/Madrid',
+        location: 'C/ Artajona, 9, 28039 Madrid',
+        sequence,
+        method,
+        /* El mesón organiza, con el mismo remitente que el correo; el cliente es el asistente */
+        organizer: { name: process.env.MAIL_FROM_NAME || 'Mesón La Paloma', email: process.env.MAIL_FROM },
+        attendee: { name: reservation.name, email: reservation.email }
+    })
+})
+
+/* Los datos del correo de la reserva (confirmación o modificación), con la invitación de calendario adjunta.
 - isUpdate: true en la modificación, cambia el asunto y el título del correo.
 - sequence: versión del evento de calendario; en la creación no se pasa (0) */
 const buildReservationEmail = ( reservation, { isUpdate = false, sequence } = {} ) => {
@@ -77,22 +101,12 @@ const buildReservationEmail = ( reservation, { isUpdate = false, sequence } = {}
         manageUrl,
         isUpdate
     })
-    /* Evento de calendario adjunto (.ics): así el programa de correo ofrece "Añadir al calendario" */
-    const calendarEvent = buildCalendarEvent({
-        uid: `${ reservation.token }@mesonlapaloma.com`,
-        title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
-        date: reservation.date,
-        time: reservation.time,
-        durationMinutes: BOOKING_RULES.durationMinutes,
-        timeZone: 'Europe/Madrid',
-        location: 'C/ Artajona, 9, 28039 Madrid',
-        sequence
-    })
 
     return {
         to: { email: reservation.email, name: reservation.name },
         subject, html, text,
-        attachments: [ { name: 'reserva-meson-la-paloma.ics', content: calendarEvent } ]
+        /* Invitación de calendario: el programa de correo la añade al calendario, o mueve el evento si ya estaba */
+        attachments: [ buildInviteAttachment( reservation, { sequence } ) ]
     }
 }
 
@@ -274,8 +288,10 @@ const cancelReservation = async ( req, res, next ) => {
             })
         }
 
-        /* Correo de cancelación con el enlace para reservar otra vez. Va en su propio try / catch:
-        si el correo falla, la reserva ya está cancelada y se mantiene; solo lo apuntamos en la consola */
+        /* Correo de cancelación con el enlace para reservar otra vez y la invitación de anulación, que quita
+        el evento del calendario. Va en su propio try / catch: si el correo falla, la reserva ya está cancelada
+        y se mantiene; solo lo apuntamos en la consola.
+        sequence son los segundos de updatedAt de la reserva ya cancelada: mayor que el de cualquier correo anterior */
         try {
             const { subject, html, text } = buildCancellationEmail({
                 name: cancelled.name,
@@ -284,9 +300,11 @@ const cancelReservation = async ( req, res, next ) => {
                 partySize: cancelled.partySize,
                 bookingUrl: `${ process.env.SITE_URL }/reservar`
             })
+            const sequence = Math.floor( cancelled.updatedAt.getTime() / 1000 )
             await sendEmail({
                 to: { email: cancelled.email, name: cancelled.name },
-                subject, html, text
+                subject, html, text,
+                attachments: [ buildInviteAttachment( cancelled, { method: 'CANCEL', sequence } ) ]
             })
         } catch ( error ) {
             console.error( 'No se ha podido enviar el correo de cancelación:', error.message )
