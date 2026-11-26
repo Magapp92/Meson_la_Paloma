@@ -1,12 +1,11 @@
 {
     "compilerOptions": {
-        "baseUrl": ".",
         "paths": {
-            "@components/*": ["components/*"],
-            "@const/*": ["const/*"],
-            "@hooks/*": ["hooks/*"],
-            "@lib/*": ["lib/*"],
-            "@views/*": ["views/*"]
+            "@components/*": ["./components/*"],
+            "@const/*": ["./const/*"],
+            "@hooks/*": ["./hooks/*"],
+            "@lib/*": ["./lib/*"],
+            "@views/*": ["./views/*"]
         }
     }
 }
