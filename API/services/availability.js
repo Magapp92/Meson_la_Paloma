@@ -118,6 +118,7 @@ module.exports = {
     parseDate,
     daysBetween,
     getDaySlots,
+    overlaps,
     pickTable,
     getAvailableTimes,
     getOpenDays
