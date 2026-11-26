@@ -8,7 +8,7 @@ import { CONTACT, TIME_ZONE } from '@const/business.js'
 import { ROUTES } from '@const/routes.js'
 import { useRequest } from '@hooks/use-request.js'
 import { request } from '@lib/request.js'
-import { downloadCalendarEvent } from '@lib/calendar.js'
+import { downloadCalendarEvent, getGoogleCalendarUrl } from '@lib/calendar.js'
 
 /* Los pasos del formulario, en orden. El número de cada paso es su posición + 1 */
 const STEPS = Object.freeze([ 'Personas', 'Día', 'Hora', 'Datos' ])
@@ -311,16 +311,21 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
         titleRef.current?.focus()
     }, [] )
 
-    /* Descarga el evento de calendario con los datos de la reserva */
-    const addToCalendar = () => downloadCalendarEvent({
+    /* El evento de calendario con los datos de la reserva, para los dos botones */
+    const calendarEvent = {
         title: `Mesa en Mesón La Paloma (${ reservation.partySize } personas)`,
         date: reservation.date,
         time: reservation.time,
         durationMinutes: reservation.durationMinutes,
         timeZone: TIME_ZONE,
-        location: `${ CONTACT.street }, ${ CONTACT.city }`,
-        fileName: 'reserva-meson-la-paloma.ics'
-    })
+        location: `${ CONTACT.street }, ${ CONTACT.city }`
+    }
+
+    /* Enlace a Google Calendar con el evento ya rellenado */
+    const googleUrl = getGoogleCalendarUrl( calendarEvent )
+
+    /* Descarga el evento como archivo .ics, para Apple Calendar u Outlook */
+    const downloadEvent = () => downloadCalendarEvent({ ...calendarEvent, fileName: 'reserva-meson-la-paloma.ics' })
 
     return (
         <section className="BookingConfirmation">
@@ -333,8 +338,16 @@ const BookingConfirmation = ({ reservation, dayLabel }) => {
                 Si necesitas cambiar algo,{' '}
                 <a href={CONTACT.phoneHref} className="BookingStep-link">llámanos al {CONTACT.phone}</a>.
             </p>
+            {/* Guardar la reserva en el calendario: Google Calendar se abre en otra pestaña; Apple y Outlook, con el archivo .ics */}
+            <div className="BookingConfirmation-calendar">
+                <p className="BookingConfirmation-label">Añadir al calendario:</p>
+                <div className="BookingConfirmation-actions">
+                    <Button href={googleUrl} target="_blank" rel="noopener" title="Añadir a Google Calendar">Google Calendar</Button>
+                    <Button onClick={downloadEvent} title="Descargar el evento para Apple Calendar u Outlook">Apple / Outlook</Button>
+                </div>
+            </div>
+            {/* El enlace a la carta, debajo */}
             <div className="BookingConfirmation-actions">
-                <Button onClick={addToCalendar}>Añadir al calendario</Button>
                 <Button href={ROUTES.FOOD_MENU} variant="ghost" title="Ir a la carta">Ver la carta</Button>
             </div>
         </section>

@@ -534,13 +534,30 @@ button.BookingProgress-button:focus-visible{
     line-height: 1.5;
 }
 
-/* Los dos botones en fila, bajando de línea si no caben */
+/* Cada fila de botones (los del calendario y "Ver la carta"), bajando de línea si no caben */
 .BookingConfirmation-actions{
     margin-top: 1.75rem;
 
     display: flex;
     flex-flow: row wrap;
     gap: .8rem;
+}
+
+/* El bloque del calendario, separado de la nota como los botones */
+.BookingConfirmation-calendar{
+    margin-top: 1.75rem;
+}
+
+/* "Añadir al calendario:", pequeño y en gris claro, encima de sus botones */
+.BookingConfirmation-label{
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+/* Los botones del calendario, pegados a su texto */
+.BookingConfirmation-calendar .BookingConfirmation-actions{
+    margin-top: .6rem;
 }
 
 
@@ -566,13 +583,13 @@ button.BookingProgress-button:focus-visible{
 
 /* MÓVIL */
 
-/* En esta página no se ve la barra fija del móvil: su botón "Reservar mesa" no tiene sentido aquí
+/* En esta página (formulario y resumen) no se ve la barra fija del móvil: su botón "Reservar mesa" no tiene sentido aquí
    y el teléfono ya está en el formulario. Se quita también el hueco que deja para ella al final */
 @media (max-width: 900px){
-    body:has(.BookingForm) .MobileBar{
+    body:has(.BookingForm, .BookingConfirmation) .MobileBar{
         display: none;
     }
-    body:has(.BookingForm){
+    body:has(.BookingForm, .BookingConfirmation){
         padding-bottom: 0;
     }
 }
@@ -582,7 +599,8 @@ button.BookingProgress-button:focus-visible{
    - círculos de personas más pequeños, para que los cinco quepan en una fila;
    - días en columnas más estrechas, con letra más pequeña y menos relleno;
    - horas de cinco en cinco, más juntas;
-   - los datos en una sola columna */
+   - los datos en una sola columna;
+   - los botones del calendario, uno debajo de otro y a todo el ancho */
 @media (max-width: 480px){
     .BookingProgress-label{
         display: none;
@@ -640,5 +658,9 @@ button.BookingProgress-button:focus-visible{
 
     .ContactFields{
         grid-template-columns: 1fr;
+    }
+
+    .BookingConfirmation-calendar .Button{
+        flex: 1 1 100%;
     }
 }

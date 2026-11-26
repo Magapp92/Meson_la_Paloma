@@ -1,6 +1,7 @@
 
-/* Crea un evento de calendario y lo descarga como archivo .ics, el formato que abren
-Google Calendar, Apple Calendar y Outlook. Se genera en el navegador, sin servicios externos */
+/* Añadir una reserva al calendario, sin servicios externos:
+- getGoogleCalendarUrl: un enlace que abre Google Calendar con el evento ya rellenado.
+- downloadCalendarEvent: crea el evento como archivo .ics (el formato que abren Apple Calendar y Outlook) y lo descarga */
 
 /* Pone un número con dos cifras: 9 → '09' */
 const pad = number => String( number ).padStart( 2, '0' )
@@ -11,10 +12,31 @@ const toIcsDateTime = ( date, minutes ) => `${ date.replaceAll( '-', '' ) }T${ p
 /* En los textos del .ics, la barra, la coma y el punto y coma tienen significado: se escapan con \ */
 const escapeText = text => text.replace( /[\\,;]/g, character => `\\${ character }` )
 
+/* Hora 'HH:MM' en minutos desde las 00:00: '21:00' → 1260 */
+const toMinutes = time => {
+    const [ hours, minutes ] = time.split( ':' ).map( Number )
+
+    return hours * 60 + minutes
+}
+
+/* Enlace que abre Google Calendar con el evento ya rellenado, listo para guardarlo.
+Las horas van sin zona: Google las interpreta en la zona que indica ctz (por ejemplo 'Europe/Madrid') */
+export const getGoogleCalendarUrl = ({ title, date, time, durationMinutes, timeZone, location }) => {
+    const start = toMinutes( time )
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: title,
+        dates: `${ toIcsDateTime( date, start ) }/${ toIcsDateTime( date, start + durationMinutes ) }`,
+        ctz: timeZone,
+        location
+    })
+
+    return `https://calendar.google.com/calendar/render?${ params }`
+}
+
 /* date 'AAAA-MM-DD', time 'HH:MM', durationMinutes y timeZone (por ejemplo 'Europe/Madrid') */
 export const downloadCalendarEvent = ({ title, date, time, durationMinutes, timeZone, location, fileName }) => {
-    const [ hours, minutes ] = time.split( ':' ).map( Number )
-    const start = hours * 60 + minutes
+    const start = toMinutes( time )
 
     /* Momento en que se crea el evento, en hora universal: '20261126T101500Z' */
     const stamp = new Date().toISOString().replace( /[-:]/g, '' ).replace( /\.\d{3}/, '' )
