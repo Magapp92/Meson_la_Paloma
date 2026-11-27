@@ -6,7 +6,7 @@ responde 429 (Too Many Requests) con el formato de siempre: { message, data: nul
 Las cuentas se guardan en la memoria del proceso: si la API se reinicia, empiezan de cero.
 
 AVISO para cuando la API se publique detrás de un proxy (Render, Railway…): todas las peticiones llegarán
-desde la IP del proxy y el límite sería para todos los clientes a la vez. Habrá que configurar en index.js
+desde la IP del proxy y el límite sería para todos los clientes a la vez. Habrá que configurar en app.js
 app.set( 'trust proxy', … ) con el número de proxies que pone el proveedor, para que req.ip sea la del cliente */
 const { rateLimit } = require( 'express-rate-limit' )
 
