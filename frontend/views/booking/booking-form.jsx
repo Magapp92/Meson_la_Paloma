@@ -332,13 +332,15 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                             <span className="ContactFields-label">Correo</span>
                             <input className="ContactFields-input" type="email" name="email" value={contact.email} onChange={changeContact} autoComplete="email" maxLength={254} required />
                         </label>
-                        <label className="ContactFields-field ContactFields-field--full">
-                            <span className="ContactFields-label">Notas <span className="ContactFields-optional">(opcional)</span></span>
-                            <textarea className="ContactFields-input ContactFields-input--notes" name="notes" value={contact.notes} onChange={changeContact} maxLength={500} rows={3} placeholder="Una trona, una alergia, una celebración…" aria-describedby="notes-hint" />
+                        {/* Las notas van en un div y no dentro de un label como los demás campos: así el aviso queda fuera
+                        de la etiqueta y el lector de pantalla no lo junta con el nombre del campo (lo diría dos veces) */}
+                        <div className="ContactFields-field ContactFields-field--full">
+                            <label htmlFor="notes" className="ContactFields-label">Notas <span className="ContactFields-optional">(opcional)</span></label>
+                            <textarea id="notes" className="ContactFields-input ContactFields-input--notes" name="notes" value={contact.notes} onChange={changeContact} maxLength={500} rows={3} placeholder="Una trona, una alergia, una celebración…" aria-describedby="notes-hint" />
                             {/* Aviso de privacidad: las alergias sí, otros datos de salud no. aria-describedby hace que
-                            el lector de pantalla lo lea al entrar en el campo */}
+                            el lector de pantalla lo lea después del nombre del campo, al entrar en él */}
                             <span id="notes-hint" className="ContactFields-hint">Si tienes alguna alergia o intolerancia, indícala aquí. No escribas otros datos de salud.</span>
-                        </label>
+                        </div>
                         {/* Campo trampa para robots: está en la página pero nadie lo ve. Fuera de la vista (CSS),
                         oculto al lector de pantalla (aria-hidden), sin paso con el tabulador (tabIndex -1) y sin que
                         el navegador lo rellene solo (autoComplete off). Una persona lo deja vacío; un robot que rellena
