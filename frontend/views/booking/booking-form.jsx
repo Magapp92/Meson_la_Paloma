@@ -351,7 +351,7 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                             <input className="ContactFields-checkbox" type="checkbox" checked={isPrivacyAccepted} onChange={ event => setIsPrivacyAccepted( event.target.checked ) } required />
                             <span className="ContactFields-consentText">
                                 He leído y acepto la{' '}
-                                <Link href={ROUTES.HOME} target="_blank" rel="noopener" className="BookingStep-link">política de privacidad</Link>.
+                                <Link href={ROUTES.PRIVACY} target="_blank" rel="noopener" className="BookingStep-link">política de privacidad</Link>.
                             </span>
                         </label>
                         {/* Si la API rechaza algún dato, su mensaje. role="alert" hace que el lector de pantalla lo lea al aparecer */}

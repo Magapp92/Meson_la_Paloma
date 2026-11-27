@@ -10,7 +10,7 @@ import './footer.css'
 /* Enlaces legales. Los que aún no tienen página llevan a la portada: cambiarán cuando creemos sus páginas */
 const LEGAL_LINKS = Object.freeze([
     { text: 'Aviso legal', href: ROUTES.LEGAL_NOTICE, title: 'Ir al aviso legal' },
-    { text: 'Privacidad', href: ROUTES.HOME, title: 'Ir a la política de privacidad' },
+    { text: 'Privacidad', href: ROUTES.PRIVACY, title: 'Ir a la política de privacidad' },
     { text: 'Cookies', href: ROUTES.HOME, title: 'Ir a la política de cookies' }
 ])
 
