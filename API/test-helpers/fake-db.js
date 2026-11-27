@@ -55,6 +55,7 @@ const sameValue = ( a, b ) => {
 }
 
 /* ¿Cumple el documento el filtro? Admite igualdad, $ne y $gte, que son los que usan los controllers,
+$in (el valor es uno de la lista), que usa services/reminders.js,
 y $lte, que ya no usa ninguno pero se deja por si vuelve a hacer falta */
 const matches = ( doc, filter = {} ) => Object.entries( filter ).every( ([ key, condition ]) => {
     const value = doc[ key ]
@@ -64,6 +65,7 @@ const matches = ( doc, filter = {} ) => Object.entries( filter ).every( ([ key, 
             if ( operator === '$ne' ) return !sameValue( value, operand )
             if ( operator === '$lte' ) return value <= operand
             if ( operator === '$gte' ) return value >= operand
+            if ( operator === '$in' ) return operand.some( item => sameValue( value, item ) )
             throw new Error( `Operador no soportado por la base falsa: ${ operator }` )
         })
     }
@@ -116,7 +118,8 @@ const Reservation = {
         return created
     },
 
-    /* Solo cambios simples ({ campo: valor }), que es lo que mandan los controllers. Actualiza updatedAt */
+    /* Solo cambios simples ({ campo: valor }), que es lo que mandan los controllers.
+    Actualiza updatedAt, salvo con la opción timestamps: false, como Mongoose (la usa services/reminders.js) */
     findOneAndUpdate: ( filter, update, options = {} ) => query( async () => {
         if ( hooks.beforeUpdate ) {
             const hook = hooks.beforeUpdate
@@ -128,7 +131,7 @@ const Reservation = {
         if ( !doc ) return null
 
         const before = clone( doc )
-        Object.assign( doc, update, { updatedAt: nextDate( doc.updatedAt ) } )
+        Object.assign( doc, update, options.timestamps === false ? {} : { updatedAt: nextDate( doc.updatedAt ) } )
         const result = clone( options.returnDocument === 'after' ? doc : before )
 
         if ( hooks.afterUpdate ) {
@@ -140,11 +143,12 @@ const Reservation = {
         return result
     }),
 
-    updateOne: async ( filter, update ) => {
+    /* Igual que findOneAndUpdate: con timestamps: false no toca updatedAt */
+    updateOne: async ( filter, update, options = {} ) => {
         const doc = store.reservations.find( item => matches( item, filter ) )
         if ( !doc ) return { matchedCount: 0, modifiedCount: 0 }
 
-        Object.assign( doc, update, { updatedAt: nextDate( doc.updatedAt ) } )
+        Object.assign( doc, update, options.timestamps === false ? {} : { updatedAt: nextDate( doc.updatedAt ) } )
 
         return { matchedCount: 1, modifiedCount: 1 }
     },
