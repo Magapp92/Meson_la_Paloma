@@ -10,11 +10,14 @@ const { RESTAURANT, emailLayout, paragraph, heading, details, detailRow, button,
 - name: lo escribe el cliente, va escapado en el HTML.
 - date 'AAAA-MM-DD', time 'HH:MM', partySize: los datos de la reserva.
 - manageUrl: el enlace para ver, cambiar o cancelar la reserva.
+- isToday (opcional): true si la reserva es el mismo día en que sale el aviso. Lo normal es que salga
+el día antes ("mañana"), pero si el envío se retrasó (la API estuvo apagada o un envío falló y se reintentó)
+puede llegar el mismo día, y entonces dice "hoy".
 Devuelve { subject, html, text } */
-const buildReminderEmail = ({ name, date, time, partySize, manageUrl }) => {
+const buildReminderEmail = ({ name, date, time, partySize, manageUrl, isToday = false }) => {
     const longDate = formatLongDate( date )
     const people = `${ partySize } ${ partySize === 1 ? 'persona' : 'personas' }`
-    const title = 'Te esperamos mañana'
+    const title = isToday ? 'Te esperamos hoy' : 'Te esperamos mañana'
     const cancelNote = 'Si al final no podéis venir, cancélala desde el botón y la mesa quedará libre para otras personas.'
 
     const subject = `${ title }: ${ longDate } a las ${ time }`

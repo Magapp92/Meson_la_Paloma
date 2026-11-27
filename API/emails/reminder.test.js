@@ -41,3 +41,13 @@ test( 'el html lleva el título "Te esperamos mañana"', () => {
 
     assert.ok( html.includes( 'Te esperamos mañana' ) )
 })
+
+/* Si el aviso llega el mismo día de la reserva (porque se retrasó), dice "hoy" en el asunto, el html y el texto */
+test( 'con isToday dice "Te esperamos hoy"', () => {
+    const { subject, html, text } = buildReminderEmail({ ...RESERVATION, isToday: true })
+
+    assert.equal( subject, 'Te esperamos hoy: sábado 28 de noviembre a las 21:00' )
+    assert.ok( html.includes( 'Te esperamos hoy' ) )
+    assert.ok( text.includes( 'Te esperamos hoy' ) )
+    assert.ok( !html.includes( 'mañana' ) )
+})

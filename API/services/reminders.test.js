@@ -167,6 +167,18 @@ describe( 'sendDueReminders', () => {
 
         assert.deepEqual( result, { sent: 1, skipped: 0, failed: 0 } )
         assert.equal( stored( reservation ).reminderSent, true )
+        assert.match( fake.mailer.calls[ 0 ].subject, /^Te esperamos mañana/ )
+    })
+
+    test( 'aviso retrasado: a las 00:30 avisa de una reserva de hoy a las 13:00 y el correo dice "hoy"', async () => {
+        const reservation = storedReservation()
+
+        /* Jueves 26 a las 00:30 de Madrid: la reserva es ese mismo día */
+        const result = await sendDueReminders( new Date( '2026-11-25T23:30:00Z' ) )
+
+        assert.deepEqual( result, { sent: 1, skipped: 0, failed: 0 } )
+        assert.match( fake.mailer.calls[ 0 ].subject, /^Te esperamos hoy/ )
+        assert.equal( stored( reservation ).reminderSent, true )
     })
 
     test( 'cambio de mes y de año: el 31 de diciembre avisa de una reserva del 1 de enero, y no de una del 2', async () => {

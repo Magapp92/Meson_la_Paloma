@@ -82,14 +82,16 @@ const buildCancellationMessage = reservation => {
 }
 
 /* El correo de recordatorio, unas 24 horas antes de la reserva, con el enlace para verla, cambiarla o cancelarla.
-Sin invitación de calendario: el cliente ya la tiene del correo de confirmación */
-const buildReminderMessage = reservation => {
+Sin invitación de calendario: el cliente ya la tiene del correo de confirmación.
+isToday: true si la reserva es el mismo día del aviso (el correo dice "hoy" en vez de "mañana") */
+const buildReminderMessage = ( reservation, { isToday = false } = {} ) => {
     const { subject, html, text } = buildReminderEmail({
         name: reservation.name,
         date: reservation.date,
         time: reservation.time,
         partySize: reservation.partySize,
-        manageUrl: `${ process.env.SITE_URL }/mi-reserva?codigo=${ reservation.token }`
+        manageUrl: `${ process.env.SITE_URL }/mi-reserva?codigo=${ reservation.token }`,
+        isToday
     })
 
     return {

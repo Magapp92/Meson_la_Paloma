@@ -84,7 +84,9 @@ const sendDueReminders = async ( now = new Date() ) => {
             ).lean()
             if ( !claimed ) continue
 
-            const sent = await sendEmailSafely( () => buildReminderMessage( claimed ), 'recordatorio', { _id, date, time } )
+            /* Si la reserva es de hoy (el aviso se retrasó), el correo dice "hoy" en vez de "mañana" */
+            const isToday = claimed.date === today
+            const sent = await sendEmailSafely( () => buildReminderMessage( claimed, { isToday } ), 'recordatorio', { _id, date, time } )
             if ( sent ) {
                 result.sent++
                 continue
