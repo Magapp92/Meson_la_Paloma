@@ -42,8 +42,14 @@ const FIELD_LIMITS = Object.freeze({
 Para hacer más, tiene que llamar: así nadie llena el comedor con reservas falsas desde la web */
 const MAX_ACTIVE_PER_CONTACT = 2
 
+/* Versión de la política de privacidad que acepta el cliente al reservar: la fecha de su última actualización.
+Se guarda en cada reserva para saber qué texto aceptó. Tiene que coincidir con LEGAL_UPDATED de la web
+(frontend/const/legal.js): si cambia la política, se cambian las dos */
+const PRIVACY_POLICY_VERSION = '2026-11-27'
+
 module.exports = {
     BOOKING_RULES,
     FIELD_LIMITS,
-    MAX_ACTIVE_PER_CONTACT
+    MAX_ACTIVE_PER_CONTACT,
+    PRIVACY_POLICY_VERSION
 }

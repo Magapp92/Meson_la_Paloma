@@ -62,6 +62,8 @@ Los maxlength repiten los máximos de la validación (FIELD_LIMITS): por si alg�
 emailFailedAt (opcional) es cuándo falló el último correo de la reserva: así el mesón puede ver a quién no le ha llegado y avisarle.
 expiresAt es cuándo se borra la reserva: al empezar en Madrid el día siguiente a date (services/madrid-time.js).
 Lo pone la API al crear y lo recalcula al modificar; al cancelar no cambia, así que las canceladas se borran igual.
+privacyAcceptedAt y privacyPolicyVersion son cuándo aceptó el cliente la política de privacidad y qué versión:
+la ley pide poder demostrarlo. Los pone la API al crear la reserva y no cambian al modificarla.
 timestamps añade createdAt y updatedAt solos */
 const reservationSchema = new mongoose.Schema(
     {
@@ -78,7 +80,9 @@ const reservationSchema = new mongoose.Schema(
         token: { type: mongoose.Schema.Types.String, required: true, unique: true },
         reminderSent: { type: mongoose.Schema.Types.Boolean, default: false },
         emailFailedAt: { type: mongoose.Schema.Types.Date },
-        expiresAt: { type: mongoose.Schema.Types.Date, required: true }
+        expiresAt: { type: mongoose.Schema.Types.Date, required: true },
+        privacyAcceptedAt: { type: mongoose.Schema.Types.Date, required: true },
+        privacyPolicyVersion: { type: mongoose.Schema.Types.String, required: true }
     },
     {
         collection: 'reservations',

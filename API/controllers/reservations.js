@@ -3,7 +3,7 @@
 const crypto = require( 'node:crypto' )
 const { Table, Reservation } = require( '../models' )
 const { getAvailableTimes, pickTable, overlaps, toMinutes } = require( '../services/availability' )
-const { BOOKING_RULES, MAX_ACTIVE_PER_CONTACT } = require( '../services/booking-rules' )
+const { BOOKING_RULES, MAX_ACTIVE_PER_CONTACT, PRIVACY_POLICY_VERSION } = require( '../services/booking-rules' )
 const { getMadridNow, getStartOfNextDayInMadrid } = require( '../services/madrid-time' )
 const { sendEmailSafely } = require( '../services/notifications' )
 const { TOKEN_PATTERN, validateBooking, validateReservationForm, validateDaysAhead } = require( '../services/reservation-validation' )
@@ -14,6 +14,7 @@ const NOT_FOUND_MESSAGE = 'No encontramos ninguna reserva con este enlace'
 const NOT_FREE_MESSAGE = 'Esa hora ya no está libre. Elige otra, por favor'
 const TOO_LATE_TO_CHANGE_MESSAGE = `Faltan menos de ${ BOOKING_RULES.minNoticeMinutes / 60 } horas para tu reserva: para cambiarla, llámanos`
 const TOO_MANY_ACTIVE_MESSAGE = `Ya tienes ${ MAX_ACTIVE_PER_CONTACT } reservas activas. Para hacer otra, llámanos`
+const PRIVACY_REQUIRED_MESSAGE = 'Para reservar tienes que aceptar la política de privacidad'
 
 /* Ventana para tratar una reserva igual como repetida (doble clic o reintento del navegador): 10 minutos */
 const DUPLICATE_WINDOW_MS = 10 * 60 * 1000
@@ -116,12 +117,15 @@ const postReservation = async ( req, res, next ) => {
         /* Si la petición llega sin cuerpo JSON, Express 5 deja req.body en undefined: con {} llega a la validación y responde 400 */
         const body = req.body ?? {}
         /* Solo cogemos los campos permitidos: si alguien manda status, table o token, se ignoran */
-        const { date, time, name, phone, email, notes, website } = body
+        const { date, time, name, phone, email, notes, website, privacyAccepted } = body
 
         /* La validación recibe partySize tal como llega, sin convertir: así una lista ([ 4 ]) se rechaza.
         Una vez validado, para el resto lo usamos como número */
         const error = validateReservationForm({ date, time, partySize: body.partySize, name, phone, email, notes })
         if ( error ) return fail( res, 400, error )
+
+        /* La casilla de privacidad tiene que llegar marcada: solo vale true, no "true" ni 1 */
+        if ( privacyAccepted !== true ) return fail( res, 400, PRIVACY_REQUIRED_MESSAGE )
         const partySize = Number( body.partySize )
 
         const now = getMadridNow()
@@ -173,7 +177,10 @@ const postReservation = async ( req, res, next ) => {
             table: table.number,
             token,
             /* Se borra sola al empezar el día siguiente (índice TTL de models/schemas.js) */
-            expiresAt: getStartOfNextDayInMadrid( date )
+            expiresAt: getStartOfNextDayInMadrid( date ),
+            /* Cuándo aceptó la privacidad y qué versión: la hora la pone la API, no el navegador */
+            privacyAcceptedAt: new Date(),
+            privacyPolicyVersion: PRIVACY_POLICY_VERSION
         })
 
         /* Si dos personas reservan la misma mesa a la vez, las dos pueden pasar la comprobación de arriba.

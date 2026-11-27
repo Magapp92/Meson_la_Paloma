@@ -169,7 +169,8 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
             } else {
                 const data = await request( '/reservations', {
                     method: 'POST',
-                    body: { date, time, partySize, ...contact }
+                    /* privacyAccepted: la casilla de privacidad; la API guarda cuándo se aceptó */
+                    body: { date, time, partySize, ...contact, privacyAccepted: isPrivacyAccepted }
                 })
 
                 setReservation( data )

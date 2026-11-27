@@ -37,6 +37,7 @@ const validBody = ( overrides = {} ) => ({
     phone: '600 123 456',
     email: 'lucia@ejemplo.es',
     notes: 'Una trona',
+    privacyAccepted: true,
     ...overrides
 })
 
@@ -110,6 +111,30 @@ describe( 'POST /api/reservations (postReservation)', () => {
         assert.equal( email.attachments[ 0 ].name, 'invite.ics' )
         assert.equal( icsValue( email.attachments[ 0 ].content, 'METHOD' ), 'REQUEST' )
         assert.equal( icsValue( email.attachments[ 0 ].content, 'SEQUENCE' ), '0' )
+    })
+
+    /* Guarda cuándo aceptó la privacidad (la hora la pone la API) y qué versión; el campo privacyAccepted no se guarda */
+    test( 'guarda cuándo se aceptó la privacidad y qué versión', async () => {
+        const before = Date.now()
+        await fake.callHandler( postReservation, { body: validBody() } )
+
+        const saved = createdReservation()
+        assert.ok( saved.privacyAcceptedAt instanceof Date )
+        assert.ok( saved.privacyAcceptedAt.getTime() >= before && saved.privacyAcceptedAt.getTime() <= Date.now() )
+        assert.equal( saved.privacyPolicyVersion, '2026-11-27' )
+        assert.equal( 'privacyAccepted' in saved, false )
+    })
+
+    /* Sin la casilla marcada no se reserva: solo vale true (no "true", 1 ni que falte), y no se guarda nada ni sale correo */
+    test( 'sin aceptar la privacidad responde 400 y no guarda nada', async () => {
+        for ( const privacyAccepted of [ undefined, false, 'true', 1 ] ) {
+            const { res } = await fake.callHandler( postReservation, { body: validBody({ privacyAccepted }) } )
+
+            assert.equal( res.statusCode, 400 )
+            assert.equal( res.body.message, 'Para reservar tienes que aceptar la política de privacidad' )
+        }
+        assert.equal( fake.store.reservations.length, 0 )
+        assert.equal( fake.mailer.calls.length, 0 )
     })
 
     /* La invitación de calendario usa el _id de la reserva como UID, no el código secreto:
