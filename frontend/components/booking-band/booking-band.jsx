@@ -3,7 +3,7 @@ import { PartySizes } from '@components/party-sizes/party-sizes.jsx'
 import { CONTACT } from '@const/business.js'
 import './booking-band.css'
 
-/* Franja mostaza para reservar que va al final de las páginas interiores (todas menos la portada y Mi reserva),
+/* Franja mostaza para reservar que va al final de las páginas interiores (todas menos la portada, Mi reserva y las páginas legales),
 para que la opción de reservar se vea siempre. Lleva la invitación, el aviso de los grupos y los círculos */
 export const BookingBand = () => {
 
