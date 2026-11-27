@@ -7,11 +7,11 @@ import { CONTACT, SOCIAL_LINKS, DAY_NAMES, OPENING_HOURS } from '@const/business
 import { ROUTES } from '@const/routes.js'
 import './footer.css'
 
-/* Enlaces legales. Los que aún no tienen página llevan a la portada: cambiarán cuando creemos sus páginas */
+/* Enlaces a las páginas legales */
 const LEGAL_LINKS = Object.freeze([
     { text: 'Aviso legal', href: ROUTES.LEGAL_NOTICE, title: 'Ir al aviso legal' },
     { text: 'Privacidad', href: ROUTES.PRIVACY, title: 'Ir a la política de privacidad' },
-    { text: 'Cookies', href: ROUTES.HOME, title: 'Ir a la política de cookies' }
+    { text: 'Cookies', href: ROUTES.COOKIES, title: 'Ir a la política de cookies' }
 ])
 
 /* Autora de la web, con el enlace a su portfolio */
