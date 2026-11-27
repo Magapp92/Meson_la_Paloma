@@ -334,7 +334,10 @@ export const BookingForm = ({ initialPartySize = null, days, editToken, initial,
                         </label>
                         <label className="ContactFields-field ContactFields-field--full">
                             <span className="ContactFields-label">Notas <span className="ContactFields-optional">(opcional)</span></span>
-                            <textarea className="ContactFields-input ContactFields-input--notes" name="notes" value={contact.notes} onChange={changeContact} maxLength={500} rows={3} placeholder="Una trona, una alergia, una celebración…" />
+                            <textarea className="ContactFields-input ContactFields-input--notes" name="notes" value={contact.notes} onChange={changeContact} maxLength={500} rows={3} placeholder="Una trona, una alergia, una celebración…" aria-describedby="notes-hint" />
+                            {/* Aviso de privacidad: las alergias sí, otros datos de salud no. aria-describedby hace que
+                            el lector de pantalla lo lea al entrar en el campo */}
+                            <span id="notes-hint" className="ContactFields-hint">Si tienes alguna alergia o intolerancia, indícala aquí. No escribas otros datos de salud.</span>
                         </label>
                         {/* Campo trampa para robots: está en la página pero nadie lo ve. Fuera de la vista (CSS),
                         oculto al lector de pantalla (aria-hidden), sin paso con el tabulador (tabIndex -1) y sin que

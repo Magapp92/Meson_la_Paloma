@@ -446,6 +446,13 @@ button.BookingProgress-button:focus-visible{
     resize: vertical;
 }
 
+/* Aviso debajo de las notas, pequeño y más suave que el texto del campo */
+.ContactFields-hint{
+    font-size: .85rem;
+    color: var(--faint);
+    line-height: 1.5;
+}
+
 /* La casilla de privacidad: la casilla a la izquierda y el texto al lado */
 .ContactFields-consent{
     display: flex;
