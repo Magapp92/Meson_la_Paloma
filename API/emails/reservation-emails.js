@@ -1,10 +1,11 @@
 
 /* Los correos de las reservas, listos para sendEmail: destinatario, asunto, cuerpo y la invitación de calendario.
-Juntan los textos (confirmation.js y cancellation.js) con la invitación (calendar-event.js) */
+Juntan los textos (confirmation.js, cancellation.js y reminder.js) con la invitación (calendar-event.js) */
 const { BOOKING_RULES } = require( '../services/booking-rules' )
 const { buildConfirmationEmail } = require( './confirmation' )
 const { buildCalendarEvent } = require( './calendar-event' )
 const { buildCancellationEmail } = require( './cancellation' )
+const { buildReminderEmail } = require( './reminder' )
 
 /* La versión del evento de calendario: los segundos de updatedAt de la reserva. Siempre crecen,
 así cada correo lleva un número mayor que el anterior y, con el mismo UID, el calendario actualiza
@@ -80,9 +81,27 @@ const buildCancellationMessage = reservation => {
     }
 }
 
+/* El correo de recordatorio, unas 24 horas antes de la reserva, con el enlace para verla, cambiarla o cancelarla.
+Sin invitación de calendario: el cliente ya la tiene del correo de confirmación */
+const buildReminderMessage = reservation => {
+    const { subject, html, text } = buildReminderEmail({
+        name: reservation.name,
+        date: reservation.date,
+        time: reservation.time,
+        partySize: reservation.partySize,
+        manageUrl: `${ process.env.SITE_URL }/mi-reserva?codigo=${ reservation.token }`
+    })
+
+    return {
+        to: { email: reservation.email, name: reservation.name },
+        subject, html, text
+    }
+}
+
 /* Exportamos los correos para el controller de reservas */
 module.exports = {
     getSequence,
     buildReservationEmail,
-    buildCancellationMessage
+    buildCancellationMessage,
+    buildReminderMessage
 }
