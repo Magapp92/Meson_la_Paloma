@@ -16,6 +16,7 @@ try {
 
 const { app } = require( './app' )
 const { connect } = require( './config/db' )
+const { startReminderTimer } = require( './services/reminder-timer' )
 
 const { PORT = 4000 } = process.env
 
@@ -33,4 +34,7 @@ app.listen( PORT, error => {
     }
 
     console.log( `API en http://localhost:${ PORT }/api` )
+
+    /* Con el puerto abierto, arrancamos los recordatorios: ahora y después cada hora */
+    startReminderTimer()
 })
