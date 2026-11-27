@@ -7,5 +7,6 @@ export const ROUTES = Object.freeze({
     EXPERIENCES: '/experiencias',
     ABOUT: '/nosotros',
     EVENTS: '/menus-y-eventos',
-    BOOKING: '/reservar'
+    BOOKING: '/reservar',
+    LEGAL_NOTICE: '/aviso-legal'
 })

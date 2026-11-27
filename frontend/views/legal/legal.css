@@ -1,0 +1,68 @@
+
+/* LEGAL PAGES */
+
+/* HERO */
+
+/* Cabecera de la página */
+.LegalPage-hero{
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) 1rem;
+}
+
+/* Título en una sola línea y en mostaza, del tamaño de los títulos de sección */
+.LegalPage-title{
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    color: whitesmoke;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Fecha de actualización debajo del título, pequeña y en gris claro */
+.LegalPage-updated{
+    margin-top: 1rem;
+
+    font-size: .95rem;
+    color: var(--muted);
+}
+
+
+/* CONTENIDO */
+
+/* Separación con el hero y con el pie */
+.LegalPage-content{
+    padding-block: 1.5rem clamp(3rem, 7vw, 5rem);
+}
+
+/* Título de cada apartado, en mostaza y con aire por encima para separar los apartados */
+.LegalPage-heading{
+    margin-top: 2.5rem;
+    margin-bottom: .75rem;
+
+    font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+    color: var(--accent);
+    line-height: 1.3;
+}
+
+/* El primer apartado no necesita separarse del hero */
+.LegalPage-heading:first-child{
+    margin-top: 0;
+}
+
+/* Párrafos y listas en gris claro, con el interlineado de los textos largos.
+   Ocupan casi todo el ancho, pero con un máximo para que las líneas no sean tan largas que cueste leerlas */
+.LegalPage-text,
+.LegalPage-list{
+    max-width: 70rem;
+
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+/* Separación entre párrafos: solo en el que va justo después de otro */
+.LegalPage-text + .LegalPage-text{
+    margin-top: 1rem;
+}
+
+/* Lista de datos, un dato por línea y sin viñetas */
+.LegalPage-list{
+    margin-top: .75rem;
+}
